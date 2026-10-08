@@ -1,0 +1,29 @@
+# Pasce pri migrácii (zistené z kódu a logov)
+
+1. **Stratený form objekt v modeli.** Portletové controllery majú `@ModelAttribute` metódy na úrovni
+   triedy, ktoré sa volajú pred každou fázou. Keď sa viac portletových controllerov zlúči do jedného
+   web controllera, tieto metódy sa nepresunú a `<form:form modelAttribute="x">` spadne s
+   `Neither BindingResult nor plain target object for bean name 'x'` (presne toto je v PoC logu).
+   → Pri migrácii každého controllera vypíš všetky `@ModelAttribute` a `@SessionAttributes` a over ich.
+2. **Action → render.** V portletoch `@ActionMapping` nič nevracia, render ide hneď po ňom
+   s render parametrami (`response.setRenderParameter`). V servlete to musí byť explicitné:
+   POST → redirect → GET (PRG), parametre do URL alebo do flash atribútov.
+3. **Skrytá Liferay závislosť v tagoch.** JSP nemusia obsahovať nič z Liferay, ale vlastný tag
+   `portal:actionURL` vo vnútri pretypuje na `LiferayPortletURL`. Hľadaj závislosti aj v tag handleroch
+   (`.tld` → trieda), nielen v JSP.
+4. **Kompatibilné tagy, ktoré „nič nerobia“.** Ak sa tag nahradí no-op stubom, stránka sa vykreslí,
+   ale funkcia zmizne potichu (napr. i18n vypisuje kľúče). Každý no-op tag musí byť v zozname dlhu.
+5. **Dispatch podľa parametra.** Dashboard/order nevyberajú controller podľa URL, ale vlastným
+   `HandlerMapping` podľa `page` / scenára. Treba to rozbiť na skutočné URL, inak sa stratí
+   prehľadnosť a bookmarky.
+6. **Session je zdieľaná so SSO portálom.** Identita a kontext zákazníka nie sú v Liferay, ale
+   v externom portáli – bez neho aplikácia nevie, kto je prihlásený. To je architektonický problém,
+   nie technický prepis.
+7. **Backend in-process.** Frontend importuje backend Spring kontexty → migrácia frontendu
+   ťahá celý backend classpath (Hibernate 4, Spring 4, javax). Upgrade na moderný Spring Boot
+   (Jakarta) to **nedovolí bez upgradu backendu** alebo bez oddelenia (REST/klient).
+8. **`javax` → `jakarta`.** Spring Boot 3+ = Jakarta EE. Legacy JSP tagy, validátory
+   (`javax.validation`) aj servlet API treba prepísať na `jakarta.*`.
+9. **Meranie pokroku.** „100 % JSP“ v PoC neznamená funkčnosť – merať scenáre end-to-end.
+10. **Interné URL a tajomstvá v kóde.** Zdrojáky obsahujú interné hostnames, testovacie kľúče a root
+    POM heslá k DB v profiloch. Pri akomkoľvek kopírovaní von z repa treba sanitizáciu.

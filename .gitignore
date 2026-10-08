@@ -1,0 +1,17 @@
+# Klientske podklady – nikdy necommitovať (obsahujú klientsky kód a interné údaje)
+/input/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Build výstupy
+target/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lokálne mapovanie aliasov na skutočné názvy (prenáša sa ručne, nie cez git)
+/poznamky/LOCAL-*
