@@ -14,6 +14,7 @@ lokálneho, git-ignorovaného súboru `LOCAL-aliasy.md`, ktorý sa prenáša ru�
 | [05-mapa-konceptov.md](05-mapa-konceptov.md) | Liferay/portlet koncept → náhrada |
 | [06-playbook-migracie-portletu.md](06-playbook-migracie-portletu.md) | kde čo hľadať + postup migrácie jedného portletu + DoD |
 | [07-pasce.md](07-pasce.md) | konkrétne pasce zistené v kóde a logoch |
+| [09-session-liferay-vs-spring.md](09-session-liferay-vs-spring.md) | session pred → po: PortletSession scope, fasáda, `@SessionAttributes`, duálna session |
 
 Odporúčané poradie na reálnom projekte: 00 → 01 → 03 → 05 → 06 → 07 (→ 04, ak sa nadväzuje na PoC).
 Detailná analýza s odkazmi na súbory: [`../docs/ANALYZA.md`](../docs/ANALYZA.md).

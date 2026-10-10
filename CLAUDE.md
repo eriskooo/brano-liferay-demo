@@ -38,6 +38,22 @@ or code copied from `input/`. "Before" examples are rewritten as minimal anonymi
 Use the abbreviations from `poznamky/00-konvencie.md` (e.g. `$FE` for the unpacked frontend project, `<pkg>` for its base package).
 Do not commit or push; the user does that.
 
+Check before the user commits (Bash, repo root): `bash poznamky/LOCAL-anonymizacia.sh` — expected output: nothing (grep exit 1).
+If the script is missing on this machine, it has to be copied manually together with `poznamky/LOCAL-aliasy.md`.
+
+## Demo architecture and conventions (planned — see the plan's "Global Constraints")
+
+- Single Maven WAR module at the repo root, package `com.example.crm`. Portlet phases map to Spring MVC:
+  render = GET, action = POST + redirect (PRG), resource = AJAX endpoint (HTML fragment or JSON).
+- Custom JSP tags `portal:*` / `common:*` keep the **legacy interface** but are implemented without Liferay
+  (`web/tag/`, TLDs in `src/main/webapp/WEB-INF/tld/`); the session facade (`CrmSession`) and ACL keep the legacy contract;
+  backend services are interfaces with in-memory implementations.
+- Every JSP starts with `<%@ include file="/WEB-INF/jsp/layout/taglibs.jspf" %>` and has no own `page` directive.
+- Identifiers in English; code comments, UI texts (`messages.properties`) and docs in **Slovak** (this overrides the global
+  "comments in Czech" rule for this repo). Comments explain the migration decision / legacy equivalent, not what the code does.
+- The plan's last task replaces the "not yet created" line above with a `Build & run` section (`mvn verify`,
+  `mvn -q -B test -Dtest=ClassName`, `mvn spring-boot:run`) — keep it in sync once the code exists.
+
 ## The legacy project (in `input/`, for reference only)
 
 - `$FE` = the unpacked `frontend` Maven module. Its `target/` dirs are build output, not source.
