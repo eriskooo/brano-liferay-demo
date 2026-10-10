@@ -209,7 +209,65 @@ public class BlacklistCreateController {
 }
 ```
 
-## 4. Zhrnutie
+## 4. Ako sa nájde správna session
+
+Automaticky: session manager nič nevyberá, vždy sa pýta **aktuálneho requestu** a ten svoju session pozná.
+
+### 4.1 Cookie → `HttpSession` (servlet kontajner)
+
+```
+1. request:  bez cookie → Tomcat vytvorí session, pošle  Set-Cookie: JSESSIONID=ABC123
+2. request:  Cookie: JSESSIONID=ABC123 → Tomcat nájde v pamäti session "ABC123"
+```
+
+Kontajner drží mapu `id → HttpSession` a `request.getSession()` vráti session podľa cookie.
+Rovnaké v Liferay aj v Spring Boote, kód na to nesiaha.
+
+### 4.2 Request → vlákno (`ThreadLocal`)
+Request spracúva jedno vlákno. Spring na začiatku uloží request do `RequestContextHolder` (`ThreadLocal`)
+a na konci ho zmaže (legacy: `DispatcherPortlet`, Boot: `DispatcherServlet`).
+
+### 4.3 Legacy: cesta zo singletonu k session
+`sessionManager` je v XML konfigurácii **singleton** (jedna inštancia pre všetkých používateľov),
+session v sebe držať nemôže, vždy si ju dohľadá:
+
+```
+controller → getSessionManager().getOrder()
+   → requestAwareManager.getPortletRequest()     ← aktuálny request tohto vlákna
+   → portletRequest.getPortletSession()          ← Liferay: obal nad HttpSession (4.1)
+   → getAttribute(KEY, APPLICATION_SCOPE)
+```
+
+- Odkiaľ `requestAwareManager` berie request, nie je overené (základná trieda je v chýbajúcom JAR-e).
+  Takmer určite z `RequestContextHolder`: testy pred volaním ručne nastavujú
+  `RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(mockRequest))` a jedna utilita
+  odtiaľ request číta rovnako.
+- Identita a zákazník: `portalSessionManager.getPortalSession(request)` hľadá session SSO portálu podľa
+  údajov z requestu. API je `provided` JAR, ako presne páruje (cookie / SSO ID), nie je známe.
+
+### 4.4 Spring Boot demo: bez `ThreadLocal`
+
+```
+request (Cookie: JSESSIONID=ABC123)
+  → DispatcherServlet → controller potrebuje parameter CrmSession
+  → CrmSessionArgumentResolver dostane od Springu aktuálny HttpServletRequest
+  → HttpSessionCrmSession.of(request)     ← nový ľahký obal pre každý request
+  → request.getSession()                  ← kontajner podľa cookie (4.1)
+```
+
+Fasáda sa vytvára pre každý request a request dostane priamo: je vidieť, odkiaľ session prišla,
+a v teste stačí `MockHttpServletRequest` (nič sa nenastavuje do `ThreadLocal`).
+
+### 4.5 So Spring Session + Redis
+Pribudne `SessionRepositoryFilter`, ktorý obalí request:
+
+```
+Cookie: SESSION=xyz → filter → request.getSession() načíta session "xyz" z Redisu
+```
+
+Kód nad tým sa nemení, `request.getSession()` len vráti session z Redisu namiesto pamäte kontajnera.
+
+## 5. Zhrnutie
 
 | | Liferay | Spring Boot |
 |---|---|---|
@@ -220,7 +278,7 @@ public class BlacklistCreateController {
 | Controllery | `getSessionManager().x()` | `crmSession.x()`, rovnaký tvar |
 | Redis / cluster | – | doplní sa pod fasádu (Spring Session), controllery sa nemenia |
 
-## 5. Na čo si dať pozor pri migrácii
+## 6. Na čo si dať pozor pri migrácii
 
 ```bash
 # priame prístupy so scope – tu sa stratí automatický namespace
@@ -228,6 +286,8 @@ grep -rn "getPortletSession()" J/portlet/controller/<oblasť>
 grep -rn "PORTLET_SCOPE\|APPLICATION_SCOPE" J/portlet/controller/<oblasť>
 # modely držané v session medzi fázami
 grep -rn "@SessionAttributes" J/portlet/controller/<oblasť>
+# práca mimo vlákna requestu – tam RequestContextHolder (a teda session manager) nefunguje
+grep -rn "@Async\|ExecutorService\|CompletableFuture\|new Thread" J
 ```
 
 - Priame `getPortletSession()` s `PORTLET_SCOPE`: po prechode na jednu `HttpSession` môžu dva bývalé
@@ -235,3 +295,6 @@ grep -rn "@SessionAttributes" J/portlet/controller/<oblasť>
 - Volania cez fasádu sú bezpečné, stačí vymeniť implementáciu.
 - `@SessionAttributes` bez `status.setComplete()` = model visí v session do jej vypršania
   (pri Redise to je aj pamäť a sieť).
+- Session manager cez `ThreadLocal` funguje len vo vlákne requestu. V `@Async`, vlastnom executore
+  alebo po skončení requestu vráti `RequestContextHolder` `null` (alebo request iného používateľa,
+  ak sa kontext nevyčistil). Údaje zo session treba načítať vopred a odovzdať ako parameter.
