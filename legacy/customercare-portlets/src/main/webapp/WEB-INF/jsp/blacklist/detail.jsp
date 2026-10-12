@@ -11,7 +11,7 @@
 
 <h2><common:message key="blacklist.detail.title"/>: <c:out value="${record.fullName}"/></h2>
 <div id="crm-ajax-error"></div>
-<table id="recordSummary">
+<table id="recordSummary" class="table table-striped table-bordered">
     <tr><th><common:message key="blacklist.result.birthDate"/></th><td>${record.birthDate}</td></tr>
     <tr><th><common:message key="blacklist.result.state"/></th>
         <td id="recordState"><common:message key="blacklist.state.${record.state}"/></td></tr>
@@ -50,7 +50,7 @@
     <form id="noteForm" method="post" action="${noteUrl}">
         <input type="hidden" name="detailId" value="${record.id}"/>
         <textarea name="text" rows="2" cols="60"></textarea>
-        <button type="submit"><common:message key="blacklist.detail.addNote"/></button>
+        <button type="submit" class="btn"><common:message key="blacklist.detail.addNote"/></button>
     </form>
     <fieldset>
         <legend><common:message key="blacklist.detail.change"/></legend>
@@ -64,7 +64,7 @@
             </select>
             <label for="validTo"><common:message key="blacklist.detail.validTo"/></label>
             <input id="validTo" type="date" name="validTo" value="${record.validTo}"/>
-            <button type="submit"><common:message key="blacklist.detail.save"/></button>
+            <button type="submit" class="btn"><common:message key="blacklist.detail.save"/></button>
         </form>
     </fieldset>
 </common:aclFilter>

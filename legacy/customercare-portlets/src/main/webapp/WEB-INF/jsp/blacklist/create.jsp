@@ -67,8 +67,8 @@
         <label for="identifierValue"><common:message key="blacklist.create.identifierValue"/></label>
         <form:input path="identifierValue"/> <form:errors path="identifierValue" cssClass="field-error"/>
     </div>
-    <button type="submit"><common:message key="blacklist.create.submit"/></button>
+    <button type="submit" class="btn btn-primary"><common:message key="blacklist.create.submit"/></button>
 </form:form>
 <form id="cancelForm" method="post" action="${cancelUrl}" class="crm-inline">
-    <button type="submit"><common:message key="blacklist.create.cancel"/></button>
+    <button type="submit" class="btn"><common:message key="blacklist.create.cancel"/></button>
 </form>

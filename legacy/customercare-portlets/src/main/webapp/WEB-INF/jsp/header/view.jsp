@@ -3,7 +3,7 @@
     <c:choose>
         <c:when test="${empty operator}">
             <span><common:message key="common.loginRequired"/></span>
-            <a id="headerLogin" class="crm-button" href="${fn:escapeXml(loginUrl)}"><common:message key="common.login"/></a>
+            <a id="headerLogin" class="btn btn-primary" href="${fn:escapeXml(loginUrl)}"><common:message key="common.login"/></a>
         </c:when>
         <c:otherwise>
             <span id="headerOperator"><common:message key="common.operator"/>: <c:out value="${operator.displayName}"/></span>
@@ -18,7 +18,7 @@
             </c:if>
             <a id="changeCustomer" href="${fn:escapeXml(changeCustomerUrl)}"><common:message key="common.changeCustomer"/></a>
             <form id="logoutForm" method="post" action="/sso/logout" class="crm-inline">
-                <button type="submit"><common:message key="common.logout"/></button>
+                <button type="submit" class="btn"><common:message key="common.logout"/></button>
             </form>
         </c:otherwise>
     </c:choose>

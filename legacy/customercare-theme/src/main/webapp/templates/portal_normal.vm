@@ -4,6 +4,10 @@
 <head>
     <title>$the_title - CRM</title>
     <meta content="initial-scale=1.0, width=device-width" name="viewport" />
+    ## Základné CSS (AlloyUI/Bootstrap 2 + portál) z vstavaného theme "classic" – theme bez Liferay SDK z neho nededí,
+    ## a @import absolútnej URL z vlastného CSS Liferay pri spracovaní zahodí. Vlastné CSS ide až za ním.
+    <link href="/html/themes/classic/css/aui.css?themeId=classic&amp;minifierType=css" rel="stylesheet" type="text/css" />
+    <link href="/html/themes/classic/css/main.css?themeId=classic&amp;minifierType=css" rel="stylesheet" type="text/css" />
     $theme.include($top_head_include)
 </head>
 <body class="$css_class">
@@ -11,7 +15,7 @@ $theme.include($body_top_include)
 #if ($is_signed_in)
     #dockbar()
 #end
-<div id="wrapper" class="crm-wrapper">
+<div id="wrapper" class="container-fluid crm-wrapper">
     <header id="banner" role="banner">
         <div class="crm-brand">CRM – legacy (Liferay 6.2)</div>
         #parse ("$full_templates_path/navigation.vm")

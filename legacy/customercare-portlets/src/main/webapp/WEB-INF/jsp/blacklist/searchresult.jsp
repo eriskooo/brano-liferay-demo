@@ -3,7 +3,7 @@
 
 <h2><common:message key="blacklist.result.title"/></h2>
 <p id="resultCount"><common:message key="blacklist.result.count"><common:msgarg value="${fn:length(records)}"/></common:message></p>
-<table>
+<table class="table table-striped table-bordered">
     <thead>
     <tr>
         <th><common:message key="blacklist.result.name"/></th>

@@ -13,7 +13,7 @@
     <fieldset>
         <legend><common:message key="dashboard.deactivation.type"/></legend>
         <c:forEach items="${deactivationTypes}" var="t">
-            <label><form:radiobutton path="type" value="${t}" onchange="Crm.earliestDate(this.form)"/>
+            <label class="radio-label"><form:radiobutton path="type" value="${t}" onchange="Crm.earliestDate(this.form)"/>
                 <common:message key="dashboard.deactivationType.${t}"/></label><br/>
         </c:forEach>
         <form:errors path="type" cssClass="field-error"/>
@@ -29,6 +29,6 @@
         <common:message key="dashboard.deactivation.earliest"/> <span id="earliestHint">${earliestDate}</span>
         <form:errors path="effectiveDate" cssClass="field-error"/>
     </div>
-    <button type="submit"><common:message key="dashboard.deactivation.submit"/></button>
+    <button type="submit" class="btn btn-primary"><common:message key="dashboard.deactivation.submit"/></button>
 </form:form>
 <a href="${productsUrl}"><common:message key="dashboard.deactivation.backToProducts"/></a>

@@ -28,13 +28,13 @@
             </c:forEach>
         </form:select>
     </div>
-    <button type="submit"><common:message key="blacklist.search.submit"/></button>
+    <button type="submit" class="btn btn-primary"><common:message key="blacklist.search.submit"/></button>
 </form:form>
 <form id="clearForm" method="post" action="${clearUrl}" class="crm-inline">
-    <button type="submit"><common:message key="blacklist.search.clear"/></button>
+    <button type="submit" class="btn"><common:message key="blacklist.search.clear"/></button>
 </form>
 <common:aclFilter privilegeType="BLACKLIST_MODIFY">
     <form id="gotoCreateForm" method="post" action="${gotoCreateUrl}" class="crm-inline">
-        <button type="submit"><common:message key="blacklist.search.create"/></button>
+        <button type="submit" class="btn"><common:message key="blacklist.search.create"/></button>
     </form>
 </common:aclFilter>

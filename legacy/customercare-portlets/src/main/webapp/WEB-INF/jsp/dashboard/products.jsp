@@ -3,7 +3,7 @@
 <c:choose>
     <c:when test="${empty products}"><p><common:message key="dashboard.products.empty"/></p></c:when>
     <c:otherwise>
-        <table id="products">
+        <table id="products" class="table table-striped table-bordered">
             <thead>
             <tr>
                 <th><common:message key="dashboard.products.name"/></th>
