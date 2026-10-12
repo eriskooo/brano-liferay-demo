@@ -20,7 +20,9 @@ class ApplicationSmokeTest {
     @Test
     @DisplayName("Statické súbory (náhrada theme) sú pod kontextom /crm")
     void should_serveStaticAssets_when_requestedUnderContextPath() throws Exception {
-        assertThat(get("/crm/css/crm.css")).contains("--accent");
+        assertThat(get("/crm/css/theme.css")).contains(".crm-wrapper");
+        assertThat(get("/crm/css/portlet.css")).contains(".crm-portlet label");
+        assertThat(get("/crm/css/crm.css")).isNotNull();
         assertThat(get("/crm/js/crm.js")).contains("X-Requested-With");
     }
 

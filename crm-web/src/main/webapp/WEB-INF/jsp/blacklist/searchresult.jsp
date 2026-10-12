@@ -2,37 +2,40 @@
 <c:set var="titleKey" value="blacklist.result.title"/>
 <%@ include file="/WEB-INF/jsp/layout/header.jspf" %>
 <common:aclPageFilterTag privilegeType="BLACKLIST_VIEW" wireframe="blacklist-result"/>
-<h1><common:message key="blacklist.result.title"/></h1>
-<table class="grid table table-striped table-bordered">
+<%-- Telo stránky je 1:1 legacy searchresult.jsp; controller dáva výsledky pod menom "results" (legacy "records"). --%>
+<portal:renderURL var="newSearchUrl"><portal:param name="render" value="search"/></portal:renderURL>
+
+<h2><common:message key="blacklist.result.title"/></h2>
+<p id="resultCount"><common:message key="blacklist.result.count"><common:msgarg value="${fn:length(results)}"/></common:message></p>
+<table class="table table-striped table-bordered">
     <thead>
     <tr>
-        <th><common:message key="blacklist.field.lastName"/>, <common:message key="blacklist.field.firstName"/></th>
-        <th><common:message key="blacklist.field.birthDate"/></th>
-        <th><common:message key="blacklist.detail.identifiers"/></th>
-        <th><common:message key="blacklist.field.state"/></th>
-        <th><common:message key="blacklist.field.stateReason"/></th>
-        <th></th>
+        <th><common:message key="blacklist.result.name"/></th>
+        <th><common:message key="blacklist.result.birthDate"/></th>
+        <th><common:message key="blacklist.result.state"/></th>
+        <th><common:message key="blacklist.result.validity"/></th>
     </tr>
     </thead>
     <tbody>
-    <c:forEach var="record" items="${results}">
+    <c:forEach items="${results}" var="r">
+        <portal:renderURL var="detailUrl">
+            <portal:param name="viewPage" value="detail"/>
+            <portal:param name="detailId" value="${r.id}"/>
+        </portal:renderURL>
         <tr>
-            <td><c:out value="${record.fullName}"/></td>
-            <td>${record.birthDate}</td>
-            <td><c:forEach var="identifier" items="${record.identifiers}" varStatus="loop"><c:out value="${identifier.value}"/><c:if test="${not loop.last}">, </c:if></c:forEach></td>
-            <td><common:message key="blacklist.state.${record.state}"/></td>
-            <td><common:message key="blacklist.reason.${record.stateReason}"/></td>
-            <td>
-                <portal:renderURL var="detailUrl">
-                    <portal:param name="render" value="detail"/>
-                    <portal:param name="detailId" value="${record.id}"/>
-                </portal:renderURL>
-                <a href="${detailUrl}"><common:message key="common.detail"/></a>
+            <td><a id="detail-${r.id}" href="${detailUrl}"><c:out value="${r.fullName}"/></a></td>
+            <td>${r.birthDate}</td>
+            <td><common:message key="blacklist.state.${r.state}"/></td>
+            <%-- &ndash; namiesto znaku: JSP bez vlastnej page direktívy sa číta ako ISO-8859-1 (pageEncoding v jspf platí len preň). --%>
+            <td>${r.validFrom} &ndash;
+                <c:choose>
+                    <c:when test="${empty r.validTo}"><common:message key="blacklist.detail.unlimited"/></c:when>
+                    <c:otherwise>${r.validTo}</c:otherwise>
+                </c:choose>
             </td>
         </tr>
     </c:forEach>
     </tbody>
 </table>
-<portal:renderURL var="backUrl"><portal:param name="render" value="search"/></portal:renderURL>
-<p><a href="${backUrl}"><common:message key="blacklist.result.backToSearch"/></a></p>
+<a href="${newSearchUrl}"><common:message key="blacklist.result.newSearch"/></a>
 <%@ include file="/WEB-INF/jsp/layout/footer.jspf" %>

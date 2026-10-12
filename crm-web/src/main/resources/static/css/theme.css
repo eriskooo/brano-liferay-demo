@@ -1,0 +1,11 @@
+/* Neutrálny theme bez brandingu – nad základom z theme "classic" (Bootstrap 2). */
+body { background: #f4f6f8; }
+.crm-wrapper { max-width: 1140px; margin: 0 auto; padding: 0 0 24px; background: #fff; box-shadow: 0 0 6px rgba(0, 0, 0, .08); }
+.crm-brand { padding: 12px 16px; font-size: 18px; font-weight: bold; background: #33475b; color: #fff; }
+.crm-nav ul { list-style: none; margin: 0; padding: 0 8px; display: flex; background: #dfe6ee; }
+.crm-nav li a { display: block; padding: 10px 16px; color: #33475b; text-decoration: none; }
+.crm-nav li.selected a { background: #fff; font-weight: bold; }
+#content { padding: 16px; }
+.portlet-msg-error { color: #b00020; padding: 6px 0; }
+.portlet-msg-success { color: #1b5e20; padding: 6px 0; }
+.crm-portal-error { padding: 20px; }

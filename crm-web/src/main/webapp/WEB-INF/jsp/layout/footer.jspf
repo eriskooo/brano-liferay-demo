@@ -1,4 +1,12 @@
-</main>
+<%-- Uzatvára obal z header.jspf (portlet-body … #content … #wrapper). --%>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 </body>
 </html>

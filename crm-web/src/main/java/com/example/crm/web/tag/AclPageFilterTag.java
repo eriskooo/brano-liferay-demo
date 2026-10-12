@@ -29,8 +29,9 @@ public class AclPageFilterTag extends TagSupport {
             return EVAL_PAGE;
         }
         try {
-            pageContext.getOut().write("<p class=\"acl-denied\">"
-                    + HtmlUtils.htmlEscape(AclTagSupport.message(pageContext, "acl.pageDenied", privilegeType), "UTF-8") + "</p>");
+            // Rovnaký prvok ako legacy tag – štýl dodáva theme (portlet-msg-error).
+            pageContext.getOut().write("<div class=\"portlet-msg-error\">"
+                    + HtmlUtils.htmlEscape(AclTagSupport.message(pageContext, "acl.pageDenied", privilegeType), "UTF-8") + "</div>");
         } catch (IOException e) {
             throw new JspException(e);
         }

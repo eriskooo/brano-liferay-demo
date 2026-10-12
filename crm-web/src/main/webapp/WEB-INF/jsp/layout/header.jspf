@@ -1,24 +1,33 @@
-<%-- Náhrada Liferay theme + portletu „header“. Očakáva premennú titleKey. Vzhľad: rovnaké CSS ako stará appka
-     (theme „classic“ z Liferay cez spoločný nginx), potom vlastné crm.css. --%>
+<%-- Náhrada Liferay theme + portletu „header“. Očakáva premennú titleKey. Vzhľad 1:1 so starou appkou: rovnaké CSS
+     v rovnakom poradí ako ich vkladá Liferay (classic theme, jadro portálu, portlet CSS, náš theme) a rovnaký obalový DOM
+     (html.aui – Bootstrap 2 v Liferay 6.2 platí len pod triedou .aui; portlet-boundary … crm-portlet – na ňu cieli portlet CSS). --%>
 <!DOCTYPE html>
-<html lang="sk">
+<html class="aui ltr" dir="ltr" lang="sk">
 <head>
     <meta charset="UTF-8">
     <title><common:message key="${titleKey}"/> &ndash; <common:message key="app.name"/></title>
+    <meta content="initial-scale=1.0, width=device-width" name="viewport">
     <link rel="stylesheet" href="/html/themes/classic/css/aui.css?themeId=classic&amp;minifierType=css">
     <link rel="stylesheet" href="/html/themes/classic/css/main.css?themeId=classic&amp;minifierType=css">
+    <link rel="stylesheet" href="/html/css/main.css?minifierType=css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/portlet.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/crm.css">
     <script src="${pageContext.request.contextPath}/js/crm.js" defer></script>
 </head>
 <body class="crm-new-app">
-<div class="container-fluid crm-wrapper">
+<div id="wrapper" class="container-fluid crm-wrapper">
+<header id="banner" role="banner">
 <div class="crm-brand"><common:message key="app.name"/></div>
-<nav class="crm-nav">
+<nav id="navigation" class="crm-nav" role="navigation">
     <ul>
         <li class="selected"><a href="${pageContext.request.contextPath}/blacklist/search"><common:message key="nav.blacklist"/></a></li>
         <li><a href="/web/crm/dashboard"><common:message key="nav.dashboard"/></a></li>
     </ul>
 </nav>
+<div class="portlet-boundary portlet-static portlet-static-end portlet-borderless crm-header-portlet" id="p_p_id_header_">
+<div class="portlet-borderless-container">
+<div class="portlet-body">
 <div class="crm-header">
     <c:choose>
         <c:when test="${empty layoutOperator}">
@@ -31,7 +40,7 @@
                 <span id="headerLastViewed"><common:message key="header.lastViewed"/>: <c:out value="${layoutLastViewed.fullName}"/></span>
             </c:if>
             <a id="changeCustomer" href="/sso/login?returnUrl=${pageContext.request.contextPath}/blacklist/search"><common:message key="header.changeCustomer"/></a>
-            <form id="logoutForm" method="post" action="/sso/logout" class="inline">
+            <form id="logoutForm" method="post" action="/sso/logout" class="crm-inline">
                 <button type="submit" class="btn"><common:message key="header.logout"/></button>
             </form>
         </c:otherwise>
@@ -43,7 +52,18 @@
         SSO_ID = <c:out value="${empty layoutSsoId ? '-' : layoutSsoId}"/>
     </div>
     <c:forEach var="message" items="${layoutMessages}">
-        <div class="msg msg-${message.level} crm-message"><common:message key="${message.key}"/></div>
+        <div class="${message.level == 'ERROR' ? 'portlet-msg-error' : 'portlet-msg-success'} crm-message"><common:message key="${message.key}"/></div>
     </c:forEach>
 </div>
-<main id="content">
+</div>
+</div>
+</div>
+</header>
+<div id="content">
+<div class="columns-1" id="main-content" role="main">
+<div class="portlet-layout row-fluid">
+<div class="portlet-column portlet-column-only span12" id="column-1">
+<div class="portlet-dropzone portlet-column-content portlet-column-content-only">
+<div class="portlet-boundary portlet-static portlet-static-end portlet-borderless crm-portlet" id="p_p_id_crm_">
+<div class="portlet-borderless-container">
+<div class="portlet-body">
