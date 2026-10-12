@@ -1,6 +1,6 @@
 # Spec: demo migrácie dvoch portletov z Liferay 6.2 na Spring Boot
 
-Dátum: 2026-10-08 · Stav: návrh na schválenie · Súvisí: [`docs/ANALYZA.md`](../../ANALYZA.md),
+Dátum: 2026-10-08 · Stav: **nahradený** specom [`2026-10-12-crm-web-migration-design.md`](2026-10-12-crm-web-migration-design.md) (podprojekt 2) · Súvisí: [`docs/ANALYZA.md`](../../ANALYZA.md),
 [`poznamky/`](../../../poznamky/README.md)
 
 ## 1. Cieľ a kontext
