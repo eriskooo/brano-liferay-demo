@@ -1,6 +1,7 @@
 package com.example.crm.frontend.base.web;
 
 import com.example.crm.frontend.base.acl.Privilege;
+import com.example.crm.frontend.base.session.PortletSessionStore;
 import java.io.IOException;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -44,6 +45,7 @@ public class DispatcherPortletCustom extends DispatcherPortlet {
 
     @Override
     protected void doRenderService(RenderRequest request, RenderResponse response) throws Exception {
+        ensureSessionOwner();
         PortletAccessGuard guard = guard();
         AccessDecision decision = guard.decide(loginRequired, requiredPrivilege);
         switch (decision) {
@@ -65,6 +67,7 @@ public class DispatcherPortletCustom extends DispatcherPortlet {
 
     @Override
     protected void doActionService(ActionRequest request, ActionResponse response) throws Exception {
+        ensureSessionOwner();
         PortletAccessGuard guard = guard();
         AccessDecision decision = guard.decide(loginRequired, requiredPrivilege);
         if (decision == AccessDecision.ALLOWED) {
@@ -82,6 +85,7 @@ public class DispatcherPortletCustom extends DispatcherPortlet {
 
     @Override
     protected void doResourceService(ResourceRequest request, ResourceResponse response) throws Exception {
+        ensureSessionOwner();
         AccessDecision decision = guard().decide(loginRequired, requiredPrivilege);
         if (decision == AccessDecision.ALLOWED) {
             super.doResourceService(request, response);
@@ -89,6 +93,11 @@ public class DispatcherPortletCustom extends DispatcherPortlet {
         }
         // AJAX dostane holý status – prihlasovacia výzva vložená JS-kom do <div> by bola nezmysel.
         response.setProperty(ResourceResponse.HTTP_STATUS_CODE, String.valueOf(decision.getHttpStatus()));
+    }
+
+    /** Zmena operátora v SSO vyčistí stav predchádzajúceho (viď PortletSessionStore#ensureOwner). */
+    protected void ensureSessionOwner() {
+        getPortletApplicationContext().getBean(PortletSessionStore.class).ensureOwner();
     }
 
     /** Strážca z root kontextu (portlet kontext ho zdedí od rodiča). */

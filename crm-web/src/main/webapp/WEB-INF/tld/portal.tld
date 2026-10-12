@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Rovnaké názvy tagov a atribútov ako legacy portal.tld; implementácia bez Liferay/Portlet API. -->
+<taglib xmlns="https://jakarta.ee/xml/ns/jakartaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-jsptaglibrary_3_0.xsd"
+        version="3.0">
+    <tlib-version>1.0</tlib-version>
+    <short-name>portal</short-name>
+    <uri>http://example.com/crm/tags/portal</uri>
+
+    <tag>
+        <name>actionURL</name>
+        <tag-class>com.example.crm.web.tag.ActionUrlTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute><name>var</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>name</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>escapeXml</name><required>false</required><rtexprvalue>true</rtexprvalue><type>boolean</type></attribute>
+    </tag>
+    <tag>
+        <name>renderURL</name>
+        <tag-class>com.example.crm.web.tag.RenderUrlTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute><name>var</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>escapeXml</name><required>false</required><rtexprvalue>true</rtexprvalue><type>boolean</type></attribute>
+        <attribute><name>copyCurrentRenderParameters</name><required>false</required><rtexprvalue>true</rtexprvalue><type>boolean</type></attribute>
+    </tag>
+    <tag>
+        <name>resourceURL</name>
+        <tag-class>com.example.crm.web.tag.ResourceUrlTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute><name>var</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>id</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>escapeXml</name><required>false</required><rtexprvalue>true</rtexprvalue><type>boolean</type></attribute>
+    </tag>
+    <tag>
+        <name>param</name>
+        <tag-class>com.example.crm.web.tag.UrlParamTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute><name>name</name><required>true</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>value</name><required>true</required><rtexprvalue>true</rtexprvalue></attribute>
+    </tag>
+</taglib>

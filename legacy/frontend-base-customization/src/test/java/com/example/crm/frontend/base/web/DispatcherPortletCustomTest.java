@@ -111,6 +111,19 @@ class DispatcherPortletCustomTest {
         assertThat(portlet.decisions).containsExactly(AccessDecision.DENIED);
     }
 
+    @Test
+    @DisplayName("Pred každou fázou sa overí vlastník session (zmena operátora v SSO)")
+    void should_checkSessionOwner_when_anyPhaseStarts() throws Exception {
+        when(guard.decide(anyBoolean(), any())).thenReturn(AccessDecision.LOGIN_REQUIRED);
+        when(guard.loginUrl()).thenReturn("/sso/login");
+
+        portlet.doRenderService(new MockRenderRequest(), new MockRenderResponse());
+        portlet.doActionService(new MockActionRequest(), new MockActionResponse());
+        portlet.doResourceService(new MockResourceRequest(), new MockResourceResponse());
+
+        assertThat(portlet.ownerChecks).isEqualTo(3);
+    }
+
     /** Portlet bez Spring kontextu: strážca je podstrčený, include sa len zaznamená. */
     static class TestablePortlet extends DispatcherPortletCustom {
 
@@ -142,6 +155,13 @@ class DispatcherPortletCustomTest {
         @Override
         protected void include(String path, PortletRequest request, MimeResponse response) {
             included.add(path);
+        }
+
+        int ownerChecks;
+
+        @Override
+        protected void ensureSessionOwner() {
+            ownerChecks++;
         }
     }
 }

@@ -1,0 +1,49 @@
+<%-- Náhrada Liferay theme + portletu „header“. Očakáva premennú titleKey. Vzhľad: rovnaké CSS ako stará appka
+     (theme „classic“ z Liferay cez spoločný nginx), potom vlastné crm.css. --%>
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title><common:message key="${titleKey}"/> &ndash; <common:message key="app.name"/></title>
+    <link rel="stylesheet" href="/html/themes/classic/css/aui.css?themeId=classic&amp;minifierType=css">
+    <link rel="stylesheet" href="/html/themes/classic/css/main.css?themeId=classic&amp;minifierType=css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/crm.css">
+    <script src="${pageContext.request.contextPath}/js/crm.js" defer></script>
+</head>
+<body class="crm-new-app">
+<div class="container-fluid crm-wrapper">
+<div class="crm-brand"><common:message key="app.name"/></div>
+<nav class="crm-nav">
+    <ul>
+        <li class="selected"><a href="${pageContext.request.contextPath}/blacklist/search"><common:message key="nav.blacklist"/></a></li>
+        <li><a href="/web/crm/dashboard"><common:message key="nav.dashboard"/></a></li>
+    </ul>
+</nav>
+<div class="crm-header">
+    <c:choose>
+        <c:when test="${empty layoutOperator}">
+            <span><common:message key="header.loginRequired"/></span>
+        </c:when>
+        <c:otherwise>
+            <span id="headerOperator"><common:message key="header.operator"/>: <c:out value="${layoutOperator.displayName}"/></span>
+            <span id="headerCustomer"><common:message key="header.customer"/>: <c:out value="${layoutCustomer.displayName}"/> (<c:out value="${layoutCustomer.customerId}"/>)</span>
+            <c:if test="${not empty layoutLastViewed}">
+                <span id="headerLastViewed"><common:message key="header.lastViewed"/>: <c:out value="${layoutLastViewed.fullName}"/></span>
+            </c:if>
+            <a id="changeCustomer" href="/sso/login?returnUrl=${pageContext.request.contextPath}/blacklist/search"><common:message key="header.changeCustomer"/></a>
+            <form id="logoutForm" method="post" action="/sso/logout" class="inline">
+                <button type="submit" class="btn"><common:message key="header.logout"/></button>
+            </form>
+        </c:otherwise>
+    </c:choose>
+    <%-- Len pre demo zdieľanej session: nová appka číta zdieľané kľúče vždy z Redisu; flag patrí starej appke. --%>
+    <div id="sessionDebug" class="crm-session-debug">
+        <common:message key="header.sessionDebug"/>: <common:message key="header.readSource"/> = <common:message key="header.newApp"/>,
+        <common:message key="header.legacyFlag"/> = <c:out value="${layoutLegacyFlag}"/>,
+        SSO_ID = <c:out value="${empty layoutSsoId ? '-' : layoutSsoId}"/>
+    </div>
+    <c:forEach var="message" items="${layoutMessages}">
+        <div class="msg msg-${message.level} crm-message"><common:message key="${message.key}"/></div>
+    </c:forEach>
+</div>
+<main id="content">

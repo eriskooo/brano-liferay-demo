@@ -312,3 +312,11 @@ Stará appka (`legacy/`, Liferay 6.2) implementuje návrh z 1.2:
 - výpadok Redisu request nezhodí (zápis sa zaloguje, čítanie spadne späť na `PortletSession`).
 
 Ako to vidieť naživo: `legacy/README.md`, sekcia „Zdieľaná session naživo“.
+
+## 8. Súbeh v praxi (demo)
+
+Stará appka (`legacy/`) a nová (`crm-web/`) bežia za jedným nginx a zdieľajú hash `crm:session:{SSO_ID}`:
+- nová appka zapisuje zdieľané kľúče len do Redisu, stará do PortletSession aj Redisu;
+- stará appka číta podľa flagu – pri `PORTLET` nevidí zápisy novej, pri `REDIS` áno;
+- identitu obe berú zo SSO (cookie `SSO_ID`), zákazníka mení len SSO portál.
+Preklikanie: `crm-web/README.md`; automaticky: `docker/smoke-migration.sh`.

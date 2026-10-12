@@ -4,6 +4,7 @@
 set -u
 cd "$(dirname "$0")"
 B="http://localhost:8000"
+L="http://localhost:8080"   # Liferay priamo (starý blacklist mimo nginx – na :8000 ho presmeruje strangler)
 WORK="$(mktemp -d)"
 JAR="$WORK/cookies.txt"
 FAILS=0
@@ -30,15 +31,16 @@ login() {
 echo "Čakám na Liferay (prvý štart 1-3 min)..."
 code=000
 for _ in $(seq 1 90); do
-    code="$(curl -s -o /dev/null -w '%{http_code}' "$B/web/crm/blacklist")"
-    [ "$code" = "200" ] && break
+    # 200 vráti Liferay aj počas nasadzovania WAR-ov – čaká sa, kým portlet hlavičky naozaj vykreslí obsah.
+    code="$(curl -s -o /dev/null -w '%{http_code}' "$L/web/crm/blacklist")"
+    [ "$code" = "200" ] && curl -s "$L/web/crm/blacklist" | grep -q 'id="sessionDebug"' && break
     sleep 5
 done
 [ "$code" = "200" ] || { echo "Liferay neodpovedá (posledný HTTP $code)"; exit 1; }
 
 echo "== 1. Bez prihlásenia"
 rm -f "$JAR"
-fetch /web/crm/blacklist "$WORK/anon.html"
+fetch "$L/web/crm/blacklist" "$WORK/anon.html"
 expect "blacklist bez SSO ukáže výzvu na prihlásenie" 'id="loginLink"' "$WORK/anon.html"
 expect "hlavička je vložená z theme (runtime portlet)" 'id="sessionDebug"' "$WORK/anon.html"
 
@@ -46,7 +48,7 @@ echo "== 2. Prihlásenie v SSO mocku (správca, zákazník C-1001)"
 login spravca
 SSO_ID="$(grep SSO_ID "$JAR" | awk '{print $7}')"
 if [ -n "$SSO_ID" ]; then ok "cookie SSO_ID=$SSO_ID"; else fail "cookie SSO_ID chýba"; fi
-fetch /web/crm/blacklist "$WORK/search.html"
+fetch "$L/web/crm/blacklist" "$WORK/search.html"
 expect "hlavička ukazuje operátora" 'id="headerOperator"' "$WORK/search.html"
 expect "operátor Správca" 'Správca' "$WORK/search.html"
 expect "formulár vyhľadávania" 'id="searchForm"' "$WORK/search.html"
@@ -58,7 +60,7 @@ post "$(attr_of searchForm "$WORK/search.html" action)" "$WORK/result1.html" \
 expect "Mária nájdená" 'id="detail-2"' "$WORK/result1.html"
 
 echo "== 4. Vyhľadávanie a detail"
-fetch /web/crm/blacklist "$WORK/search2.html"
+fetch "$L/web/crm/blacklist" "$WORK/search2.html"
 post "$(attr_of searchForm "$WORK/search2.html" action)" "$WORK/result2.html" \
     -d firstName= -d lastName=Vzork -d identifierValue= -d state=
 expect "výsledok: záznam 1" 'id="detail-1"' "$WORK/result2.html"
@@ -103,7 +105,7 @@ rc SET crm:flags:session-read-source PORTLET > /dev/null
 
 echo "== 9. Výpadok Redisu nezhodí stránku"
 docker compose stop redis > /dev/null 2>&1
-fetch /web/crm/blacklist "$WORK/no-redis.html"
+fetch "$L/web/crm/blacklist" "$WORK/no-redis.html"
 expect "stránka beží bez Redisu" 'id="searchForm"' "$WORK/no-redis.html"
 docker compose start redis > /dev/null 2>&1
 
@@ -113,7 +115,7 @@ expect "hooked status.jsp" 'id="crmPortalError"' "$WORK/404.html"
 
 echo "== 11. Čitateľ: bez zmien a bez dashboardu"
 login citatel
-fetch /web/crm/blacklist "$WORK/reader.html"
+fetch "$L/web/crm/blacklist" "$WORK/reader.html"
 expect "čitateľ vidí vyhľadávanie" 'id="searchForm"' "$WORK/reader.html"
 expect_not "čitateľ nevidí „Nový záznam“" 'id="gotoCreateForm"' "$WORK/reader.html"
 fetch /web/crm/dashboard "$WORK/reader-dashboard.html"

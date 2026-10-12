@@ -6,6 +6,8 @@ mvn -q -B -f "$root\legacy\pom.xml" verify
 if ($LASTEXITCODE -ne 0) { throw 'Build of legacy failed' }
 mvn -q -B -f "$root\sso-mock\pom.xml" verify
 if ($LASTEXITCODE -ne 0) { throw 'Build of sso-mock failed' }
+mvn -q -B -f "$root\crm-web\pom.xml" verify
+if ($LASTEXITCODE -ne 0) { throw 'Build of crm-web failed' }
 Copy-Item "$root\legacy\sso-portal-api\target\sso-portal-api.jar" "$PSScriptRoot\liferay\sso-portal-api.jar" -Force
 New-Item -ItemType Directory -Force "$PSScriptRoot\deploy" | Out-Null
 

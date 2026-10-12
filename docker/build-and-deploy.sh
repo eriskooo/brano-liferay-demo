@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 mvn -q -B -f "$ROOT/legacy/pom.xml" verify
 mvn -q -B -f "$ROOT/sso-mock/pom.xml" verify
+mvn -q -B -f "$ROOT/crm-web/pom.xml" verify
 cp "$ROOT/legacy/sso-portal-api/target/sso-portal-api.jar" "$ROOT/docker/liferay/sso-portal-api.jar"
 mkdir -p "$ROOT/docker/deploy"
 

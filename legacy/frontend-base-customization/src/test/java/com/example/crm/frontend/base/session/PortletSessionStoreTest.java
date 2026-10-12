@@ -57,4 +57,37 @@ class PortletSessionStoreTest {
 
         assertThat(store.get("APP_X")).isNull();
     }
+
+    @Test
+    @DisplayName("Iný operátor (iné SSO_ID) v tej istej Liferay session nevidí stav predchádzajúceho")
+    void should_clearPreviousOperatorState_when_ssoIdChanges() {
+        MockPortletSession session = new MockPortletSession();
+        session.setAttribute(PortletSessionStore.OWNER, "s-a", PortletSession.APPLICATION_SCOPE);
+        session.setAttribute("APP_LAST_VIEWED_RECORD", "A", PortletSession.APPLICATION_SCOPE);
+        session.setAttribute("javax.portlet.p.blacklist_WAR_customercareportlet?searchCriteria", "form",
+                PortletSession.APPLICATION_SCOPE);
+        session.setAttribute("OTHER", "keep", PortletSession.APPLICATION_SCOPE);
+
+        new PortletSessionStore(new FakeRequestAwareManager(session).withSsoSessionId("s-b")).ensureOwner();
+
+        assertThat(session.getAttribute("APP_LAST_VIEWED_RECORD", PortletSession.APPLICATION_SCOPE)).isNull();
+        assertThat(session.getAttribute("javax.portlet.p.blacklist_WAR_customercareportlet?searchCriteria",
+                PortletSession.APPLICATION_SCOPE)).isNull();
+        assertThat(session.getAttribute("OTHER", PortletSession.APPLICATION_SCOPE)).isEqualTo("keep");
+        assertThat(session.getAttribute(PortletSessionStore.OWNER, PortletSession.APPLICATION_SCOPE)).isEqualTo("s-b");
+    }
+
+    @Test
+    @DisplayName("Prvý prístup len zapamätá vlastníka; bez SSO_ID sa nič nemení")
+    void should_rememberOwnerWithoutClearing_when_firstAccess() {
+        MockPortletSession session = new MockPortletSession();
+        session.setAttribute("APP_X", "1", PortletSession.APPLICATION_SCOPE);
+
+        new PortletSessionStore(new FakeRequestAwareManager(session)).ensureOwner();
+        assertThat(session.getAttribute(PortletSessionStore.OWNER, PortletSession.APPLICATION_SCOPE)).isNull();
+
+        new PortletSessionStore(new FakeRequestAwareManager(session).withSsoSessionId("s-a")).ensureOwner();
+        assertThat(session.getAttribute("APP_X", PortletSession.APPLICATION_SCOPE)).isEqualTo("1");
+        assertThat(session.getAttribute(PortletSessionStore.OWNER, PortletSession.APPLICATION_SCOPE)).isEqualTo("s-a");
+    }
 }

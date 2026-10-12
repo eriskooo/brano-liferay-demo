@@ -57,4 +57,35 @@ public class PortletSessionStore implements SessionStore {
             session.removeAttribute(key, PortletSession.APPLICATION_SCOPE);
         }
     }
+
+    /** SSO_ID operátora, ktorému patrí obsah tejto PortletSession. */
+    public static final String OWNER = PREFIX + "SSO_OWNER";
+    private static final String PORTLET_SCOPE_PREFIX = "javax.portlet.p.";
+
+    /**
+     * Liferay session prežije odhlásenie/prihlásenie iného operátora v SSO (JSESSIONID sa nemení). Bez tejto kontroly
+     * by operátor B videl stav A (hlavička, formuláre v @SessionAttributes) – pri flagu PORTLET, nie pri REDIS.
+     */
+    public void ensureOwner() {
+        String current = requests.getSsoSessionId();
+        PortletSession session = requests.getPortletRequest().getPortletSession(false);
+        if (current == null || session == null) {
+            return;
+        }
+        Object owner = session.getAttribute(OWNER, PortletSession.APPLICATION_SCOPE);
+        if (owner != null && !owner.equals(current)) {
+            List<String> stale = new ArrayList<>();
+            Enumeration<String> names = session.getAttributeNames(PortletSession.APPLICATION_SCOPE);
+            while (names.hasMoreElements()) {
+                String name = names.nextElement();
+                if (name.startsWith(PREFIX) || name.startsWith(PORTLET_SCOPE_PREFIX)) {
+                    stale.add(name);
+                }
+            }
+            for (String name : stale) {
+                session.removeAttribute(name, PortletSession.APPLICATION_SCOPE);
+            }
+        }
+        session.setAttribute(OWNER, current, PortletSession.APPLICATION_SCOPE);
+    }
 }

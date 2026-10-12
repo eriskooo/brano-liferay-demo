@@ -27,7 +27,10 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import javax.portlet.ResourceResponse;
 import org.springframework.mock.web.portlet.MockActionResponse;
+import org.springframework.mock.web.portlet.MockResourceRequest;
+import org.springframework.mock.web.portlet.MockResourceResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.portlet.ModelAndView;
 
@@ -103,7 +106,7 @@ class BlacklistDetailControllerTest {
     @DisplayName("AJAX odstránenie vráti fragment so zostávajúcimi identifikátormi")
     @SuppressWarnings("unchecked")
     void should_returnFragmentWithRemaining_when_identifierRemoved() {
-        ModelAndView view = controller.removeIdentifier(1, 2);
+        ModelAndView view = controller.removeIdentifier(1, 2, post(), new MockResourceResponse());
 
         assertThat(view.getViewName()).isEqualTo("blacklist/fragments/identifiers");
         assertThat((List<Identifier>) view.getModel().get("identifiers")).extracting(Identifier::getId).containsExactly(1L);
@@ -114,7 +117,7 @@ class BlacklistDetailControllerTest {
     @DisplayName("Posledný identifikátor: fragment s chybovým kľúčom a nezmeneným zoznamom")
     @SuppressWarnings("unchecked")
     void should_returnErrorKey_when_removingLastIdentifier() {
-        ModelAndView view = controller.removeIdentifier(4, 5);
+        ModelAndView view = controller.removeIdentifier(4, 5, post(), new MockResourceResponse());
 
         assertThat(view.getModel().get("errorKey")).isEqualTo("blacklist.detail.lastIdentifier");
         assertThat((List<Identifier>) view.getModel().get("identifiers")).hasSize(1);
@@ -123,6 +126,24 @@ class BlacklistDetailControllerTest {
     @Test
     @DisplayName("Identifikátor iného záznamu je 404 (resolver z toho spraví HTTP 404)")
     void should_throwNotFound_when_identifierOfOtherRecord() {
-        assertThatThrownBy(() -> controller.removeIdentifier(1, 3)).isInstanceOf(NotFoundException.class);
+        assertThatThrownBy(() -> controller.removeIdentifier(1, 3, post(), new MockResourceResponse())).isInstanceOf(NotFoundException.class);
+    }
+
+    private static MockResourceRequest post() {
+        MockResourceRequest request = new MockResourceRequest();
+        request.setMethod("POST");
+        return request;
+    }
+
+    @Test
+    @DisplayName("Mutácia v resource fáze len cez POST – GET (napr. odkaz z cudzej stránky) je 405 bez zmeny")
+    void should_reject405_when_removeIdentifierViaGet() {
+        MockResourceRequest get = new MockResourceRequest();
+        get.setMethod("GET");
+        MockResourceResponse response = new MockResourceResponse();
+
+        assertThat(controller.removeIdentifier(1, 2, get, response)).isNull();
+        assertThat(response.getProperty(ResourceResponse.HTTP_STATUS_CODE)).isEqualTo("405");
+        assertThat(service.findById(1).get().getIdentifiers()).hasSize(2);
     }
 }

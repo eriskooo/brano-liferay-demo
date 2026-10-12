@@ -1,0 +1,43 @@
+/* Neutrálny vzhľad dema – náhrada Liferay theme (bez brandingu klienta). */
+:root { --fg:#1d2433; --muted:#5b6475; --accent:#1f5fbf; --bg:#f4f6fa; --panel:#fff; --line:#dde2ea; --error:#b3261e; --ok:#1e7d32; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+.app-header { display: flex; gap: 1.5rem; align-items: center; padding: .75rem 1.5rem; background: var(--accent); color: #fff; }
+.app-header a { color: #fff; }
+.app-header nav { display: flex; gap: 1rem; flex: 1; }
+.app-header .who { font-size: .9rem; }
+main { max-width: 960px; margin: 1.5rem auto; padding: 0 1rem; }
+.panel { background: var(--panel); padding: 1rem 1.25rem; border-radius: 6px; border: 1px solid var(--line); margin-bottom: 1rem; }
+label { display: block; margin: .5rem 0; }
+input, select, textarea { font: inherit; padding: .3rem .4rem; }
+fieldset { border: 1px solid var(--line); margin-bottom: 1rem; }
+button, .button { font: inherit; padding: .4rem .9rem; border-radius: 4px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; text-decoration: none; }
+button.primary { background: var(--accent); color: #fff; }
+button.link { border: none; background: none; text-decoration: underline; padding: 0 .3rem; }
+form.inline { display: inline; }
+.actions { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
+.msg { padding: .6rem 1rem; border-radius: 4px; margin-bottom: 1rem; }
+.msg-INFO { background: #e6f4ea; color: var(--ok); }
+.msg-ERROR, .acl-denied { background: #fdecea; color: var(--error); padding: .6rem 1rem; }
+.field-error { color: var(--error); font-size: .9rem; }
+table.grid { width: 100%; border-collapse: collapse; background: var(--panel); }
+table.grid th, table.grid td { text-align: left; padding: .5rem; border-bottom: 1px solid var(--line); }
+.badge { font-size: .8rem; background: #e8eefc; color: var(--accent); padding: .1rem .4rem; border-radius: 3px; }
+.hint { color: var(--muted); }
+dl.panel { display: grid; grid-template-columns: 12rem 1fr; gap: .4rem 1rem; }
+dl.panel dt { font-weight: 600; }
+dl.panel dd { margin: 0; }
+ul.plain { list-style: none; padding: 0; }
+ul.plain li { padding: .4rem 0; border-bottom: 1px solid var(--line); }
+/* Štruktúra ako theme starej appky (nad Bootstrapom 2 z Liferay „classic“). */
+body.crm-new-app { background: #f4f6f8; }
+.crm-wrapper { max-width: 1140px; margin: 0 auto; padding: 0 0 24px; background: #fff; box-shadow: 0 0 6px rgba(0, 0, 0, .08); }
+.crm-brand { padding: 12px 16px; font-size: 18px; font-weight: bold; background: #33475b; color: #fff; }
+.crm-nav ul { list-style: none; margin: 0; padding: 0 8px; display: flex; background: #dfe6ee; }
+.crm-nav li a { display: block; padding: 10px 16px; color: #33475b; text-decoration: none; }
+.crm-nav li.selected a { background: #fff; font-weight: bold; }
+.crm-header { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 8px 16px; background: #eef2f6; border-bottom: 1px solid #c9d3dd; }
+.crm-header .crm-message { flex-basis: 100%; margin: 0; }
+.crm-header form { margin: 0; }
+.crm-session-debug { flex-basis: 100%; font: 12px monospace; color: #555; }
+#content { padding: 16px; }

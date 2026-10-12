@@ -111,6 +111,11 @@ docs/MIGRACIA.md, poznamky/*, README.md, CLAUDE.md
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        <!-- RestClient.Builder pre SSO klienta (Boot 4 je rozdelený na moduly). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-restclient</artifactId>
+        </dependency>
         <!-- Zdieľaná session so starou appkou (Redis hash crm:session:{SSO_ID}). -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -2243,7 +2248,7 @@ public abstract class PortletUrlTag extends TagSupport {
             if (var != null) {
                 pageContext.setAttribute(var, url);
             } else {
-                pageContext.getOut().write(escapeXml ? HtmlUtils.htmlEscape(url) : url);
+                pageContext.getOut().write(escapeXml ? HtmlUtils.htmlEscape(url, "UTF-8") : url);
             }
         } catch (IOException e) {
             throw new JspException(e);
@@ -2518,7 +2523,7 @@ public class MessageTag extends TagSupport {
             if (var != null) {
                 pageContext.setAttribute(var, text);
             } else {
-                pageContext.getOut().write(HtmlUtils.htmlEscape(text));
+                pageContext.getOut().write(HtmlUtils.htmlEscape(text, "UTF-8"));
             }
         } catch (IOException e) {
             throw new JspException(e);
@@ -2695,7 +2700,7 @@ public class AclPageFilterTag extends TagSupport {
         }
         try {
             pageContext.getOut().write("<p class=\"acl-denied\">"
-                    + HtmlUtils.htmlEscape(AclTagSupport.message(pageContext, "acl.pageDenied", privilegeType)) + "</p>");
+                    + HtmlUtils.htmlEscape(AclTagSupport.message(pageContext, "acl.pageDenied", privilegeType), "UTF-8") + "</p>");
         } catch (IOException e) {
             throw new JspException(e);
         }
@@ -3048,6 +3053,8 @@ public final class WebClient {
     public WebClient addCookie(String name, String value) {
         HttpCookie cookie = new HttpCookie(name, value);
         cookie.setPath("/");
+        // Verzia 0 (Netscape) ako v prehliadači – verzia 1 by hodnotu poslala v úvodzovkách ("it-admin").
+        cookie.setVersion(0);
         cookies.getCookieStore().add(URI.create(baseUrl), cookie);
         return this;
     }
@@ -3222,10 +3229,10 @@ class LayoutRenderingTest {
     @Test
     @DisplayName("Neznáma cesta vykreslí vlastnú chybovú stránku s layoutom a navigáciou do Liferay")
     void should_renderCustomErrorPage_when_pathUnknown() throws Exception {
-        HttpResponse<String> response = new WebClient(port).get("/crm/neexistuje");
+        HttpResponse<String> response = new WebClient(port).get("/crm/neexistuje", "Accept", "text/html");
 
         assertThat(response.statusCode()).isEqualTo(404);
-        assertThat(response.body()).contains("Chyba").contains("/web/crm/dashboard").contains("/crm/css/crm.css");
+        assertThat(response.body()).contains("Nenájdené").contains("/web/crm/dashboard").contains("/crm/css/crm.css");
         WebClient.assertNoMissingMessages(response.body());
     }
 }
@@ -3564,7 +3571,7 @@ public class HomeController {
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
-    <title><common:message key="${titleKey}"/> – <common:message key="app.name"/></title>
+    <title><common:message key="${titleKey}"/> &ndash; <common:message key="app.name"/></title>
     <link rel="stylesheet" href="/html/themes/classic/css/aui.css?themeId=classic&amp;minifierType=css">
     <link rel="stylesheet" href="/html/themes/classic/css/main.css?themeId=classic&amp;minifierType=css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/crm.css">
@@ -3672,7 +3679,7 @@ public class HomeController {
 
 Run: `mvn -q -B -f crm-web/pom.xml test -Dtest="WebInfrastructureTest,LayoutRenderingTest"`
 Expected: PASS (7 + 1 = 8 testov).
-Ak `should_renderCustomErrorPage_when_pathUnknown` dostane telo bez „Chyba“, Spring Boot nenašiel view `error` – over `server.error.whitelabel.enabled=false` a `WEB-INF/jsp/error.jsp`.
+Ak `should_renderCustomErrorPage_when_pathUnknown` dostane telo bez „Nenájdené“, Spring Boot nenašiel view `error` – over `server.error.whitelabel.enabled=false` a `WEB-INF/jsp/error.jsp`.
 
 - [ ] **Step 7: Spusti všetky doterajšie testy**
 
@@ -4662,7 +4669,7 @@ class BlacklistDetailWebTest {
     @Test
     @org.junit.jupiter.api.DisplayName("Detail zapíše posledný záznam do zdieľanej session")
     void should_shareLastViewed_when_detailOpened() throws Exception {
-        MockHttpSession session = TestSessions.reader();
+        org.springframework.mock.web.MockHttpSession session = TestSessions.reader();
         String ssoId = ((com.example.crm.session.SsoIdentity) session.getAttribute(
                 com.example.crm.testsupport.TestInfrastructure.TEST_IDENTITY)).ssoSessionId();
 
@@ -5462,7 +5469,7 @@ public class BlacklistCreateController {
         <legend><common:message key="blacklist.create.identifier"/></legend>
         <label><common:message key="blacklist.field.identifierType"/>
             <form:select path="identifierType">
-                <form:option value="">—</form:option>
+                <form:option value="">&mdash;</form:option>
                 <c:forEach var="type" items="${identifierTypes}">
                     <form:option value="${type}"><common:message key="blacklist.identType.${type}"/></form:option>
                 </c:forEach>
@@ -5479,7 +5486,7 @@ public class BlacklistCreateController {
         <label><common:message key="blacklist.field.stateReason"/>
             <%-- data-ajax-refresh: náhrada legacy JS, ktorý volal resource URL portletu --%>
             <form:select path="stateReason" data-ajax-refresh="${conditionTypesUrl}" data-ajax-target="#conditionTypes">
-                <form:option value="">—</form:option>
+                <form:option value="">&mdash;</form:option>
                 <c:forEach var="reason" items="${stateReasons}">
                     <form:option value="${reason}"><common:message key="blacklist.reason.${reason}"/></form:option>
                 </c:forEach>
@@ -5512,7 +5519,7 @@ public class BlacklistCreateController {
 <%@ include file="/WEB-INF/jsp/layout/taglibs.jspf" %>
 <%-- Obyčajný <select> (nie form:select): fragment sa vracia aj samostatne cez AJAX, mimo <form:form>. --%>
 <select name="conditionType" id="conditionTypes">
-    <option value="">—</option>
+    <option value="">&mdash;</option>
     <c:forEach var="condition" items="${conditionTypes}">
         <option value="${condition}" ${condition == createForm.conditionType ? 'selected' : ''}><common:message key="blacklist.condition.${condition}"/></option>
     </c:forEach>
@@ -6027,7 +6034,7 @@ echo "Čakám na Liferay a crm-web..."
 for _ in $(seq 1 90); do
     a="$(curl -s -o /dev/null -w '%{http_code}' "$B/web/crm/dashboard")"
     b="$(curl -s -o /dev/null -w '%{http_code}' "$B/crm/blacklist/search")"
-    [ "$a" = "200" ] && [ "$b" = "302" ] && break
+    [ "$a" = "200" ] && [ "$b" = "302" ] && curl -s "$B/web/crm/dashboard" | grep -q 'id="sessionDebug"' && break
     sleep 5
 done
 
@@ -6054,9 +6061,10 @@ expect "nová appka: ladiaci riadok so SSO_ID" "SSO_ID = $SSO_ID" "$WORK/search.
 expect "stará appka (dashboard): operátor zo SSO" 'id="headerOperator"' "$WORK/dash0.html"
 
 echo "== 4. Blacklist v novej appke"
-post /crm/blacklist/searchAction "$WORK/result1.html" -d "firstName=M%C3%A1ria"
+# Všetky polia formulára ako prehliadač – kritériá sú v @SessionAttributes a nevyplnené pole by ostalo z minulého hľadania.
+post /crm/blacklist/searchAction "$WORK/result1.html" -d "firstName=M%C3%A1ria" -d lastName= -d identifierValue= -d state=
 expect "diakritika: Mária nájdená" 'Mária Príkladová' "$WORK/result1.html"
-post /crm/blacklist/searchAction "$WORK/result2.html" -d lastName=Vzork
+post /crm/blacklist/searchAction "$WORK/result2.html" -d firstName= -d lastName=Vzork -d identifierValue= -d state=
 expect "výsledok: Peter Vzorka" 'Peter Vzorka' "$WORK/result2.html"
 post "/crm/blacklist/changeAction?detailId=7" "$WORK/changed.html" -d state=INACTIVE -d validTo=
 expect "zmena stavu: hláška po PRG" 'Záznam bol zmenený.' "$WORK/changed.html"
@@ -6273,7 +6281,8 @@ porovnať aj v prehliadači: starý blacklist na :8080, nový na :8000. Skratky 
 
 ## 5. Formuláre a validácia
 - **Pred:** vlastné `Validator` triedy volané v controlleri (`SearchCriteriaValidator`, `BlacklistCreateValidator`).
-- **Po:** Bean Validation (`@NotBlank`, `@AssertTrue`, vlastné pravidlo pre podmienku) + `@Valid`.
+- **Po:** Bean Validation na formulári (`@NotBlank`, `@NotNull`, `@Past`, krížové pravidlá ako `@AssertTrue` metódy) + `@Valid`;
+  povolenú podmienku pre dôvod overuje controller cez službu (`crm-web/.../blacklist/BlacklistCreateController.java`).
 - **Prečo:** menej kódu, pravidlá pri poliach formulára; business pravidlo (povolená podmienka) ostáva v službe.
 
 ## 6. ACL

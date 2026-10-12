@@ -61,3 +61,7 @@ grep -rhoE "<[a-z]+:[A-Za-z]+" CP/webapp/WEB-INF/jsp/<portlet> | sort | uniq -c 
 - [ ] všetky `@ModelAttribute`/`@SessionAttributes` zmapované
 - [ ] scenáre end-to-end prejdú proti stubu aj reálnemu backendu
 - [ ] ACL pravidlá overené testom
+
+## Ukážka v deme
+Celý postup na jednom portlete (blacklist) aj so súbehom starej a novej appky: `docs/MIGRACIA.md`
+(pred → po po súboroch), `crm-web/README.md` (preklikanie), `docker/smoke-migration.sh` (overenie).

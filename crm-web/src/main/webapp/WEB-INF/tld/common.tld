@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Rovnaké názvy tagov a atribútov ako legacy common.tld (len podmnožina, ktorú demo potrebuje). -->
+<taglib xmlns="https://jakarta.ee/xml/ns/jakartaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-jsptaglibrary_3_0.xsd"
+        version="3.0">
+    <tlib-version>1.0</tlib-version>
+    <short-name>common</short-name>
+    <uri>http://example.com/crm/tags/common</uri>
+
+    <tag>
+        <name>message</name>
+        <tag-class>com.example.crm.web.tag.MessageTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute><name>key</name><required>true</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>var</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>showMessageOnlyIfExists</name><required>false</required><rtexprvalue>true</rtexprvalue><type>boolean</type></attribute>
+    </tag>
+    <tag>
+        <name>msgarg</name>
+        <tag-class>com.example.crm.web.tag.MessageArgTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute><name>value</name><required>true</required><rtexprvalue>true</rtexprvalue><type>java.lang.Object</type></attribute>
+    </tag>
+    <tag>
+        <name>aclFilter</name>
+        <tag-class>com.example.crm.web.tag.AclFilterTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute><name>privilegeType</name><required>true</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>aclResource</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+    </tag>
+    <tag>
+        <name>aclPageFilterTag</name>
+        <tag-class>com.example.crm.web.tag.AclPageFilterTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute><name>privilegeType</name><required>true</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><name>wireframe</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+    </tag>
+</taglib>

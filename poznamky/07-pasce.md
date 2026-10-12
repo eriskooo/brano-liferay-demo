@@ -49,3 +49,18 @@
 18. **Oprávnenia z hooku pri prvom deployi.** Hook beží skôr, než sa zaregistrujú portlety toho istého WAR-u, takže
     `setResourcePermissions` pre ich akcie zlyhá (`…#VIEW`). Hosť VIEW napriek tomu dostal z predvolených oprávnení
     portletu pri umiestnení na stránku – na explicitné oprávnenia sa pri prvom štarte nespoliehaj.
+
+19. **Flag zdroja čítania pri súbehu.** Kým stará appka číta `PORTLET`, nevidí nič, čo zapíše nová appka (tá starú
+    session nemá). Flag treba prepnúť na `REDIS` najneskôr s nasadením prvej zmigrovanej stránky.
+20. **JSON kontrakt medzi Java 8 a Java 21.** Zdieľané hodnoty sú len jednoduché DTO v JSON; nová appka musí ignorovať
+    neznáme polia a znášať `null` (Jackson 2 vs. Jackson 3 sa líšia predvoľbami).
+21. **Session cookie novej appky.** Za jedným hostom musí mať iný názov a cestu (`CRM_SESSION`, `/crm`) – inak prepíše
+    `JSESSIONID` portálu.
+22. **Liferay session prežije zmenu operátora v SSO.** Bez kontroly vlastníka (`SSO_ID`) vidí operátor B stav A.
+23. **`HtmlUtils.htmlEscape(text)` bez kódovania** mení slovenské znaky na entity (`&yacute;`). V tagoch a výstupe
+    používaj `htmlEscape(text, "UTF-8")` – escapujú sa len `& < > " '`.
+24. **Spring Boot 4 je rozdelený na moduly.** Napr. `RestClient.Builder` bez `spring-boot-starter-restclient` neexistuje,
+    hoci kód sa skompiluje – chyba sa ukáže až pri štarte kontextu.
+25. **Čiastočné bindovanie `@SessionAttributes`.** Pole, ktoré request neobsahuje, ostane z predchádzajúceho formulára
+    v session (v legacy aj po migrácii). Prehliadač posiela všetky polia, ručné testy (curl) musia tiež.
+26. **nginx `return 302` za proxy s iným portom** skladá absolútnu URL s interným portom – `absolute_redirect off`.

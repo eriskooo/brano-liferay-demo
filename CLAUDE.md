@@ -16,7 +16,7 @@ Output layout (outside `input/`):
   and add to it as you learn. Index: `poznamky/README.md`; abbreviations and anonymization: `poznamky/00-konvencie.md`.
   `poznamky/LOCAL-*` (alias → real-name mapping, anonymization check script) is git-ignored and copied manually.
 - `legacy/`, `sso-mock/`, `docker/` – the runnable "before" app on Liferay 6.2 (sub-project 1, done; see `legacy/README.md`).
-- The migrated Spring Boot "after" app (sub-project 2, not yet created).
+- `crm-web/` – the migrated Spring Boot "after" app (sub-project 2, done; see `crm-web/README.md`, `docs/MIGRACIA.md`).
 
 Docs and notes are written in **Slovak**; the source materials are in Czech.
 
@@ -32,8 +32,9 @@ Docs and notes are written in **Slovak**; the source materials are in Czech.
   1. **Legacy "before" app — done** (`legacy/`, `sso-mock/`, `docker/`; spec + plan `2026-10-12-legacy-liferay-app*`):
      Liferay 6.2 CE GA6 + Java 8 (Zulu 8u252 – update must be ≤ 255, ICU bug) + Spring Portlet MVC 4.3.6,
      SSO mock (HTTP + API JAR in `lib/ext`), dual session via Redis (flag `crm:flags:session-read-source`).
-  2. **Spring Boot "after" app** – next: revise the 2026-10-08 spec/plan (read the shared session from Redis,
-     run behind the same nginx under `/crm/`, Boot app in `crm-web/`, own session cookie name). Not started.
+  2. **Spring Boot "after" app — done** (`crm-web/`; spec + plan `2026-10-12-crm-web-migration*`): blacklist migrated,
+     dashboard stays in Liferay; nginx strangler `/web/crm/blacklist` → `/crm/blacklist/search`; shared SSO identity and
+     Redis session (same JSON as legacy); legacy flag must be `REDIS` for cross-app state. Verify: `bash docker/smoke-migration.sh`.
 - Git: the user allows commits only when they explicitly ask; never push unless asked.
 
 ## Anonymization (hard rule)
@@ -54,11 +55,12 @@ If the script is missing on this machine, it has to be copied manually together 
 - Stack: `bash docker/build-and-deploy.sh` (or `docker\build-and-deploy.ps1`), then `bash docker/smoke.sh` → `SMOKE OK`.
   CRM at http://localhost:8000, RedisInsight :5540, Liferay admin :8080 (`test@liferay.com`/`test`).
 - Shared session: `bash docker/show-session.sh`, `bash docker/session-flag.sh PORTLET|REDIS`.
+- New app: `mvn -q -B -f crm-web/pom.xml verify` (needs Docker for Testcontainers); stack smoke: `bash docker/smoke-migration.sh` → `MIGRATION SMOKE OK`.
 - Legacy modules compile with `--release 8` – Java 8 API only (no records, `var`, `List.of`, `isBlank`, `toList()`).
 
-## "After" app architecture and conventions (planned, sub-project 2 — see the 2026-10-08 plan's "Global Constraints")
+## "After" app architecture and conventions
 
-- Single Maven WAR module at the repo root, package `com.example.crm`. Portlet phases map to Spring MVC:
+- `crm-web/` Maven WAR module, context path `/crm`, package `com.example.crm`. Portlet phases map to Spring MVC:
   render = GET, action = POST + redirect (PRG), resource = AJAX endpoint (HTML fragment or JSON).
 - Custom JSP tags `portal:*` / `common:*` keep the **legacy interface** but are implemented without Liferay
   (`web/tag/`, TLDs in `src/main/webapp/WEB-INF/tld/`); the session facade (`CrmSession`) and ACL keep the legacy contract;
@@ -66,8 +68,6 @@ If the script is missing on this machine, it has to be copied manually together 
 - Every JSP starts with `<%@ include file="/WEB-INF/jsp/layout/taglibs.jspf" %>` and has no own `page` directive.
 - Identifiers in English; code comments, UI texts (`messages.properties`) and docs in **Slovak** (this overrides the global
   "comments in Czech" rule for this repo). Comments explain the migration decision / legacy equivalent, not what the code does.
-- The plan's last task replaces the "not yet created" line above with a `Build & run` section (`mvn verify`,
-  `mvn -q -B test -Dtest=ClassName`, `mvn spring-boot:run`) — keep it in sync once the code exists.
 
 ## The legacy project (in `input/`, for reference only)
 

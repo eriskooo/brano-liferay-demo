@@ -11,7 +11,7 @@ Zrozumiteľnosť a komentované rozhodnutia majú prednosť pred úplnosťou.
 | 1. Analýza legacy projektu | [`docs/ANALYZA.md`](docs/ANALYZA.md) | hotovo |
 | Znalostná báza pre reálny projekt | [`poznamky/`](poznamky/README.md) | hotovo, priebežne sa dopĺňa |
 | 2a. Stará appka „pred“ (Liferay 6.2) | [`legacy/`](legacy/README.md), [`sso-mock/`](sso-mock), [`docker/`](docker) – [spec](docs/superpowers/specs/2026-10-12-legacy-liferay-app-design.md), [plán](docs/superpowers/plans/2026-10-12-legacy-liferay-app.md) | hotovo |
-| 2b. Zmigrovaná appka „po“ (Spring Boot) | [spec](docs/superpowers/specs/2026-10-08-liferay-migracia-demo-design.md), [plán](docs/superpowers/plans/2026-10-08-liferay-migracia-demo.md) | čaká na úpravu (zdieľaná session z Redisu) |
+| 2b. Zmigrovaná appka „po“ (Spring Boot) | [`crm-web/`](crm-web/README.md), [`docs/MIGRACIA.md`](docs/MIGRACIA.md) – [spec](docs/superpowers/specs/2026-10-12-crm-web-migration-design.md), [plán](docs/superpowers/plans/2026-10-12-crm-web-migration.md) | hotovo – blacklist beží v Spring Boot vedľa Liferay |
 
 ## Čo demo ukáže
 
@@ -27,6 +27,7 @@ Stack: Java 21, Spring Boot 4.1.1, Maven, WAR + JSP, in-memory služby namiesto 
 
 ```
 legacy/      stará appka na Liferay 6.2 (Java 8, Spring Portlet MVC) – 4 moduly ako legacy
+crm-web/     nová appka (Spring Boot 4.1.1) so zmigrovaným blacklistom – beží súčasne so starou
 sso-mock/    mock SSO portálu (Spring Boot 4.1.1)
 docker/      Liferay 6.2 + Redis + RedisInsight + SSO mock + nginx, skripty (build, smoke, zdieľaná session)
 docs/        analýza, (neskôr) MIGRACIA.md, superpowers spec + plány

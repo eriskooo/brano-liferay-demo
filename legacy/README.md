@@ -64,8 +64,10 @@ Zákazníci: `C-1001` Ján Vzorový (3 produkty), `C-1002` Firma Ukážka s.r.o.
 6. **Dashboard** (navigácia hore): produkty zákazníka zo SSO. **Zrušiť** pri *Tarif Neobmedzený* →
    formulár (`page=tariffDeactivation`). Zmena typu alebo dátumu podania zavolá JSON resource a nastaví
    *Najskôr:*. Príliš skorý dátum → chyba; správny → potvrdenie so žiadosťou.
-   Legacy pasca: otvor potom zrušenie *Tarif Štandard* – typ a dátumy ostali z predchádzajúceho formulára
-   (`@SessionAttributes`), migrácia to opraví.
+   Legacy pasca `@SessionAttributes`: pri *Tarif Neobmedzený* zvoľ *Zrušenie* a dátum „Ku dňu“ skorší než *Najskôr*
+   → **Odoslať** skončí chybou (formulár ostane v session). Vráť sa na produkty a otvor *Tarif Štandard* – typ a dátumy
+   ostali z predchádzajúceho formulára. Po úspešnom odoslaní sa formulár zo session odstráni (`setComplete`), preto
+   sa pasca ukáže len po neúspešnom pokuse; migrácia ju odstráni úplne.
 7. **Zmena zákazníka:** v hlavičke **Zmeniť zákazníka** → v SSO mocku vyber `C-1002` → dashboard ukáže iné produkty.
    Zákazníka vlastní SSO portál, nie CRM.
 8. **ACL:** **Odhlásiť** → prihlás sa ako *Čitateľ*. Blacklist vidí, ale bez tlačidiel zmeny a bez „Nový záznam“;
@@ -93,6 +95,10 @@ Fasáda (`SessionManagerCustom`) zapisuje hlášky a vybrané atribúty **do Por
   ostávajú v `PortletSession` – zdieľa sa len to, čo ide cez fasádu a je v registri `SharedKeys`.
 
 V podprojekte 2 bude za tým istým nginx aj Spring Boot appka (`/crm/`), ktorá prečíta ten istý hash.
+
+## Súbeh so zmigrovanou appkou
+Blacklist je zmigrovaný do `../crm-web` – na :8000 ho nginx presmeruje do novej appky, starý portlet je na
+http://localhost:8080/web/crm/blacklist. Návod na preklikanie súbehu: [`../crm-web/README.md`](../crm-web/README.md).
 
 ## Testy
 

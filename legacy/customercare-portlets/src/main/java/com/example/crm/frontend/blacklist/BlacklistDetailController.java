@@ -9,6 +9,8 @@ import com.example.crm.frontend.base.web.BaseCrmController;
 import com.example.crm.frontend.base.web.NotFoundException;
 import java.time.LocalDate;
 import javax.portlet.ActionResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -77,9 +79,14 @@ public class BlacklistDetailController extends BaseCrmController {
         backToDetail(response, detailId);
     }
 
-    /** AJAX: odstránenie identifikátora, vráti HTML fragment zoznamu. */
+    /** AJAX: odstránenie identifikátora, vráti HTML fragment zoznamu. Len POST – resource URL nemá p_auth token. */
     @ResourceMapping("removeIdentAction")
-    public ModelAndView removeIdentifier(@RequestParam("detailId") long detailId, @RequestParam("identId") long identId) {
+    public ModelAndView removeIdentifier(@RequestParam("detailId") long detailId, @RequestParam("identId") long identId,
+                                         ResourceRequest request, ResourceResponse response) {
+        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+            response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "405");
+            return null;
+        }
         checkPrivilege(Privilege.BLACKLIST_MODIFY);
         ModelAndView view = new ModelAndView("blacklist/fragments/identifiers");
         view.addObject("detailId", detailId);
