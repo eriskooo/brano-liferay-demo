@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+      In-memory náhrada backendu. V legacy tento kontext pochádza z backend JAR-u a obsahuje DAO, transakcie
+      a klientov integračnej vrstvy – všetko v jednom JVM s frontendom (riziko č. 2 z analýzy).
+    -->
+    <bean id="blacklistService" class="com.example.crm.frontend.backend.blacklist.InMemoryBlacklistService">
+        <constructor-arg ref="clock"/>
+    </bean>
+    <bean id="customerProductService"
+          class="com.example.crm.frontend.backend.deactivation.InMemoryCustomerProductService"/>
+    <bean id="deactivationService" class="com.example.crm.frontend.backend.deactivation.InMemoryDeactivationService">
+        <constructor-arg ref="clock"/>
+    </bean>
+</beans>

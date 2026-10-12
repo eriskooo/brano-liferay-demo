@@ -1,0 +1,40 @@
+name: crm-legacy
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    ports: ["6379:6379"]
+
+  # GUI na zdieľanú session: http://localhost:5540 (databázu "crm-shared-session" zaregistruje build-and-deploy cez API).
+  redisinsight:
+    image: redis/redisinsight:3.6.0
+    ports: ["5540:5540"]
+    depends_on: [redis]
+
+  sso-mock:
+    build: ../sso-mock
+    expose: ["8090"]
+
+  liferay:
+    build: ./liferay
+    environment:
+      CATALINA_OPTS: >-
+        -Xmx2g -Dfile.encoding=UTF-8
+        -Dsso.portal.api-url=http://sso-mock:8090/sso
+        -Dsso.portal.login-url=/sso/login
+        -Dcrm.redis.host=redis
+    ports: ["8080:8080"]
+    volumes:
+      - liferay-data:/opt/liferay/data
+      - ./deploy:/opt/liferay/deploy
+    depends_on: [redis, sso-mock]
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["8000:80"]
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [liferay, sso-mock]
+
+volumes:
+  liferay-data:

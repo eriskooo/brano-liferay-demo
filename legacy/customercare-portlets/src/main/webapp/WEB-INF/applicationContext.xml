@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- XML konfigurácia ako v legacy. System properties (CATALINA_OPTS) nahrádzajú profily root POM. -->
+    <context:property-placeholder/>
+
+    <!-- Backend „v tom istom JVM“ – v legacy import kontextov z backend JAR-ov. -->
+    <import resource="backend-context.xml"/>
+
+    <bean id="clock" class="java.time.Clock" factory-method="systemDefaultZone"/>
+    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+
+    <bean id="requestAwareManager" class="com.example.crm.frontend.base.session.PortletRequestAwareManager"/>
+
+    <!-- API SSO portálu z tomcat/lib/ext cez service locator (legacy: provided JAR + locator). -->
+    <bean id="portalSessionManager" class="com.example.sso.api.PortalServiceLocator"
+          factory-method="getPortalSessionManager"/>
+
+    <bean id="jedisPool" class="redis.clients.jedis.JedisPool" destroy-method="close">
+        <constructor-arg index="0"><bean class="redis.clients.jedis.JedisPoolConfig"/></constructor-arg>
+        <constructor-arg index="1" type="java.lang.String" value="${crm.redis.host:localhost}"/>
+        <constructor-arg index="2" type="int" value="${crm.redis.port:6379}"/>
+        <constructor-arg index="3" type="int" value="1000"/>
+    </bean>
+
+    <!-- Čo sa zdieľa so Spring appkou (podprojekt 2): len tieto kľúče + hlášky. -->
+    <bean id="sharedKeys" class="com.example.crm.frontend.base.session.SharedKeys">
+        <property name="types">
+            <map>
+                <entry key="APP_BLACKLIST_LAST_CRITERIA" value="com.example.crm.frontend.blacklist.LastSearchCriteria"/>
+                <entry key="APP_LAST_VIEWED_RECORD" value="com.example.crm.frontend.blacklist.LastViewedRecord"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="portletSessionStore" class="com.example.crm.frontend.base.session.PortletSessionStore">
+        <constructor-arg ref="requestAwareManager"/>
+    </bean>
+    <bean id="redisSessionStore" class="com.example.crm.frontend.base.session.RedisSessionStore">
+        <constructor-arg ref="jedisPool"/>
+        <constructor-arg ref="requestAwareManager"/>
+        <constructor-arg ref="sharedKeys"/>
+    </bean>
+    <bean id="readSourceFlag" class="com.example.crm.frontend.base.session.ReadSourceFlag">
+        <constructor-arg ref="jedisPool"/>
+        <constructor-arg ref="requestAwareManager"/>
+    </bean>
+    <!-- Duálna session (slide 12): zápis do oboch, čítanie podľa flagu v Redise. -->
+    <bean id="sessionStore" class="com.example.crm.frontend.base.session.DualSessionStore">
+        <constructor-arg ref="portletSessionStore"/>
+        <constructor-arg ref="redisSessionStore"/>
+        <constructor-arg ref="readSourceFlag"/>
+    </bean>
+
+    <bean id="sessionManager" class="com.example.crm.frontend.base.session.SessionManagerCustomImpl">
+        <constructor-arg ref="requestAwareManager"/>
+        <constructor-arg ref="portalSessionManager"/>
+        <constructor-arg ref="sessionStore"/>
+    </bean>
+
+    <bean id="aclService" class="com.example.crm.frontend.base.acl.InMemoryAclService"/>
+    <bean id="operatorAcl" class="com.example.crm.frontend.base.acl.OperatorAcl">
+        <constructor-arg ref="sessionManager"/>
+        <constructor-arg ref="aclService"/>
+    </bean>
+    <bean id="portletAccessGuard" class="com.example.crm.frontend.base.web.PortletAccessGuard">
+        <constructor-arg ref="sessionManager"/>
+        <constructor-arg ref="operatorAcl"/>
+    </bean>
+
+    <bean id="messageSource" class="com.example.crm.frontend.base.i18n.MessageSourceCustom"/>
+</beans>

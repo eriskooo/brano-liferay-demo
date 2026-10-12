@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Vlastný Spring kontext portletu (legacy: <portlet>-portlet.xml). Po migrácii jeden DispatcherServlet. -->
+    <context:component-scan base-package="com.example.crm.frontend.blacklist"/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <bean class="com.example.crm.frontend.base.web.SimpleMappingExceptionResolverCustom">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="com.example.crm.frontend.base.acl.AclDeniedException">error/403</prop>
+                <prop key="com.example.crm.frontend.base.web.NotFoundException">error/404</prop>
+                <prop key="org.springframework.beans.TypeMismatchException">error/404</prop>
+                <prop key="org.springframework.web.portlet.bind.MissingPortletRequestParameterException">error/404</prop>
+                <prop key="com.example.sso.api.SsoUnavailableException">error/sso</prop>
+            </props>
+        </property>
+        <property name="defaultErrorView" value="error/error"/>
+    </bean>
+</beans>

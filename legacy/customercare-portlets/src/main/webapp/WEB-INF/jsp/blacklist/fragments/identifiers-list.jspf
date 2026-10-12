@@ -1,0 +1,21 @@
+<%-- Zoznam identifikátorov: v detaile (statický include) aj ako AJAX fragment resource fázy. Potrebuje
+     premenné identifiers, detailId a voliteľne errorKey. --%>
+<c:if test="${not empty errorKey}">
+    <div class="portlet-msg-error"><common:message key="${errorKey}"/></div>
+</c:if>
+<ul>
+    <c:forEach items="${identifiers}" var="i">
+        <li>
+            <common:message key="blacklist.identifier.${i.type}"/>: <c:out value="${i.value}"/>
+            <common:aclFilter privilegeType="BLACKLIST_MODIFY">
+                <portal:resourceURL id="removeIdentAction" var="removeUrl">
+                    <portal:param name="viewPage" value="detail"/>
+                    <portal:param name="detailId" value="${detailId}"/>
+                    <portal:param name="identId" value="${i.id}"/>
+                </portal:resourceURL>
+                <a id="remove-ident-${i.id}" href="#" data-url="${removeUrl}" data-target="identifiers"
+                   onclick="return Crm.removeIdentifier(this);"><common:message key="blacklist.detail.removeIdentifier"/></a>
+            </common:aclFilter>
+        </li>
+    </c:forEach>
+</ul>

@@ -1,0 +1,9 @@
+<nav id="navigation" class="crm-nav" role="navigation">
+    <ul>
+        #foreach ($nav_item in $nav_items)
+            <li #if ($nav_item.isSelected()) class="selected" #end>
+                <a href="$nav_item.getURL()" $nav_item.getTarget()>$nav_item.getName()</a>
+            </li>
+        #end
+    </ul>
+</nav>

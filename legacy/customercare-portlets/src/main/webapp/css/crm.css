@@ -1,0 +1,12 @@
+/* Neutrálny vzhľad bez brandingu. */
+.crm-header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 8px 12px; background: #eef2f6; border-bottom: 1px solid #c9d3dd; }
+.crm-header .crm-message { flex-basis: 100%; }
+.crm-session-debug { flex-basis: 100%; font: 12px monospace; color: #555; }
+.crm-inline { display: inline; margin: 0; }
+.crm-button { display: inline-block; padding: 4px 10px; border: 1px solid #4a6a8a; border-radius: 3px; text-decoration: none; }
+.crm-portlet table { border-collapse: collapse; width: 100%; }
+.crm-portlet th, .crm-portlet td { border: 1px solid #d5dde5; padding: 4px 8px; text-align: left; }
+.crm-portlet .field-error { color: #b00020; }
+.crm-portlet fieldset { border: 1px solid #d5dde5; margin: 8px 0; padding: 8px; }
+.crm-portlet label { display: inline-block; min-width: 160px; }
+#crm-ajax-error { display: none; color: #b00020; }

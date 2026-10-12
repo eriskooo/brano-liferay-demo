@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE liferay-portlet-app PUBLIC "-//Liferay//DTD Portlet Application 6.2.0//EN"
+        "http://www.liferay.com/dtd/liferay-portlet-app_6_2_0.dtd">
+<liferay-portlet-app>
+    <!-- requires-namespaced-parameters=false: formuláre posielajú mená polí bez namespace portletu (ako legacy). -->
+    <portlet>
+        <portlet-name>blacklist</portlet-name>
+        <instanceable>false</instanceable>
+        <requires-namespaced-parameters>false</requires-namespaced-parameters>
+        <header-portlet-css>/css/crm.css</header-portlet-css>
+        <footer-portlet-javascript>/js/crm.js</footer-portlet-javascript>
+        <css-class-wrapper>crm-portlet</css-class-wrapper>
+    </portlet>
+    <portlet>
+        <portlet-name>dashboard</portlet-name>
+        <instanceable>false</instanceable>
+        <requires-namespaced-parameters>false</requires-namespaced-parameters>
+        <header-portlet-css>/css/crm.css</header-portlet-css>
+        <footer-portlet-javascript>/js/crm.js</footer-portlet-javascript>
+        <css-class-wrapper>crm-portlet</css-class-wrapper>
+    </portlet>
+    <!-- Hlavičku vkladá theme ako runtime portlet (nie je na stránke) – hosť ju vidí len s add-default-resource. -->
+    <portlet>
+        <portlet-name>header</portlet-name>
+        <instanceable>false</instanceable>
+        <requires-namespaced-parameters>false</requires-namespaced-parameters>
+        <header-portlet-css>/css/crm.css</header-portlet-css>
+        <css-class-wrapper>crm-header-portlet</css-class-wrapper>
+        <add-default-resource>true</add-default-resource>
+    </portlet>
+    <role-mapper><role-name>guest</role-name><role-link>Guest</role-link></role-mapper>
+    <role-mapper><role-name>user</role-name><role-link>User</role-link></role-mapper>
+</liferay-portlet-app>

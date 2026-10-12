@@ -1,0 +1,8 @@
+<%-- Select podmienok: vo formulári (statický include) aj ako AJAX fragment. Obyčajný <select>, lebo fragment
+     resource fázy nemá kontext <form:form>. --%>
+<select id="conditionType" name="conditionType">
+    <option value=""><common:message key="blacklist.create.choose"/></option>
+    <c:forEach items="${conditionTypes}" var="t">
+        <option value="${t}" ${t == selectedConditionType ? 'selected' : ''}><common:message key="blacklist.condition.${t}"/></option>
+    </c:forEach>
+</select>

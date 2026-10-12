@@ -15,3 +15,7 @@ Thumbs.db
 
 # Lokálne mapovanie aliasov na skutočné názvy (prenáša sa ručne, nie cez git)
 /poznamky/LOCAL-*
+
+# Docker: WAR-y na hot deploy a API JAR kopírovaný do image Liferay (build výstupy)
+/docker/deploy/
+/docker/liferay/sso-portal-api.jar

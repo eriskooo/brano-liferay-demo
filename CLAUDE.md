@@ -15,7 +15,8 @@ Output layout (outside `input/`):
   themselves and carry out the migration. Keep it practical (where to look, concepts → replacements, playbook, pitfalls)
   and add to it as you learn. Index: `poznamky/README.md`; abbreviations and anonymization: `poznamky/00-konvencie.md`.
   `poznamky/LOCAL-*` (alias → real-name mapping, anonymization check script) is git-ignored and copied manually.
-- The demo Spring Boot project itself (Phase 2, not yet created).
+- `legacy/`, `sso-mock/`, `docker/` – the runnable "before" app on Liferay 6.2 (sub-project 1, done; see `legacy/README.md`).
+- The migrated Spring Boot "after" app (sub-project 2, not yet created).
 
 Docs and notes are written in **Slovak**; the source materials are in Czech.
 
@@ -25,9 +26,14 @@ Docs and notes are written in **Slovak**; the source materials are in Czech.
 - Phase 2 design approved: spec `docs/superpowers/specs/2026-10-08-liferay-migracia-demo-design.md`
   (user decisions: blacklist + simplified service cancellation, Spring MVC + JSP with same-interface tags, Java 21,
   Spring Boot 4.1.1, security unchanged).
-- Implementation plan written: `docs/superpowers/plans/2026-10-08-liferay-migracia-demo.md` (13 TDD tasks).
-  **Next step:** the user reviews the plan and picks the execution method (recommended: native – superpowers:executing-plans);
-  nothing of the demo code exists yet.
+- Implementation plan for the "after" app: `docs/superpowers/plans/2026-10-08-liferay-migracia-demo.md` (13 TDD tasks) –
+  not executed; it must be revised first (see sub-project 2 below).
+- 2026-10-12 scope change – the demo shows **both** states, split into two sub-projects:
+  1. **Legacy "before" app — done** (`legacy/`, `sso-mock/`, `docker/`; spec + plan `2026-10-12-legacy-liferay-app*`):
+     Liferay 6.2 CE GA6 + Java 8 (Zulu 8u252 – update must be ≤ 255, ICU bug) + Spring Portlet MVC 4.3.6,
+     SSO mock (HTTP + API JAR in `lib/ext`), dual session via Redis (flag `crm:flags:session-read-source`).
+  2. **Spring Boot "after" app** – next: revise the 2026-10-08 spec/plan (read the shared session from Redis,
+     run behind the same nginx under `/crm/`, Boot app in `crm-web/`, own session cookie name). Not started.
 - Git: the user allows commits only when they explicitly ask; never push unless asked.
 
 ## Anonymization (hard rule)
@@ -41,7 +47,16 @@ Do not commit or push; the user does that.
 Check before the user commits (Bash, repo root): `bash poznamky/LOCAL-anonymizacia.sh` — expected output: nothing (grep exit 1).
 If the script is missing on this machine, it has to be copied manually together with `poznamky/LOCAL-aliasy.md`.
 
-## Demo architecture and conventions (planned — see the plan's "Global Constraints")
+## Build & run (legacy "before" app)
+
+- Unit tests: `mvn -q -B -f legacy/pom.xml verify`, `mvn -q -B -f sso-mock/pom.xml verify`;
+  one class: `mvn -q -B -f legacy/pom.xml test -pl <module> -am -Dtest=ClassName -Dsurefire.failIfNoSpecifiedTests=false`.
+- Stack: `bash docker/build-and-deploy.sh` (or `docker\build-and-deploy.ps1`), then `bash docker/smoke.sh` → `SMOKE OK`.
+  CRM at http://localhost:8000, RedisInsight :5540, Liferay admin :8080 (`test@liferay.com`/`test`).
+- Shared session: `bash docker/show-session.sh`, `bash docker/session-flag.sh PORTLET|REDIS`.
+- Legacy modules compile with `--release 8` – Java 8 API only (no records, `var`, `List.of`, `isBlank`, `toList()`).
+
+## "After" app architecture and conventions (planned, sub-project 2 — see the 2026-10-08 plan's "Global Constraints")
 
 - Single Maven WAR module at the repo root, package `com.example.crm`. Portlet phases map to Spring MVC:
   render = GET, action = POST + redirect (PRG), resource = AJAX endpoint (HTML fragment or JSON).

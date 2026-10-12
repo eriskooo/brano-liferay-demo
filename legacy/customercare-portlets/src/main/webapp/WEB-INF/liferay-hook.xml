@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!DOCTYPE hook PUBLIC "-//Liferay//DTD Hook 6.2.0//EN" "http://www.liferay.com/dtd/liferay-hook_6_2_0.dtd">
+<hook>
+    <portal-properties>portal.properties</portal-properties>
+    <!-- Prepis JSP portálu (legacy: chybové stránky a meta tagy). Pôvodný súbor Liferay odloží ako *.portal.jsp. -->
+    <custom-jsp-dir>/WEB-INF/hooked</custom-jsp-dir>
+</hook>

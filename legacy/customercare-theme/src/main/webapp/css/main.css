@@ -1,0 +1,11 @@
+/* Neutrálny theme bez brandingu. */
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #222; background: #fff; }
+.crm-wrapper { max-width: 1100px; margin: 0 auto; }
+.crm-brand { padding: 10px 12px; font-size: 18px; font-weight: bold; background: #33475b; color: #fff; }
+.crm-nav ul { list-style: none; margin: 0; padding: 0; display: flex; background: #dfe6ee; }
+.crm-nav li a { display: block; padding: 8px 14px; color: #33475b; text-decoration: none; }
+.crm-nav li.selected a { background: #fff; font-weight: bold; }
+#content { padding: 12px; }
+.portlet-msg-error { color: #b00020; padding: 6px 0; }
+.portlet-msg-success { color: #1b5e20; padding: 6px 0; }
+.crm-portal-error { padding: 20px; }

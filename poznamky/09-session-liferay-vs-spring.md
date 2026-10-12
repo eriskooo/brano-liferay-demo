@@ -298,3 +298,17 @@ grep -rn "@Async\|ExecutorService\|CompletableFuture\|new Thread" J
 - Session manager cez `ThreadLocal` funguje len vo vlákne requestu. V `@Async`, vlastnom executore
   alebo po skončení requestu vráti `RequestContextHolder` `null` (alebo request iného používateľa,
   ak sa kontext nevyčistil). Údaje zo session treba načítať vopred a odovzdať ako parameter.
+
+## 7. Implementované v deme: duálna session v starej appke
+
+Stará appka (`legacy/`, Liferay 6.2) implementuje návrh z 1.2:
+- fasáda `SessionManagerCustom` (`legacy/frontend-base-customization/.../session/`): identita a zákazník zo SSO
+  mocku cez `sso-portal-api`, ostatné cez `SessionStore`;
+- `DualSessionStore`: zápis do `PortletSession` (`APPLICATION_SCOPE`, prefix `APP_`) aj do Redisu
+  (`RedisSessionStore`, hash `crm:session:{SSO_ID}`, JSON, TTL 30 min), čítanie podľa flagu
+  `crm:flags:session-read-source` (`ReadSourceFlag`, default `PORTLET`);
+- zdieľa sa len register `SharedKeys` (hlášky, posledné kritériá, posledný záznam) – formuláre
+  v `@SessionAttributes` nie;
+- výpadok Redisu request nezhodí (zápis sa zaloguje, čítanie spadne späť na `PortletSession`).
+
+Ako to vidieť naživo: `legacy/README.md`, sekcia „Zdieľaná session naživo“.

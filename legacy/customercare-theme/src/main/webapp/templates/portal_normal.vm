@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+#parse ($init)
+<html class="$root_css_class" dir="#language ("lang.dir")" lang="$w3c_language_id">
+<head>
+    <title>$the_title - CRM</title>
+    <meta content="initial-scale=1.0, width=device-width" name="viewport" />
+    $theme.include($top_head_include)
+</head>
+<body class="$css_class">
+$theme.include($body_top_include)
+#if ($is_signed_in)
+    #dockbar()
+#end
+<div id="wrapper" class="crm-wrapper">
+    <header id="banner" role="banner">
+        <div class="crm-brand">CRM – legacy (Liferay 6.2)</div>
+        #parse ("$full_templates_path/navigation.vm")
+        ## Hlavička CRM je portlet (legacy: stránku skladá portál z portletov a theme).
+        $theme.runtime("header_WAR_customercareportlet")
+    </header>
+    <div id="content">
+        #if ($selectable)
+            $theme.include($content_include)
+        #else
+            $portletDisplay.recycle()
+            $portletDisplay.setTitle($the_title)
+            $theme.wrapPortlet("portlet.vm", $content_include)
+        #end
+    </div>
+</div>
+$theme.include($body_bottom_include)
+$theme.include($bottom_include)
+</body>
+</html>

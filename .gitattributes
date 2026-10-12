@@ -1,0 +1,2 @@
+# Shell skripty musia mať LF (bash na CRLF padá); ostatné podľa nastavenia gitu.
+*.sh text eol=lf
