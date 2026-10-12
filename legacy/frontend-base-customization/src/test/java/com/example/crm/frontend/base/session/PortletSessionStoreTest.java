@@ -90,4 +90,16 @@ class PortletSessionStoreTest {
         assertThat(session.getAttribute("APP_X", PortletSession.APPLICATION_SCOPE)).isEqualTo("1");
         assertThat(session.getAttribute(PortletSessionStore.OWNER, PortletSession.APPLICATION_SCOPE)).isEqualTo("s-a");
     }
+
+    @Test
+    @DisplayName("Vlastník sa zapíše hneď v prvom requeste, aj keď session ešte neexistuje")
+    void should_recordOwner_when_sessionNotYetCreated() {
+        FakeRequestAwareManager request = new FakeRequestAwareManager(null).withSsoSessionId("s-a");
+
+        new PortletSessionStore(request).ensureOwner();
+
+        PortletSession session = request.getPortletRequest().getPortletSession(false);
+        assertThat(session).isNotNull();
+        assertThat(session.getAttribute(PortletSessionStore.OWNER, PortletSession.APPLICATION_SCOPE)).isEqualTo("s-a");
+    }
 }

@@ -68,10 +68,11 @@ public class PortletSessionStore implements SessionStore {
      */
     public void ensureOwner() {
         String current = requests.getSsoSessionId();
-        PortletSession session = requests.getPortletRequest().getPortletSession(false);
-        if (current == null || session == null) {
+        if (current == null) {
             return;
         }
+        // Session vytvoríme hneď, aby mala vlastníka od prvého requestu – inak by ju „bez vlastníka“ prevzal ďalší operátor.
+        PortletSession session = requests.getPortletRequest().getPortletSession(true);
         Object owner = session.getAttribute(OWNER, PortletSession.APPLICATION_SCOPE);
         if (owner != null && !owner.equals(current)) {
             List<String> stale = new ArrayList<>();

@@ -43,8 +43,7 @@ public class LegacyPortletInterceptor implements HandlerInterceptor {
             if (WebRequests.isAjax(request)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             } else {
-                String query = request.getQueryString();
-                response.sendRedirect(identities.loginUrl(request.getRequestURI() + (query == null ? "" : "?" + query)));
+                response.sendRedirect(identities.loginUrl(returnPath(request, portlet)));
             }
             return false;
         }
@@ -54,6 +53,18 @@ public class LegacyPortletInterceptor implements HandlerInterceptor {
             throw new AclDeniedException(required.value());
         }
         return true;
+    }
+
+    /**
+     * Kam sa vrátiť po prihlásení: GET na tú istú adresu; po POST (napr. vypršaná SSO session pri odosielaní formulára)
+     * na stránku portletu – POST URL by po prihlásení prehliadač otvoril cez GET a dostal 405 (legacy tiež vracal stránku).
+     */
+    private static String returnPath(HttpServletRequest request, LegacyPortlet portlet) {
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            return request.getContextPath() + portlet.value();
+        }
+        String query = request.getQueryString();
+        return request.getRequestURI() + (query == null ? "" : "?" + query);
     }
 
     private static RequiresPrivilege requiredPrivilege(HandlerMethod method) {

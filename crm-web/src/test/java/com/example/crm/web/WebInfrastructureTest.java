@@ -101,4 +101,21 @@ class WebInfrastructureTest {
         mvc.perform(get("/")).andExpect(redirectedUrl("/blacklist/search"));
         mvc.perform(get("/blacklist")).andExpect(redirectedUrl("/blacklist/search"));
     }
+
+    @Test
+    @DisplayName("POST bez identity: po prihlásení návrat na stránku portletu, nie na POST URL (tá by dala 405)")
+    void should_returnToPortletPage_when_postWithoutIdentity() throws Exception {
+        mvc.perform(post("/probe/notify")).andExpect(redirectedUrl("/sso/login?returnUrl=%2Fprobe"));
+    }
+
+    @Test
+    @DisplayName("Chybová stránka (403, 404) má v hlavičke prihláseného operátora")
+    void should_showOperatorInLayout_when_errorPageRendered() throws Exception {
+        mvc.perform(get("/probe/modify").session(TestSessions.reader()))
+                .andExpect(status().isForbidden())
+                .andExpect(model().attribute("layoutOperator", com.example.crm.testsupport.DemoIdentities.READER));
+        mvc.perform(get("/blacklist/detail").param("detailId", "999").session(TestSessions.reader()))
+                .andExpect(status().isNotFound())
+                .andExpect(model().attribute("layoutOperator", com.example.crm.testsupport.DemoIdentities.READER));
+    }
 }

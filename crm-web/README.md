@@ -24,7 +24,8 @@ bash docker/smoke-migration.sh       # súbeh – na konci "MIGRATION SMOKE OK"
 
 ## Preklikanie súbehu
 
-1. Otvor **http://localhost:8000** → **Prihlásiť** → SSO mock: *Správca*, zákazník *C-1001*.
+1. Otvor **http://localhost:8000** – nová appka vyžaduje prihlásenie, preto ťa hneď presmeruje na SSO mock:
+   vyber *Správca*, zákazník *C-1001* → **Prihlásiť**.
 2. Navigácia **Blacklist** v Liferay (alebo http://localhost:8000/web/crm/blacklist) → nginx presmeruje na
    `/crm/blacklist/search`. Hlavička vyzerá rovnako, ale je to Spring Boot – ladiaci riadok ukazuje
    *zdroj čítania = Redis (nová appka), flag starej appky = PORTLET, SSO_ID = …*.

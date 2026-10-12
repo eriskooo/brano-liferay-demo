@@ -1,9 +1,5 @@
 package com.example.crm.web.portlet;
 
-import com.example.crm.session.CrmSession;
-import com.example.crm.session.CrmSessions;
-import com.example.crm.session.LastViewedRecord;
-import com.example.crm.session.SsoIdentity;
 import com.example.crm.web.WebRequests;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,10 +13,10 @@ import org.springframework.web.servlet.view.RedirectView;
  */
 public class LayoutModelInterceptor implements HandlerInterceptor {
 
-    private final CrmSessions sessions;
+    private final LayoutModel layout;
 
-    public LayoutModelInterceptor(CrmSessions sessions) {
-        this.sessions = sessions;
+    public LayoutModelInterceptor(LayoutModel layout) {
+        this.layout = layout;
     }
 
     @Override
@@ -29,14 +25,7 @@ public class LayoutModelInterceptor implements HandlerInterceptor {
         if (modelAndView == null || WebRequests.isAjax(request) || isRedirect(modelAndView)) {
             return;
         }
-        CrmSession session = sessions.of(request);
-        modelAndView.addObject("layoutOperator", session.getOperator().orElse(null));
-        modelAndView.addObject("layoutCustomer", session.getCustomer().orElse(null));
-        modelAndView.addObject("layoutMessages", session.popMessages());
-        modelAndView.addObject("layoutLastViewed",
-                session.getGlobalAttribute(LastViewedRecord.KEY, LastViewedRecord.class).orElse(null));
-        modelAndView.addObject("layoutLegacyFlag", sessions.legacyReadSource().orElse("PORTLET"));
-        modelAndView.addObject("layoutSsoId", SsoIdentity.current(request).map(SsoIdentity::ssoSessionId).orElse(null));
+        layout.populate(modelAndView, request);
     }
 
     private static boolean isRedirect(ModelAndView modelAndView) {

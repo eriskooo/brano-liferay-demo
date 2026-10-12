@@ -99,10 +99,16 @@ code="$(curl -s -o /dev/null -w '%{http_code}' -b "$JAR" -c "$JAR" -X POST \
     "$B/crm/blacklist/changeAction?detailId=7" -d state=ACTIVE -d validTo=)"
 if [ "$code" = "403" ]; then ok "čitateľ -> 403"; else fail "čitateľ -> $code"; fi
 
-echo "== 10. Výpadok Redisu nezhodí novú appku"
+echo "== 10. Výpadok Redisu nezhodí novú appku (stránka aj akcia)"
+login spravca
 docker compose stop redis > /dev/null 2>&1
 fetch /crm/blacklist/search "$WORK/no-redis.html"
 expect "nová appka beží bez Redisu" 'id="headerOperator"' "$WORK/no-redis.html"
+started=$(date +%s)
+post "/crm/blacklist/changeAction?detailId=5" "$WORK/no-redis-action.html" -d state=INACTIVE -d validTo=
+took=$(( $(date +%s) - started ))
+expect "akcia (POST + redirect) počas výpadku prejde" 'Tomáš Fiktívny' "$WORK/no-redis-action.html"
+if [ "$took" -le 10 ]; then ok "akcia počas výpadku trvala ${took} s (<= 10 s)"; else fail "akcia počas výpadku trvala ${took} s"; fi
 docker compose start redis > /dev/null 2>&1
 
 rc SET crm:flags:session-read-source PORTLET > /dev/null
