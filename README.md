@@ -1,8 +1,19 @@
 # Liferay → Spring Boot: učebné demo migrácie
 
+![Súbeh starej a novej appky za nginx so zdieľanou session v Redise](docs/img/architektura-subeh.svg)
+
 Ukážka, o čo ide pri migrácii legacy CRM pre zákaznícku podporu z **Liferay 6.2** (Spring Portlet MVC + JSP)
 na **Spring Boot**. Podľa podkladov migrácie sa Liferay odstraňuje, ale JSP, tagy a stavová session zostávajú.
 Zrozumiteľnosť a komentované rozhodnutia majú prednosť pred úplnosťou.
+
+## Architektúra počas migrácie
+
+- **nginx** je jediný vstup (`http://localhost:8000`). Zmigrované stránky smeruje do Spring Boot, ostatné do Liferay
+  (strangler): blacklist je už v novej appke, dashboard ešte v Liferay.
+- Identitu (operátor, zákazník) vlastní **SSO portál** – obe appky ju čítajú podľa cookie `SSO_ID`.
+- **Redis** drží zdieľanú session `crm:session:{SSO_ID}`. Nová appka do nej zapisuje a číta vždy, stará zapisuje
+  do PortletSession aj Redisu a číta podľa flagu – aby videla, čo zapísala nová appka, musí byť flag `REDIS`.
+- Preklikanie súbehu: [`crm-web/README.md`](crm-web/README.md); obsah session naživo: `bash docker/show-session.sh`.
 
 ## Stav
 
