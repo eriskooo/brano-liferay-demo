@@ -63,8 +63,8 @@ Prereqs: Docker Desktop (~3 GB RAM for Liferay), JDK 21, Maven 3.9, Git Bash. Ev
 - One class: legacy `mvn -q -B -f legacy/pom.xml test -pl <module> -am -Dtest=ClassName -Dsurefire.failIfNoSpecifiedTests=false`
   (modules: `sso-portal-api`, `frontend-base-customization`, `customercare-portlets`, `customercare-theme`);
   crm-web `mvn -q -B -f crm-web/pom.xml test -Dtest=ClassName`.
-- Stack: `bash docker/build-and-deploy.sh` (builds all three, compose up, hot-deploys into Liferay; first start 1–3 min),
-  then `bash docker/smoke.sh` → `SMOKE OK` and `bash docker/smoke-migration.sh` → `MIGRATION SMOKE OK`.
+- Stack: `bash docker/build-and-deploy.sh` (builds all three, compose up, hot-deploys into Liferay and **blocks until the
+  portlets are deployed**, max 10 min; first start 1–3 min) – don't write own wait loops, then `bash docker/smoke.sh` → `SMOKE OK` and `bash docker/smoke-migration.sh` → `MIGRATION SMOKE OK`.
   Liferay admin :8080 `test@liferay.com`/`test`; demo operators `spravca` (all) / `citatel` (read-only); customers `C-1001`, `C-1002`.
 - Shared session: `bash docker/show-session.sh`, `bash docker/session-flag.sh PORTLET|REDIS`.
 - Legacy modules compile with `--release 8` – Java 8 API only (no records, `var`, `List.of`, `isBlank`, `toList()`).

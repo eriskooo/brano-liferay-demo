@@ -19,6 +19,8 @@ try {
     Pop-Location
 }
 
+# Watch only logs from now on - older container runs would report a false "ready".
+$deployStart = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
 # Theme first: the portlets list it in required-deployment-contexts.
 Copy-Item "$root\legacy\customercare-theme\target\customercare-theme.war" "$PSScriptRoot\deploy\" -Force
 Copy-Item "$root\legacy\customercare-portlets\target\customercare-portlet.war" "$PSScriptRoot\deploy\" -Force
@@ -33,4 +35,22 @@ if (-not ($existing | Where-Object { $_.name -eq 'crm-shared-session' })) {
     $body = '{"name":"crm-shared-session","host":"redis","port":6379}'
     Invoke-RestMethod -Method Post -Uri $api -ContentType 'application/json' -Body $body | Out-Null
 }
-Write-Output 'Done. Liferay needs 1-3 min: docker compose -f docker\docker-compose.yml logs -f liferay'
+# Finish only once the portlets are deployed, so smoke tests never hit a half-started stack.
+# Exact log text: the webapp is named customercare-portlet (no "s").
+$readyLog = 'portlets for customercare-portlet are available for use'
+Write-Output 'Waiting for Liferay start and portlet deploy (usually 1-3 min, max 10 min)...'
+Push-Location $PSScriptRoot
+try {
+    for ($i = 1; $i -le 120; $i++) {
+        $logs = docker compose logs --since $deployStart liferay 2>$null | Out-String
+        if ($logs.Contains($readyLog)) {
+            Write-Output "Done in ~$($i * 5) s. Next: docker\smoke.ps1; docker\smoke-migration.ps1"
+            return
+        }
+        Start-Sleep -Seconds 5
+    }
+    docker compose logs --tail 40 liferay
+    throw 'Liferay did not deploy the portlets within 10 min'
+} finally {
+    Pop-Location
+}
