@@ -10,6 +10,7 @@ cp "$ROOT/legacy/sso-portal-api/target/sso-portal-api.jar" "$ROOT/docker/liferay
 mkdir -p "$ROOT/docker/deploy"
 
 cd "$ROOT/docker"
+# Prvý build Rust appky (crm-web-rs) v Dockeri trvá niekoľko minút, ďalšie idú z cache.
 docker compose up -d --build
 
 # Čakanie na deploy sledujeme len v logoch od tohto okamihu – staršie behy kontajnera by dali falošné "hotovo".
@@ -27,7 +28,7 @@ READY_LOG="portlets for customercare-portlet are available for use"
 echo "Čakám na štart Liferay a deploy portletov (zvyčajne 1-3 min, max 10 min)..."
 for i in $(seq 1 120); do
     if docker compose logs --since "$DEPLOY_START" liferay 2>/dev/null | grep -qF "$READY_LOG"; then
-        echo "Hotovo za ~$((i * 5)) s. Ďalej: bash docker/smoke.sh && bash docker/smoke-migration.sh"
+        echo "Hotovo za ~$((i * 5)) s. Ďalej: bash docker/smoke.sh && bash docker/smoke-migration.sh && bash docker/smoke-rs.sh"
         exit 0
     fi
     sleep 5

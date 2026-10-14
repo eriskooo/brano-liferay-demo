@@ -17,10 +17,11 @@ Output layout (outside `input/`):
   `poznamky/LOCAL-*` (alias → real-name mapping, anonymization check script) is git-ignored and copied manually.
 - `legacy/`, `sso-mock/`, `docker/` – the runnable "before" app on Liferay 6.2 (sub-project 1, done; see `legacy/README.md`).
 - `crm-web/` – the migrated Spring Boot "after" app (sub-project 2, done; see `crm-web/README.md`, `docs/MIGRACIA.md`).
+- `crm-web-rs/` – Rust (axum + askama) copy of crm-web under `/crm-rs` (sub-project 3; see `crm-web-rs/README.md`, `docs/RUST.md`).
 
 Docs and notes are written in **Slovak**; the source materials are in Czech.
 
-## Status (2026-10-12)
+## Status (2026-10-14)
 
 - Phase 1 (analysis) done: `docs/ANALYZA.md`, knowledge base in `poznamky/`.
 - Phase 2 done as two sub-projects (the original 2026-10-08 spec/plan `*-liferay-migracia-demo*` is superseded by them;
@@ -28,12 +29,16 @@ Docs and notes are written in **Slovak**; the source materials are in Czech.
   1. Legacy "before" app – spec + plan `docs/superpowers/*/2026-10-12-legacy-liferay-app*`.
   2. Spring Boot "after" app – spec + plan `docs/superpowers/*/2026-10-12-crm-web-migration*`. Only the blacklist is migrated;
      the dashboard (incl. service cancellation) stays in Liferay.
+  3. Rust copy of crm-web – spec + plan `docs/superpowers/*/2026-10-14-crm-web-rs*`. Same blacklist, same SSO/Redis contract,
+     own cookie `CRM_RS_SESSION` (Path=/crm-rs); crm-web unchanged, the Liferay "Blacklist" link still goes to Java.
 - Git: the user allows commits only when they explicitly ask; never push.
 
 ## Runtime architecture (big picture)
 
 All in `docker/docker-compose.yml`: nginx (:8000, single entry) → Liferay 6.2 (:8080, legacy portlets), `crm-web` (`/crm`),
-SSO mock (`/sso`), Redis + RedisInsight (:5540).
+`crm-web-rs` (`/crm-rs`, :8082), SSO mock (`/sso`), Redis + RedisInsight (:5540).
+- `crm-web-rs` reads texts and static files straight from crm-web (build context = repo root, allowlist in
+  `crm-web-rs/Dockerfile.dockerignore`).
 - **Strangler:** nginx redirects `/web/crm/blacklist` → `/crm/blacklist/search`; everything else under `/web/…` goes to Liferay.
   `crm-web` pages pull CSS from the Liferay theme via nginx, so they look unstyled outside :8000.
 - **Identity:** owned by the SSO mock, both apps resolve it from the `SSO_ID` cookie (legacy via the shaded
@@ -59,12 +64,14 @@ If the script is missing on this machine, it has to be copied manually together 
 
 Prereqs: Docker Desktop (~3 GB RAM for Liferay), JDK 21, Maven 3.9, Git Bash. Every `docker/*.sh` has a `.ps1` twin.
 - Tests: `mvn -q -B -f legacy/pom.xml verify`, `mvn -q -B -f sso-mock/pom.xml verify`,
-  `mvn -q -B -f crm-web/pom.xml verify` (needs Docker – Redis via Testcontainers).
+  `mvn -q -B -f crm-web/pom.xml verify` (needs Docker – Redis via Testcontainers),
+  `bash crm-web-rs/test.sh` (cargo test in Docker + temporary Redis, no local Rust; one file: `bash crm-web-rs/test.sh --test blacklist_search`).
 - One class: legacy `mvn -q -B -f legacy/pom.xml test -pl <module> -am -Dtest=ClassName -Dsurefire.failIfNoSpecifiedTests=false`
   (modules: `sso-portal-api`, `frontend-base-customization`, `customercare-portlets`, `customercare-theme`);
   crm-web `mvn -q -B -f crm-web/pom.xml test -Dtest=ClassName`.
 - Stack: `bash docker/build-and-deploy.sh` (builds all three, compose up, hot-deploys into Liferay and **blocks until the
-  portlets are deployed**, max 10 min; first start 1–3 min) – don't write own wait loops, then `bash docker/smoke.sh` → `SMOKE OK` and `bash docker/smoke-migration.sh` → `MIGRATION SMOKE OK`.
+  portlets are deployed**, max 10 min; first start 1–3 min) – don't write own wait loops, then `bash docker/smoke.sh` → `SMOKE OK` and `bash docker/smoke-migration.sh` → `MIGRATION SMOKE OK`
+  and `bash docker/smoke-rs.sh` → `RS SMOKE OK` (not concurrently with smoke-migration – both stop Redis).
   Liferay admin :8080 `test@liferay.com`/`test`; demo operators `spravca` (all) / `citatel` (read-only); customers `C-1001`, `C-1002`.
 - Shared session: `bash docker/show-session.sh`, `bash docker/session-flag.sh PORTLET|REDIS`.
 - Legacy modules compile with `--release 8` – Java 8 API only (no records, `var`, `List.of`, `isBlank`, `toList()`).
@@ -92,3 +99,9 @@ Prereqs: Docker Desktop (~3 GB RAM for Liferay), JDK 21, Maven 3.9, Git Bash. Ev
   **only `target/` exists, no `src/`**), `customercare-testing`, `one-portal-portlets` (prebuilt WAR only).
 - `input/*.pptx`, `*.docx`, `*.html` + `*.py` generators — presentations and a Q&A document describing the migration approach.
 - `input/*_war*.log` — runtime logs of the PoC (stubbed services, one JSP binding error).
+
+## Rust app conventions (`crm-web-rs/`)
+
+- Identifiers English, comments Slovak (migration decision / Java equivalent). Tests `should_x_when_y` with a `///` Slovak description.
+- askama templates: methods get only literals, `&str` or Copy values (fields arrive by reference), no custom filters; `|safe` only for `FieldErrors` HTML.
+- No `unwrap`/`expect` on user input or runtime I/O; handlers return `Result<Response, AppError>`.

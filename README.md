@@ -14,6 +14,10 @@ Zrozumiteľnosť a komentované rozhodnutia majú prednosť pred úplnosťou.
 - **Redis** drží zdieľanú session `crm:session:{SSO_ID}`. Nová appka do nej zapisuje a číta vždy, stará zapisuje
   do PortletSession aj Redisu a číta podľa flagu – aby videla, čo zapísala nová appka, musí byť flag `REDIS`.
 - Preklikanie súbehu: [`crm-web/README.md`](crm-web/README.md); obsah session naživo: `bash docker/show-session.sh`.
+- **Blacklist štandardne obsluhuje Java appka `crm-web`** (`/crm/…`) – sem vedie odkaz „Blacklist“ v Liferay aj `http://localhost:8000/`.
+- **Bonus – Rust kópia** [`crm-web-rs/`](crm-web-rs/README.md): ten istý blacklist v Ruste (axum + askama) na vlastnej ceste
+  `http://localhost:8000/crm-rs/blacklist/search`. Na migráciu nie je potrebná; ukazuje, že identita a zdieľaná session
+  fungujú aj s appkou v inom jazyku ([`docs/RUST.md`](docs/RUST.md)).
 
 ## Stav
 
@@ -23,6 +27,7 @@ Zrozumiteľnosť a komentované rozhodnutia majú prednosť pred úplnosťou.
 | Znalostná báza pre reálny projekt | [`poznamky/`](poznamky/README.md) | hotovo, priebežne sa dopĺňa |
 | 2a. Stará appka „pred“ (Liferay 6.2) | [`legacy/`](legacy/README.md), [`sso-mock/`](sso-mock), [`docker/`](docker) – [spec](docs/superpowers/specs/2026-10-12-legacy-liferay-app-design.md), [plán](docs/superpowers/plans/2026-10-12-legacy-liferay-app.md) | hotovo |
 | 2b. Zmigrovaná appka „po“ (Spring Boot) | [`crm-web/`](crm-web/README.md), [`docs/MIGRACIA.md`](docs/MIGRACIA.md) – [spec](docs/superpowers/specs/2026-10-12-crm-web-migration-design.md), [plán](docs/superpowers/plans/2026-10-12-crm-web-migration.md) | hotovo – blacklist beží v Spring Boot vedľa Liferay |
+| Bonus: Rust kópia `crm-web` | [`crm-web-rs/`](crm-web-rs/README.md), [`docs/RUST.md`](docs/RUST.md) – [spec](docs/superpowers/specs/2026-10-14-crm-web-rs-design.md), [plán](docs/superpowers/plans/2026-10-14-crm-web-rs.md) | hotovo – voliteľná ukážka pod `/crm-rs`, Java appka ostáva predvolená |
 
 ## Čo demo ukáže
 
@@ -33,12 +38,14 @@ Dva zmigrované portlety:
 Pri oboch: „pred → po“ ukážky a mapovacia tabuľka Liferay koncept → Spring Boot náhrada.
 
 Stack: Java 21, Spring Boot 4.1.1, Maven, WAR + JSP, in-memory služby namiesto backendu.
+Bonus `crm-web-rs`: Rust 1.98, axum + askama; build aj testy v Dockeri (`bash crm-web-rs/test.sh`), lokálny Rust netreba.
 
 ## Štruktúra
 
 ```
 legacy/      stará appka na Liferay 6.2 (Java 8, Spring Portlet MVC) – 4 moduly ako legacy
 crm-web/     nová appka (Spring Boot 4.1.1) so zmigrovaným blacklistom – beží súčasne so starou
+crm-web-rs/  bonus: Rust kópia crm-web pod /crm-rs (voliteľná, nie je súčasťou migrácie)
 sso-mock/    mock SSO portálu (Spring Boot 4.1.1)
 docker/      Liferay 6.2 + Redis + RedisInsight + SSO mock + nginx, skripty (build, smoke, zdieľaná session)
 docs/        analýza, (neskôr) MIGRACIA.md, superpowers spec + plány

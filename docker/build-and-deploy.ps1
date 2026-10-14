@@ -13,6 +13,7 @@ New-Item -ItemType Directory -Force "$PSScriptRoot\deploy" | Out-Null
 
 Push-Location $PSScriptRoot
 try {
+    # First build of the Rust app (crm-web-rs) in Docker takes a few minutes, later ones are cached.
     docker compose up -d --build
     if ($LASTEXITCODE -ne 0) { throw 'docker compose up failed' }
 } finally {
@@ -44,7 +45,7 @@ try {
     for ($i = 1; $i -le 120; $i++) {
         $logs = docker compose logs --since $deployStart liferay 2>$null | Out-String
         if ($logs.Contains($readyLog)) {
-            Write-Output "Done in ~$($i * 5) s. Next: docker\smoke.ps1; docker\smoke-migration.ps1"
+            Write-Output "Done in ~$($i * 5) s. Next: docker\smoke.ps1; docker\smoke-migration.ps1; docker\smoke-rs.ps1"
             return
         }
         Start-Sleep -Seconds 5
