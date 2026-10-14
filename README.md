@@ -21,6 +21,7 @@ Zrozumiteľnosť a komentované rozhodnutia majú prednosť pred úplnosťou.
   - ⚡ **Výkon Java vs. Rust:** pri rovnakej logike Rust spracuje 2,6–4,8× viac requestov s ~40× menšou pamäťou
     a záťažový test odhalil dve chyby, ktoré funkčné testy nezachytili – **[`docs/BENCHMARK.md`](docs/BENCHMARK.md)**
     (spustenie: `bash docker/bench.sh`).
+  - 🎯 **Prezentácia pre zákazníka** (Java → Rust, slajdy Marp): [`docs/PREZENTACIA-RUST.md`](docs/PREZENTACIA-RUST.md).
 
 ## Stav
 
