@@ -18,6 +18,9 @@ Zrozumiteľnosť a komentované rozhodnutia majú prednosť pred úplnosťou.
 - **Bonus – Rust kópia** [`crm-web-rs/`](crm-web-rs/README.md): ten istý blacklist v Ruste (axum + askama) na vlastnej ceste
   `http://localhost:8000/crm-rs/blacklist/search`. Na migráciu nie je potrebná; ukazuje, že identita a zdieľaná session
   fungujú aj s appkou v inom jazyku ([`docs/RUST.md`](docs/RUST.md)).
+  - ⚡ **Výkon Java vs. Rust:** pri rovnakej logike Rust spracuje 2,6–4,8× viac requestov s ~40× menšou pamäťou
+    a záťažový test odhalil dve chyby, ktoré funkčné testy nezachytili – **[`docs/BENCHMARK.md`](docs/BENCHMARK.md)**
+    (spustenie: `bash docker/bench.sh`).
 
 ## Stav
 
@@ -27,7 +30,7 @@ Zrozumiteľnosť a komentované rozhodnutia majú prednosť pred úplnosťou.
 | Znalostná báza pre reálny projekt | [`poznamky/`](poznamky/README.md) | hotovo, priebežne sa dopĺňa |
 | 2a. Stará appka „pred“ (Liferay 6.2) | [`legacy/`](legacy/README.md), [`sso-mock/`](sso-mock), [`docker/`](docker) – [spec](docs/superpowers/specs/2026-10-12-legacy-liferay-app-design.md), [plán](docs/superpowers/plans/2026-10-12-legacy-liferay-app.md) | hotovo |
 | 2b. Zmigrovaná appka „po“ (Spring Boot) | [`crm-web/`](crm-web/README.md), [`docs/MIGRACIA.md`](docs/MIGRACIA.md) – [spec](docs/superpowers/specs/2026-10-12-crm-web-migration-design.md), [plán](docs/superpowers/plans/2026-10-12-crm-web-migration.md) | hotovo – blacklist beží v Spring Boot vedľa Liferay |
-| Bonus: Rust kópia `crm-web` | [`crm-web-rs/`](crm-web-rs/README.md), [`docs/RUST.md`](docs/RUST.md) – [spec](docs/superpowers/specs/2026-10-14-crm-web-rs-design.md), [plán](docs/superpowers/plans/2026-10-14-crm-web-rs.md) | hotovo – voliteľná ukážka pod `/crm-rs`, Java appka ostáva predvolená |
+| Bonus: Rust kópia `crm-web` | [`crm-web-rs/`](crm-web-rs/README.md), [`docs/RUST.md`](docs/RUST.md), [výkon](docs/BENCHMARK.md) – [spec](docs/superpowers/specs/2026-10-14-crm-web-rs-design.md), [plán](docs/superpowers/plans/2026-10-14-crm-web-rs.md) | hotovo – voliteľná ukážka pod `/crm-rs`, Java appka ostáva predvolená |
 
 ## Čo demo ukáže
 

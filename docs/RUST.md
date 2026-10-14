@@ -69,14 +69,22 @@ všetky tri appky ─→ Redis hash crm:session:{SSO_ID} (hlášky, posledné kr
 | | Java `crm-web` | Rust `crm-web-rs` |
 |---|---|---|
 | produkčný kód | 2 213 riadkov Java + 382 JSP | 2 528 riadkov Rust (bez unit testov) + 304 šablóny |
-| testy | 1 883 riadkov | 1 430 riadkov (52 unit + 40 integračných testov) |
-| Docker image | 370 MB (`eclipse-temurin:21-jre` + WAR) | 83,5 MB (`debian:bookworm-slim` + binárka) |
+| testy | 1 883 riadkov | 1 430 riadkov (54 unit + 41 integračných testov) |
+| Docker image | 370 MB (`eclipse-temurin:21-jre` + WAR) | 32,3 MB (`distroless/cc-debian12` + binárka; s `debian:bookworm-slim` 83,5 MB) |
 | RAM v pokoji | 283–434 MiB | 1,8–4,5 MiB |
 | reštart kontajnera → prvá odpoveď | ~10,3 s | ~1,5 s (väčšina je réžia `docker compose restart`) |
 
 Rust kód má viac riadkov hlavne pre komentáre k migračným rozhodnutiam a ručné formuláre/validáciu, ktoré v Jave
 robí Spring. Funkčne sú appky zhodné: `diff` normalizovaného HTML stránok search/detail/create ukazuje len názov
 appky, ladiaci riadok, poradie atribútov a spôsob escapovania `&`.
+
+Výkon pod záťažou (rps, latencie, CPU, pamäť) a dve chyby, ktoré odhalil až záťažový test:
+[`BENCHMARK.md`](BENCHMARK.md), skript `bash docker/bench.sh`.
+
+Docker image: binárka má 8,6 MB a z OS potrebuje len glibc a libgcc_s, preto beží na `gcr.io/distroless/cc-debian12`
+(24 MB, bez shellu a balíčkovača). Pôvodný `debian:bookworm-slim` tvoril 75 z 84 MB. Ešte menší (~9 MB) by bol
+`FROM scratch` so statickou musl binárkou – za cenu iného alokátora a cross-kompilácie. Ladenie v kontajneri:
+`docker compose exec` nemá shell; dočasne prepnúť base na `:debug-nonroot` (busybox).
 
 ## Poučenie
 

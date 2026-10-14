@@ -14,6 +14,9 @@ use crate::CONTEXT_PATH;
 pub const COOKIE: &str = "CRM_RS_SESSION";
 /// Ako predvolený timeout HttpSession (30 min nečinnosti).
 const IDLE_TIMEOUT: Duration = Duration::from_secs(30 * 60);
+/// Expirované session sa upratujú najviac raz za minútu (Tomcat: `backgroundProcessorDelay`). Upratovanie pri každom
+/// zápise bolo O(n) pod zámkom – klienti bez cookie (boti, health-checky) appku postupne spomalili (docs/BENCHMARK.md).
+const SWEEP_INTERVAL: Duration = Duration::from_secs(60);
 
 type Attributes = HashMap<&'static str, Box<dyn Any + Send + Sync>>;
 
@@ -22,29 +25,50 @@ struct Entry {
     last_access: Instant,
 }
 
+struct Entries {
+    by_id: HashMap<String, Entry>,
+    last_sweep: Instant,
+}
+
 /// Lokálne session v pamäti procesu (jedna inštancia appky – ako HttpSession bez replikácie v Jave).
-#[derive(Default)]
 pub struct LocalSessions {
-    entries: Mutex<HashMap<String, Entry>>,
+    entries: Mutex<Entries>,
+    idle_timeout: Duration,
+    sweep_interval: Duration,
+}
+
+impl Default for LocalSessions {
+    fn default() -> Self {
+        Self::with_timeouts(IDLE_TIMEOUT, SWEEP_INTERVAL)
+    }
 }
 
 impl LocalSessions {
+    fn with_timeouts(idle_timeout: Duration, sweep_interval: Duration) -> Self {
+        let entries = Entries { by_id: HashMap::new(), last_sweep: Instant::now() };
+        Self { entries: Mutex::new(entries), idle_timeout, sweep_interval }
+    }
+
     /// Hodnota kľúča v session `id`; neznáma/expirovaná session alebo iný typ = prázdno.
     pub fn get<T: Clone + 'static>(&self, id: Option<&str>, key: &'static str) -> Option<T> {
         let mut entries = self.lock();
-        let entry = entries.get_mut(id?)?;
-        if entry.last_access.elapsed() >= IDLE_TIMEOUT {
+        let entry = entries.by_id.get_mut(id?)?;
+        if entry.last_access.elapsed() >= self.idle_timeout {
             return None;
         }
         entry.last_access = Instant::now();
         entry.attributes.get(key)?.downcast_ref::<T>().cloned()
     }
 
-    /// Uloží hodnotu; ak session ešte nie je, založí ju a vráti jej ID pre Set-Cookie (Java `getSession(true)`).
+    /// Uloží hodnotu; ak session ešte nie je (alebo expirovala), založí ju a vráti jej ID pre Set-Cookie
+    /// (Java `getSession(true)`).
     pub fn put<T: Send + Sync + 'static>(&self, id: Option<&str>, key: &'static str, value: T) -> Option<String> {
         let mut entries = self.lock();
-        entries.retain(|_, entry| entry.last_access.elapsed() < IDLE_TIMEOUT);
-        if let Some(entry) = id.and_then(|id| entries.get_mut(id)) {
+        self.sweep_if_due(&mut entries);
+        let live = id
+            .and_then(|id| entries.by_id.get_mut(id))
+            .filter(|entry| entry.last_access.elapsed() < self.idle_timeout);
+        if let Some(entry) = live {
             entry.attributes.insert(key, Box::new(value));
             entry.last_access = Instant::now();
             return None;
@@ -52,19 +76,32 @@ impl LocalSessions {
         let new_id = Uuid::new_v4().to_string();
         let mut attributes = Attributes::new();
         attributes.insert(key, Box::new(value));
-        entries.insert(new_id.clone(), Entry { attributes, last_access: Instant::now() });
+        entries.by_id.insert(new_id.clone(), Entry { attributes, last_access: Instant::now() });
         Some(new_id)
     }
 
     /// Odstráni kľúč (Java `SessionStatus.setComplete()` pre `@SessionAttributes`).
     pub fn remove(&self, id: Option<&str>, key: &'static str) {
         let Some(id) = id else { return };
-        if let Some(entry) = self.lock().get_mut(id) {
+        if let Some(entry) = self.lock().by_id.get_mut(id) {
             entry.attributes.remove(key);
         }
     }
 
-    fn lock(&self) -> MutexGuard<'_, HashMap<String, Entry>> {
+    fn sweep_if_due(&self, entries: &mut Entries) {
+        if entries.last_sweep.elapsed() < self.sweep_interval {
+            return;
+        }
+        entries.by_id.retain(|_, entry| entry.last_access.elapsed() < self.idle_timeout);
+        entries.last_sweep = Instant::now();
+    }
+
+    #[cfg(test)]
+    fn len(&self) -> usize {
+        self.lock().by_id.len()
+    }
+
+    fn lock(&self) -> MutexGuard<'_, Entries> {
         self.entries.lock().unwrap_or_else(PoisonError::into_inner)
     }
 }
@@ -105,6 +142,25 @@ mod tests {
         assert_eq!(sessions.get::<String>(Some(&id), "k"), None);
         sessions.remove(Some(&id), "k");
         assert_eq!(sessions.get::<u32>(Some(&id), "k"), None);
+    }
+
+    /// Po uplynutí intervalu upratovania zápis odstráni expirované session.
+    #[test]
+    fn should_remove_expired_sessions_when_sweep_interval_elapsed() {
+        let sessions = LocalSessions::with_timeouts(Duration::ZERO, Duration::ZERO);
+        sessions.put(None, "k", 1_u32);
+        sessions.put(None, "k", 2_u32);
+        assert_eq!(sessions.len(), 1);
+    }
+
+    /// Pred uplynutím intervalu sa mapa neprechádza, expirovaná session však nevráti dáta ani sa nepoužije znova.
+    #[test]
+    fn should_skip_sweep_but_ignore_expired_session_when_interval_not_elapsed() {
+        let sessions = LocalSessions::with_timeouts(Duration::ZERO, Duration::from_secs(3600));
+        let id = sessions.put(None, "k", 1_u32).expect("ID");
+        assert_eq!(sessions.get::<u32>(Some(&id), "k"), None);
+        assert!(sessions.put(Some(&id), "k", 2_u32).is_some_and(|new| new != id));
+        assert_eq!(sessions.len(), 2);
     }
 
     /// Cookie má cestu /crm-rs – nesmie prepísať CRM_SESSION (Java, /crm) ani JSESSIONID (Liferay).
