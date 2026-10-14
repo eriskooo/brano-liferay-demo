@@ -1,55 +1,55 @@
-# Zadanie podľa podkladov (prezentácie + Q&A dokument)
+# Zadání podle podkladů (prezentace + Q&A dokument)
 
-Zdroj: dve prezentácie v `input/` (`*-AI.pptx` a jej verzia s komentármi klienta – 14 slajdov,
-4 komentáre) a Q&A dokument (obsah je v `BLOCKS` v generátore `input/*-odpovedi-komentare.py`).
-Skratky viď [00-konvencie.md](00-konvencie.md).
+Zdroj: dvě prezentace v `input/` (`*-AI.pptx` a její verze s komentáři klienta – 14 slajdů,
+4 komentáře) a Q&A dokument (obsah je v `BLOCKS` v generátoru `input/*-odpovedi-komentare.py`).
+Zkratky viz [00-konvencie.md](00-konvencie.md).
 
-## Čo podklady hovoria o cieli
-- Cieľ = **odstrániť Liferay** (nepodporované/rizikové knižnice) pri **zachovaní funkcionality 1:1**
-  a **zachovaní technickej filozofie 1:1**: žiadne SPA, žiadny presun logiky FE↔BE, stavovosť
-  (session) zostáva (slide 2).
-- Cieľový stack v podkladoch: **Spring MVC + JSP na plain Tomcat** (slide 5), nie Spring Boot,
-  nie REST+SPA. JSP sa kopírujú/zdieľajú, portlet tagy sa reimplementujú bez Liferay (slide 13).
-- Server services a backend integrácie „necháváme“ (slide 4).
-- Theme → statické CSS/JS vo WAR. Liferay CMS sa nepoužíva; preklady idú z externého CMS
-  a do JSP sa majú injektovať prekladové kľúče.
-- Session: „duálna session“ Liferay → Spring Session (Redis), jediný zápisový bod = session manager
-  (fasáda), feature flag pre zdroj čítania (slide 12). Prezentácia uvádza 375+ controllerov
-  a 30+ objektov v session (neoverené čísla).
-- Deeplinker/Backlinker (generovanie interných odkazov a „späť“) → vlastný URL builder;
-  podľa prezentácie „treba ešte rozpracovať“.
-- Klient sa pýta, či to pobeží na JBoss (komentár) – Q&A: technicky áno, neoverené.
+## Co podklady říkají o cíli
+- Cíl = **odstranit Liferay** (nepodporované/rizikové knihovny) při **zachování funkcionality 1:1**
+  a **zachování technické filozofie 1:1**: žádné SPA, žádný přesun logiky FE↔BE, stavovost
+  (session) zůstává (slide 2).
+- Cílový stack v podkladech: **Spring MVC + JSP na plain Tomcat** (slide 5), ne Spring Boot,
+  ne REST+SPA. JSP se kopírují/sdílejí, portlet tagy se reimplementují bez Liferay (slide 13).
+- Server services a backend integrace „necháváme“ (slide 4).
+- Theme → statické CSS/JS ve WAR. Liferay CMS se nepoužívá; překlady jdou z externího CMS
+  a do JSP se mají injektovat překladové klíče.
+- Session: „duální session“ Liferay → Spring Session (Redis), jediný zápisový bod = session manager
+  (fasáda), feature flag pro zdroj čtení (slide 12). Prezentace uvádí 375+ controllerů
+  a 30+ objektů v session (neověřená čísla).
+- Deeplinker/Backlinker (generování interních odkazů a „zpět“) → vlastní URL builder;
+  podle prezentace „je třeba ještě rozpracovat“.
+- Klient se ptá, zda to poběží na JBoss (komentář) – Q&A: technicky ano, neověřeno.
 
-## PoC ukážky v prezentácii
-- Ukážka 1: zoznam tarifov/produktov → klik → formulár „Zrušenie služby“ (dátum podania,
-  typ: prevod na iného zákazníka / zrušenie / prevod na predplatenú kartu, „ku dňu“).
-- Ukážka 1 obsahuje aj obrazovku „Plánované odstávky služieb“ (filter podľa ID služby + tabuľka
-  udalostí s detailom) – na mock dátach.
-- Ukážka 2: pôvodná Liferay verzia vs. zmigrovaná PoC verzia toho istého formulára „Zrušenie služby“.
-  Pozorovanie zo screenshotov: Liferay verzia je vnorená v layoute portálu (horné menu, zákazník
-  v hlavičke – to dodáva theme + iné portlety), PoC verzia má vlastnú jednoduchú hlavičku.
-  PoC verzia navyše zobrazuje pole „Ke dni“ (dátum účinnosti), Liferay screenshot nie – pravdepodobne
-  sa zobrazuje podmienene podľa zvoleného typu (neoverené).
-- Slide 13: tabuľka tagov, ktoré bolo treba prepísať (URL tagy → `PortletResponse.createRenderURL()`
-  / `createResourceURL()`, i18n tag → `LanguageUtil` + `ThemeDisplay`, ostatné nepriamo alebo vôbec).
-- Druhá prezentácia: Non-Customer Blacklist (vyhľadávanie + vytvorenie), Documents,
-  Customer Request History – na mock dátach.
+## PoC ukázky v prezentaci
+- Ukázka 1: seznam tarifů/produktů → klik → formulář „Zrušení služby“ (datum podání,
+  typ: převod na jiného zákazníka / zrušení / převod na předplacenou kartu, „ke dni“).
+- Ukázka 1 obsahuje i obrazovku „Plánované odstávky služeb“ (filtr podle ID služby + tabulka
+  událostí s detailem) – na mock datech.
+- Ukázka 2: původní Liferay verze vs. zmigrovaná PoC verze téhož formuláře „Zrušení služby“.
+  Pozorování ze screenshotů: Liferay verze je vnořená v layoutu portálu (horní menu, zákazník
+  v hlavičce – to dodává theme + jiné portlety), PoC verze má vlastní jednoduchou hlavičku.
+  PoC verze navíc zobrazuje pole „Ke dni“ (datum účinnosti), Liferay screenshot ne – pravděpodobně
+  se zobrazuje podmíněně podle zvoleného typu (neověřeno).
+- Slide 13: tabulka tagů, které bylo třeba přepsat (URL tagy → `PortletResponse.createRenderURL()`
+  / `createResourceURL()`, i18n tag → `LanguageUtil` + `ThemeDisplay`, ostatní nepřímo nebo vůbec).
+- Druhá prezentace: Non-Customer Blacklist (vyhledávání + vytvoření), Documents,
+  Customer Request History – na mock datech.
 
-## AS-IS architektúra (slide 14, obrázok)
-Prehliadač (HTML/JS, AJAX) → JBoss + Liferay: JSP view, controller, services (Java 8, Spring 4.3.6,
-Hibernate), DAO/JMX + JPA → Oracle 19; navonok message broker, integračná vrstva (REST/SOAP),
+## AS-IS architektura (slide 14, obrázek)
+Prohlížeč (HTML/JS, AJAX) → JBoss + Liferay: JSP view, controller, services (Java 8, Spring 4.3.6,
+Hibernate), DAO/JMX + JPA → Oracle 19; navenek message broker, integrační vrstva (REST/SOAP),
 SSO portál (session).
 
-## Čo v podkladoch NIE JE (overené fulltextom prezentácií a Q&A)
-- **JSF** – v projekte ani v podkladoch (0 `.xhtml`, 0 `faces-config.xml`, 0 `javax.faces`).
-  Portlety sú Spring Portlet MVC + JSP.
-- **Návrh security** – žiadny (Spring Security ani iné). Len: identita používateľa je zapuzdrená
-  v session fasáde (nastavenie externého/interného používateľa a zákazníka); kontrakt fasády sa má
-  zachovať a implementácia vymeniť (preč od `PortletSession`/Liferay). Autorizácia = existujúce
-  vlastné ACL. ⇒ Pri migrácii security **nemeniť**, kým nie je architektonické rozhodnutie.
+## Co v podkladech NENÍ (ověřeno fulltextem prezentací a Q&A)
+- **JSF** – v projektu ani v podkladech (0 `.xhtml`, 0 `faces-config.xml`, 0 `javax.faces`).
+  Portlety jsou Spring Portlet MVC + JSP.
+- **Návrh security** – žádný (Spring Security ani jiné). Pouze: identita uživatele je zapouzdřena
+  v session fasádě (nastavení externího/interního uživatele a zákazníka); kontrakt fasády se má
+  zachovat a implementace vyměnit (pryč od `PortletSession`/Liferay). Autorizace = existující
+  vlastní ACL. ⇒ Při migraci security **neměnit**, dokud nepadne architektonické rozhodnutí.
 
-## Rozhodnutie pre demo (používateľ, 2026-10-08)
-- Držať sa podkladov: **Spring MVC controllery + JSP** (server-side), AJAX/resource volania → JSON
-  endpointy (to je „REST“ časť). Žiadne SPA, žiadny JSF.
-- Rozsah: blacklist ne-zákazníkov + zjednodušené zrušenie služby. Java 21.
-- Security: nemeniť – session fasáda + fake login + vlastná ACL ako v legacy.
+## Rozhodnutí pro demo (uživatel, 2026-10-08)
+- Držet se podkladů: **Spring MVC controllery + JSP** (server-side), AJAX/resource volání → JSON
+  endpointy (to je „REST“ část). Žádné SPA, žádné JSF.
+- Rozsah: blacklist ne-zákazníků + zjednodušené zrušení služby. Java 21.
+- Security: neměnit – session fasáda + fake login + vlastní ACL jako v legacy.

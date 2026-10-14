@@ -19,7 +19,8 @@ Output layout (outside `input/`):
 - `crm-web/` – the migrated Spring Boot "after" app (sub-project 2, done; see `crm-web/README.md`, `docs/MIGRACIA.md`).
 - `crm-web-rs/` – Rust (axum + askama) copy of crm-web under `/crm-rs` (sub-project 3; see `crm-web-rs/README.md`, `docs/RUST.md`).
 
-Docs and notes are written in **Slovak**; the source materials are in Czech.
+Docs and notes (`README.md` files, `docs/*.md`, `poznamky/`) are written in **Czech**, like the source materials.
+Exception: `docs/superpowers/` (specs and plans) stay in Slovak as historical records.
 
 ## Status (2026-10-14)
 
@@ -86,8 +87,8 @@ Prereqs: Docker Desktop (~3 GB RAM for Liferay), JDK 21, Maven 3.9, Git Bash. Ev
   (`web/tag/`, TLDs in `src/main/webapp/WEB-INF/tld/`); the session facade (`CrmSession`) and ACL keep the legacy contract;
   backend services are interfaces with in-memory implementations.
 - Every JSP starts with `<%@ include file="/WEB-INF/jsp/layout/taglibs.jspf" %>` and has no own `page` directive.
-- Identifiers in English; code comments, UI texts (`messages.properties`) and docs in **Slovak** (this overrides the global
-  "comments in Czech" rule for this repo). Comments explain the migration decision / legacy equivalent, not what the code does.
+- Identifiers in English; code comments and UI texts (`messages.properties`) in **Slovak** (this overrides the global
+  "comments in Czech" rule for this repo); docs in Czech (see above). Comments explain the migration decision / legacy equivalent, not what the code does.
 
 ## The legacy project (in `input/`, for reference only)
 

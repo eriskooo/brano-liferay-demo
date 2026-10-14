@@ -1,22 +1,22 @@
-# Konvencie poznámok a anonymizácia
+# Konvence poznámek a anonymizace
 
-Tento repozitár (vrátane `poznamky/` a `CLAUDE.md`) pôjde na GitHub. Adresár `input/` obsahuje
-klientske podklady, je **read-only a git-ignorovaný**.
+Tento repozitář (včetně `poznamky/` a `CLAUDE.md`) půjde na GitHub. Adresář `input/` obsahuje
+klientské podklady, je **read-only a git-ignorovaný**.
 
-Pravidlá pre všetko mimo `input/`:
-- žiadne názvy klienta, dodávateľa, ľudí, interných systémov, interné URL, heslá, dáta z logov,
-- žiadny skopírovaný klientsky kód – ukážky „pred“ sú prepísané na minimálne anonymizované príklady.
+Pravidla pro vše mimo `input/`:
+- žádné názvy klienta, dodavatele, lidí, interních systémů, interní URL, hesla, data z logů,
+- žádný zkopírovaný klientský kód – ukázky „před“ jsou přepsány na minimální anonymizované příklady.
 
-Skratky používané v poznámkach a v `docs/`:
-| Skratka | Význam |
+Zkratky používané v poznámkách a v `docs/`:
+| Zkratka | Význam |
 |---|---|
-| `$FE` | koreň rozbaleného `frontend` Maven projektu v `input/` |
-| `<pkg>` | koreňový Java balík legacy kódu (zámerne neuvádzaný) |
-| legacy CRM | pôvodná aplikácia – CRM pre zákaznícku podporu telco operátora |
-| klient | telco operátor, pre ktorého aplikácia beží |
-| dodávateľ | firma, ktorá aplikáciu vyvíja a pripravila PoC |
-| SSO portál | externý portál, ktorý drží identitu a časť session používateľa |
-| externý CMS | systém, z ktorého sa ťahajú preklady/texty |
-| integračná vrstva | backend (REST/SOAP), cez ktorý ide väčšina business volaní |
+| `$FE` | kořen rozbaleného `frontend` Maven projektu v `input/` |
+| `<pkg>` | kořenový Java balík legacy kódu (záměrně neuváděný) |
+| legacy CRM | původní aplikace – CRM pro zákaznickou podporu telco operátora |
+| klient | telco operátor, pro kterého aplikace běží |
+| dodavatel | firma, která aplikaci vyvíjí a připravila PoC |
+| SSO portál | externí portál, který drží identitu a část session uživatele |
+| externí CMS | systém, ze kterého se stahují překlady/texty |
+| integrační vrstva | backend (REST/SOAP), přes který jde většina business volání |
 
-Názvy modulov `customercare-*` a `frontend-base-customization` sú generické a ostávajú.
+Názvy modulů `customercare-*` a `frontend-base-customization` jsou generické a zůstávají.

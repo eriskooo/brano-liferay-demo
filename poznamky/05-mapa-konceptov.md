@@ -1,30 +1,30 @@
-# Mapa: Liferay / Portlet koncept → čím ho nahradiť
+# Mapa: Liferay / Portlet koncept → čím ho nahradit
 
-Všeobecná tabuľka (platí pre Liferay 6.2 + Spring Portlet MVC). Stĺpec „V legacy CRM“ hovorí,
-či a kde sa to v našom projekte vyskytuje (viď [03](03-legacy-portlety.md)).
+Obecná tabulka (platí pro Liferay 6.2 + Spring Portlet MVC). Sloupec „V legacy CRM“ říká,
+zda a kde se to v našem projektu vyskytuje (viz [03](03-legacy-portlety.md)).
 
-| Koncept | Čo to je | V legacy CRM | Náhrada (Spring MVC / Spring Boot) |
+| Koncept | Co to je | V legacy CRM | Náhrada (Spring MVC / Spring Boot) |
 |---|---|---|---|
-| Portlet (`portlet.xml`) | samostatná „aplikácia“ v kúsku stránky | 13 portletov | skupina controllerov pod jedným URL prefixom (`/blacklist/**`) |
-| Stránka s viacerými portletmi | portál skladá stránku z portletov | áno (hlavička, kontext zákazníka, obsah) | layout šablóna + fragmenty (JSP include / Thymeleaf fragment / SPA komponenty) |
-| `DispatcherPortlet` + `<portlet>-portlet.xml` | Spring kontext na portlet | áno, vlastné podtriedy | jeden `DispatcherServlet` (v Boote automaticky) |
-| `@RenderMapping` | GET vykreslenie | 174× | `@GetMapping` |
+| Portlet (`portlet.xml`) | samostatná „aplikace“ v kousku stránky | 13 portletů | skupina controllerů pod jedním URL prefixem (`/blacklist/**`) |
+| Stránka s více portlety | portál skládá stránku z portletů | ano (hlavička, kontext zákazníka, obsah) | layout šablona + fragmenty (JSP include / Thymeleaf fragment / SPA komponenty) |
+| `DispatcherPortlet` + `<portlet>-portlet.xml` | Spring kontext na portlet | ano, vlastní podtřídy | jeden `DispatcherServlet` (v Bootu automaticky) |
+| `@RenderMapping` | GET vykreslení | 174× | `@GetMapping` |
 | `@ActionMapping` | POST bez výstupu, potom render | 347× | `@PostMapping` + redirect (PRG) |
-| `@ResourceMapping` | AJAX/JSON/download | 598× | `@GetMapping`/`@PostMapping` vracajúci JSON (`@RestController`) |
-| Render parametre (`page=...`) | stav navigácie v URL portálu | dashboard/order dispatch | normálne cesty `/dashboard/{page}` a path variables |
-| `@SessionAttributes` | model držaný medzi fázami | 101× | funguje aj v servlet MVC; pri REST radšej stateless + ID |
-| `PortletSession` PORTLET/APPLICATION scope | session per portlet / zdieľaná | 51× | `HttpSession` (+ Spring Session/Redis pre cluster), prefixy kľúčov |
-| `PortletURL`, `<portlet:actionURL>`, `LiferayPortletURL` | URL do portálu so zakódovaným portlet ID | skryté vo vlastných `portal:*URL` tagoch | `UriComponentsBuilder`, `<c:url>`, `@{...}` v Thymeleaf, alebo len REST cesty |
-| Friendly URL mapper + routes XML | pekné URL pre portlet | 5 portletov | priamo `@GetMapping("/{cuRefNo}/...")` |
-| `PortalUtil.getHttpServletRequest` | dostať sa k servlet requestu | 92× | netreba – request máš priamo |
-| `ThemeDisplay` | info o používateľovi, stránke, ceste k theme | 6 Java súborov, JSP len cesta k obrázkom | vlastný request-scoped bean / `@ModelAttribute` v `@ControllerAdvice` |
-| `LanguageUtil`, `<liferay-ui:message>` | preklady | málo; projekt má vlastný `common:message` + DB `MessageSource` | Spring `MessageSource` (+ vlastná implementácia nad DB/CMS) |
-| Liferay permissions (`PermissionChecker`, role) | autorizácia | **nepoužíva sa** (vlastné ACL) | Spring Security (`@PreAuthorize`, vlastný `PermissionEvaluator`) nad existujúcim ACL |
-| Service Builder (`service.xml`, `*LocalServiceUtil`) | generovaná perzistencia | **nepoužíva sa** (len v startup hooku na nastavenie portálu) | Spring Data JPA / existujúce služby |
-| Hook: `portal.properties`, startup action | zásah do portálu pri štarte | vytvára site, stránky, CMS obsah | odpadá (nie je portál); CMS obsah → externý CMS / statické |
-| Hook: `custom-jsp-dir` | prepis JSP portálu | chybové stránky, meta tagy | `@ControllerAdvice` + error stránky Spring Boot |
-| Theme (Velocity, separátny WAR) | vzhľad + layout | áno | statické CSS/JS v aplikácii + layout šablóna |
-| Liferay CMS (Journal, AssetEntry) | webový obsah | okrajovo (prázdny košík, popisy produktov) | externý CMS / statické súbory |
-| Portlet filter (napr. obmedzenie paralelných renderov) | filter na fázy portletu | 1 | servlet `Filter` / `HandlerInterceptor` (ak je ešte potrebný) |
-| `HandlerInterceptor` (portlet) | pred/po spracovaní | 18 | `HandlerInterceptor` (servlet) – logika väčšinou prenosná |
-| JBoss modul závislosti | `jboss-deployment-structure.xml` | áno | Spring Boot fat jar / WAR; závislosti v POM |
+| `@ResourceMapping` | AJAX/JSON/download | 598× | `@GetMapping`/`@PostMapping` vracející JSON (`@RestController`) |
+| Render parametry (`page=...`) | stav navigace v URL portálu | dashboard/order dispatch | normální cesty `/dashboard/{page}` a path variables |
+| `@SessionAttributes` | model držený mezi fázemi | 101× | funguje i v servlet MVC; u REST raději stateless + ID |
+| `PortletSession` PORTLET/APPLICATION scope | session per portlet / sdílená | 51× | `HttpSession` (+ Spring Session/Redis pro cluster), prefixy klíčů |
+| `PortletURL`, `<portlet:actionURL>`, `LiferayPortletURL` | URL do portálu se zakódovaným portlet ID | skryté ve vlastních `portal:*URL` tazích | `UriComponentsBuilder`, `<c:url>`, `@{...}` v Thymeleaf, nebo jen REST cesty |
+| Friendly URL mapper + routes XML | hezké URL pro portlet | 5 portletů | přímo `@GetMapping("/{cuRefNo}/...")` |
+| `PortalUtil.getHttpServletRequest` | dostat se k servlet requestu | 92× | není potřeba – request máš přímo |
+| `ThemeDisplay` | info o uživateli, stránce, cestě k theme | 6 Java souborů, JSP jen cesta k obrázkům | vlastní request-scoped bean / `@ModelAttribute` v `@ControllerAdvice` |
+| `LanguageUtil`, `<liferay-ui:message>` | překlady | málo; projekt má vlastní `common:message` + DB `MessageSource` | Spring `MessageSource` (+ vlastní implementace nad DB/CMS) |
+| Liferay permissions (`PermissionChecker`, role) | autorizace | **nepoužívá se** (vlastní ACL) | Spring Security (`@PreAuthorize`, vlastní `PermissionEvaluator`) nad existujícím ACL |
+| Service Builder (`service.xml`, `*LocalServiceUtil`) | generovaná perzistence | **nepoužívá se** (jen ve startup hooku pro nastavení portálu) | Spring Data JPA / existující služby |
+| Hook: `portal.properties`, startup action | zásah do portálu při startu | vytváří site, stránky, CMS obsah | odpadá (není portál); CMS obsah → externí CMS / statické |
+| Hook: `custom-jsp-dir` | přepis JSP portálu | chybové stránky, meta tagy | `@ControllerAdvice` + error stránky Spring Boot |
+| Theme (Velocity, samostatný WAR) | vzhled + layout | ano | statické CSS/JS v aplikaci + layout šablona |
+| Liferay CMS (Journal, AssetEntry) | webový obsah | okrajově (prázdný košík, popisy produktů) | externí CMS / statické soubory |
+| Portlet filter (např. omezení paralelních renderů) | filtr na fáze portletu | 1 | servlet `Filter` / `HandlerInterceptor` (pokud je ještě potřeba) |
+| `HandlerInterceptor` (portlet) | před/po zpracování | 18 | `HandlerInterceptor` (servlet) – logika většinou přenositelná |
+| JBoss modul závislosti | `jboss-deployment-structure.xml` | ano | Spring Boot fat jar / WAR; závislosti v POM |

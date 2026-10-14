@@ -1,72 +1,72 @@
-# Nová appka „po“ (Spring Boot) – zmigrovaný blacklist
+# Nová aplikace „po“ (Spring Boot) – zmigrovaný blacklist
 
-Portlet **blacklist ne-zákazníkov** zo starej appky (`../legacy`, Liferay 6.2) prepísaný na Spring Boot 4.1.1 + JSP.
-Beží **súčasne** so starou appkou za jedným nginx: blacklist obsluhuje nová appka, dashboard ostáva v Liferay.
-Obe appky zdieľajú identitu (SSO mock, cookie `SSO_ID`) a session (Redis hash `crm:session:{SSO_ID}`).
+Portlet **blacklist ne-zákazníků** ze staré aplikace (`../legacy`, Liferay 6.2) přepsaný na Spring Boot 4.1.1 + JSP.
+Běží **souběžně** se starou aplikací za jedním nginx: blacklist obsluhuje nová aplikace, dashboard zůstává v Liferay.
+Obě aplikace sdílejí identitu (SSO mock, cookie `SSO_ID`) a session (Redis hash `crm:session:{SSO_ID}`).
 
-## Spustenie
+## Spuštění
 
-Predpoklady: Docker Desktop, JDK 21, Maven 3.9, Git Bash.
+Předpoklady: Docker Desktop, JDK 21, Maven 3.9, Git Bash.
 
 ```bash
 bash docker/build-and-deploy.sh      # build legacy + sso-mock + crm-web, docker compose up, deploy do Liferay
-bash docker/smoke.sh                 # stará appka (blacklist priamo na :8080)
-bash docker/smoke-migration.sh       # súbeh – na konci "MIGRATION SMOKE OK"
+bash docker/smoke.sh                 # stará aplikace (blacklist přímo na :8080)
+bash docker/smoke-migration.sh       # souběh – na konci "MIGRATION SMOKE OK"
 ```
 
-| Adresa | Čo |
+| Adresa | Co |
 |---|---|
-| http://localhost:8000 | **vstup** – nginx: `/web/…` Liferay, `/crm/…` nová appka, `/sso/…` SSO mock |
-| http://localhost:8000/crm/blacklist/search | blacklist v novej appke (sem vedie aj starý odkaz „Blacklist“) |
-| http://localhost:8000/web/crm/dashboard | dashboard v starej appke |
-| http://localhost:8080/web/crm/blacklist | **starý** blacklist priamo v Liferay – na porovnanie „pred/po“ |
-| http://localhost:5540 | RedisInsight – zdieľaná session |
+| http://localhost:8000 | **vstup** – nginx: `/web/…` Liferay, `/crm/…` nová aplikace, `/sso/…` SSO mock |
+| http://localhost:8000/crm/blacklist/search | blacklist v nové aplikaci (sem vede i starý odkaz „Blacklist“) |
+| http://localhost:8000/web/crm/dashboard | dashboard ve staré aplikaci |
+| http://localhost:8080/web/crm/blacklist | **starý** blacklist přímo v Liferay – pro srovnání „před/po“ |
+| http://localhost:5540 | RedisInsight – sdílená session |
 
-## Preklikanie súbehu
+## Proklikání souběhu
 
-1. Otvor **http://localhost:8000** – nová appka vyžaduje prihlásenie, preto ťa hneď presmeruje na SSO mock:
+1. Otevři **http://localhost:8000** – nová aplikace vyžaduje přihlášení, proto tě hned přesměruje na SSO mock:
    vyber *Správca*, zákazník *C-1001* → **Prihlásiť**.
-2. Navigácia **Blacklist** v Liferay (alebo http://localhost:8000/web/crm/blacklist) → nginx presmeruje na
-   `/crm/blacklist/search`. Hlavička vyzerá rovnako, ale je to Spring Boot – ladiaci riadok ukazuje
+2. Navigace **Blacklist** v Liferay (nebo http://localhost:8000/web/crm/blacklist) → nginx přesměruje na
+   `/crm/blacklist/search`. Hlavička vypadá stejně, ale je to Spring Boot – ladicí řádek ukazuje
    *zdroj čítania = Redis (nová appka), flag starej appky = PORTLET, SSO_ID = …*.
-3. Vyhľadaj priezvisko `vzork` → otvor **Peter Vzorka**. Hlavička novej appky ukáže *Naposledy otvorený záznam*.
-   V termináli: `bash docker/show-session.sh` → v hashi je `APP_LAST_VIEWED_RECORD {"id":1,"fullName":"Peter Vzorka"}`
-   zapísaný **novou** appkou.
-4. Klikni **Dashboard** (navigácia novej appky vedie do Liferay). Pri flagu **PORTLET** hlavička starej appky posledný
-   záznam **neukáže** – číta svoju PortletSession, kam nová appka nezapisuje.
+3. Vyhledej příjmení `vzork` → otevři **Peter Vzorka**. Hlavička nové aplikace ukáže *Naposledy otvorený záznam*.
+   V terminálu: `bash docker/show-session.sh` → v hashi je `APP_LAST_VIEWED_RECORD {"id":1,"fullName":"Peter Vzorka"}`
+   zapsaný **novou** aplikací.
+4. Klikni na **Dashboard** (navigace nové aplikace vede do Liferay). Při flagu **PORTLET** hlavička staré aplikace poslední
+   záznam **neukáže** – čte svou PortletSession, kam nová aplikace nezapisuje.
 5. `bash docker/session-flag.sh REDIS` a obnov dashboard → hlavička Liferay ukáže
-   **„Naposledy otvorený záznam: Peter Vzorka“** z novej appky. Ladiaci riadok novej appky ukáže *flag starej appky = REDIS*.
-   Poučenie: flag sa prepína na `REDIS` najneskôr s nasadením prvej zmigrovanej stránky.
-6. **Zmeniť zákazníka** (v ľubovoľnej appke) → SSO mock → *C-1002*: obe appky ukážu nového zákazníka
-   (dashboard iné produkty). Zákazníka vlastní SSO portál.
-7. V novej appke zmeň stav záznamu → hláška sa zobrazí raz (prešla cez Redis). Odstránenie identifikátora (AJAX)
-   ide len cez POST.
-8. **Odhlásiť** → prihlás sa ako *Čitateľ* → v novej appke nevidí zmeny ani „Nový záznam“, priamy POST dostane 403.
-9. **Pred/po:** otvor http://localhost:8080/web/crm/blacklist (starý portlet) a porovnaj URL, správanie a kód –
+   **„Naposledy otvorený záznam: Peter Vzorka“** z nové aplikace. Ladicí řádek nové aplikace ukáže *flag starej appky = REDIS*.
+   Poučení: flag se přepíná na `REDIS` nejpozději s nasazením první zmigrované stránky.
+6. **Zmeniť zákazníka** (v libovolné aplikaci) → SSO mock → *C-1002*: obě aplikace ukážou nového zákazníka
+   (dashboard jiné produkty). Zákazníka vlastní SSO portál.
+7. V nové aplikaci změň stav záznamu → hláška se zobrazí jednou (prošla přes Redis). Odstranění identifikátoru (AJAX)
+   jde jen přes POST.
+8. **Odhlásiť** → přihlas se jako *Čitateľ* → v nové aplikaci nevidí změny ani „Nový záznam“, přímý POST dostane 403.
+9. **Před/po:** otevři http://localhost:8080/web/crm/blacklist (starý portlet) a porovnej URL, chování a kód –
    `docs/MIGRACIA.md`.
-10. `docker compose -f docker/docker-compose.yml stop redis` → nová appka beží ďalej (bez hlášok a posledného
-    záznamu), `… start redis` ho vráti.
+10. `docker compose -f docker/docker-compose.yml stop redis` → nová aplikace běží dál (bez hlášek a posledního
+    záznamu), `… start redis` ho vrátí.
 
-## Čo je kde
+## Co je kde
 
-| Koncept | Súbor |
+| Koncept | Soubor |
 |---|---|
-| fasáda session (kontrakt legacy, nová implementácia) | `src/main/java/com/example/crm/session/CrmSession.java`, `SharedCrmSession.java` |
-| identita zo SSO | `session/SsoClient.java`, `SsoIdentityResolver.java` |
-| zdieľaná session (Redis, JSON kontrakt) | `session/RedisSharedSessionStore.java`, `SharedSessionKeys.java` |
-| „portlet“ = skupina controllerov | `web/portlet/LegacyPortlet.java`, `LegacyPortletInterceptor.java` |
+| fasáda session (kontrakt legacy, nová implementace) | `src/main/java/com/example/crm/session/CrmSession.java`, `SharedCrmSession.java` |
+| identita ze SSO | `session/SsoClient.java`, `SsoIdentityResolver.java` |
+| sdílená session (Redis, JSON kontrakt) | `session/RedisSharedSessionStore.java`, `SharedSessionKeys.java` |
+| „portlet“ = skupina controllerů | `web/portlet/LegacyPortlet.java`, `LegacyPortletInterceptor.java` |
 | hlavička (náhrada theme + portletu header) | `webapp/WEB-INF/jsp/layout/header.jspf`, `web/portlet/LayoutModelInterceptor.java` |
-| tagy s rovnakým rozhraním | `web/tag/*`, `webapp/WEB-INF/tld/*.tld` |
+| tagy se stejným rozhraním | `web/tag/*`, `webapp/WEB-INF/tld/*.tld` |
 | blacklist | `blacklist/*Controller.java`, `webapp/WEB-INF/jsp/blacklist/*.jsp` |
 
 ## Testy
 
 ```bash
-mvn -q -B -f crm-web/pom.xml verify    # unit, MockMvc, Tomcat + Jasper, Redis cez Testcontainers (potrebuje Docker)
+mvn -q -B -f crm-web/pom.xml verify    # unit, MockMvc, Tomcat + Jasper, Redis přes Testcontainers (potřebuje Docker)
 ```
 
-## Vedomé obmedzenia
+## Vědomá omezení
 
-- Každá appka má vlastné in-memory dáta blacklistu (rovnaký seed). Legacy backend beží v JVM Liferay, nová appka ho
-  zdieľať nemôže – zmena v novej appke sa v starom blackliste na :8080 neprejaví. Zdieľa sa len session.
-- Stránky novej appky berú CSS z Liferay (`/html/themes/classic/…`) cez nginx – mimo :8000 sú len so základným štýlom.
+- Každá aplikace má vlastní in-memory data blacklistu (stejný seed). Legacy backend běží v JVM Liferay, nová aplikace ho
+  sdílet nemůže – změna v nové aplikaci se ve starém blacklistu na :8080 neprojeví. Sdílí se jen session.
+- Stránky nové aplikace berou CSS z Liferay (`/html/themes/classic/…`) přes nginx – mimo :8000 mají jen základní styl.

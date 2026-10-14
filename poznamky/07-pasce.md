@@ -1,66 +1,66 @@
-# Pasce pri migrácii (zistené z kódu a logov)
+# Pasti při migraci (zjištěné z kódu a logů)
 
-1. **Stratený form objekt v modeli.** Portletové controllery majú `@ModelAttribute` metódy na úrovni
-   triedy, ktoré sa volajú pred každou fázou. Keď sa viac portletových controllerov zlúči do jedného
-   web controllera, tieto metódy sa nepresunú a `<form:form modelAttribute="x">` spadne s
-   `Neither BindingResult nor plain target object for bean name 'x'` (presne toto je v PoC logu).
-   → Pri migrácii každého controllera vypíš všetky `@ModelAttribute` a `@SessionAttributes` a over ich.
-2. **Action → render.** V portletoch `@ActionMapping` nič nevracia, render ide hneď po ňom
-   s render parametrami (`response.setRenderParameter`). V servlete to musí byť explicitné:
-   POST → redirect → GET (PRG), parametre do URL alebo do flash atribútov.
-3. **Skrytá Liferay závislosť v tagoch.** JSP nemusia obsahovať nič z Liferay, ale vlastný tag
-   `portal:actionURL` vo vnútri pretypuje na `LiferayPortletURL`. Hľadaj závislosti aj v tag handleroch
-   (`.tld` → trieda), nielen v JSP.
-4. **Kompatibilné tagy, ktoré „nič nerobia“.** Ak sa tag nahradí no-op stubom, stránka sa vykreslí,
-   ale funkcia zmizne potichu (napr. i18n vypisuje kľúče). Každý no-op tag musí byť v zozname dlhu.
-5. **Dispatch podľa parametra.** Dashboard/order nevyberajú controller podľa URL, ale vlastným
-   `HandlerMapping` podľa `page` / scenára. Treba to rozbiť na skutočné URL, inak sa stratí
-   prehľadnosť a bookmarky.
-6. **Session je zdieľaná so SSO portálom.** Identita a kontext zákazníka nie sú v Liferay, ale
-   v externom portáli – bez neho aplikácia nevie, kto je prihlásený. To je architektonický problém,
-   nie technický prepis.
-7. **Backend in-process.** Frontend importuje backend Spring kontexty → migrácia frontendu
-   ťahá celý backend classpath (Hibernate 4, Spring 4, javax). Upgrade na moderný Spring Boot
-   (Jakarta) to **nedovolí bez upgradu backendu** alebo bez oddelenia (REST/klient).
+1. **Ztracený form objekt v modelu.** Portletové controllery mají `@ModelAttribute` metody na úrovni
+   třídy, které se volají před každou fází. Když se více portletových controllerů sloučí do jednoho
+   webového controlleru, tyto metody se nepřesunou a `<form:form modelAttribute="x">` spadne s
+   `Neither BindingResult nor plain target object for bean name 'x'` (přesně tohle je v logu PoC).
+   → Při migraci každého controlleru vypiš všechny `@ModelAttribute` a `@SessionAttributes` a ověř je.
+2. **Action → render.** V portletech `@ActionMapping` nic nevrací, render jde hned po něm
+   s render parametry (`response.setRenderParameter`). V servletu to musí být explicitní:
+   POST → redirect → GET (PRG), parametry do URL nebo do flash atributů.
+3. **Skrytá závislost na Liferay v tazích.** JSP nemusí obsahovat nic z Liferay, ale vlastní tag
+   `portal:actionURL` uvnitř přetypuje na `LiferayPortletURL`. Hledej závislosti i v tag handlerech
+   (`.tld` → třída), nejen v JSP.
+4. **Kompatibilní tagy, které „nic nedělají“.** Pokud se tag nahradí no-op stubem, stránka se vykreslí,
+   ale funkce potichu zmizí (např. i18n vypisuje klíče). Každý no-op tag musí být v seznamu dluhu.
+5. **Dispatch podle parametru.** Dashboard/order nevybírají controller podle URL, ale vlastním
+   `HandlerMapping` podle `page` / scénáře. Je třeba to rozbít na skutečné URL, jinak se ztratí
+   přehlednost a záložky.
+6. **Session je sdílená se SSO portálem.** Identita a kontext zákazníka nejsou v Liferay, ale
+   v externím portálu – bez něj aplikace neví, kdo je přihlášený. To je architektonický problém,
+   ne technický přepis.
+7. **Backend in-process.** Frontend importuje backendové Spring kontexty → migrace frontendu
+   táhne celý backendový classpath (Hibernate 4, Spring 4, javax). Upgrade na moderní Spring Boot
+   (Jakarta) to **nedovolí bez upgradu backendu** nebo bez oddělení (REST/klient).
 8. **`javax` → `jakarta`.** Spring Boot 3+ = Jakarta EE. Legacy JSP tagy, validátory
-   (`javax.validation`) aj servlet API treba prepísať na `jakarta.*`.
-9. **Meranie pokroku.** „100 % JSP“ v PoC neznamená funkčnosť – merať scenáre end-to-end.
-10. **Interné URL a tajomstvá v kóde.** Zdrojáky obsahujú interné hostnames, testovacie kľúče a root
-    POM heslá k DB v profiloch. Pri akomkoľvek kopírovaní von z repa treba sanitizáciu.
-11. **Java 8 update > 255 zhodí Liferay 6.2.** Stará ICU4J v portáli neprečíta `1.8.0_504`. Detail
-    a riešenie: [10-liferay62-v-dockeri.md](10-liferay62-v-dockeri.md).
-12. **Kolízia `JSESSIONID` za jednou adresou.** Stará a nová appka (aj SSO) za tým istým hostom zdieľajú cookies
-    bez ohľadu na port/cestu `/`. Druhá appka musí mať vlastný názov session cookie alebo session nepoužívať.
-13. **Render fáza nevie presmerovať ani nastaviť cookie.** Kontrola prihlásenia v render fáze portletu môže len
-    vykresliť odkaz; redirect funguje v action fáze. Kľúč zdieľanej session preto nie je vlastná cookie, ale
-    `SSO_ID`, ktorú obe appky už majú.
-14. **Hosť a portlety.** Identitu má SSO, Liferay vidí hosťa: každý portlet potrebuje VIEW pre Guest (stránka
-    + inštancia portletu, runtime portlet `add-default-resource`). Inak „You do not have the roles required“.
-15. **Implicit model medzi action a render.** Spring Portlet MVC prenesie model (aj validačné chyby) z action
-    do renderu cez session (render parameter `implicitModel`). V servlet MVC to nie je – chyby sa vykreslia
-    priamo (bez redirectu) alebo cez flash atribúty.
+   (`javax.validation`) i servlet API je třeba přepsat na `jakarta.*`.
+9. **Měření pokroku.** „100 % JSP“ v PoC neznamená funkčnost – měřit end-to-end scénáře.
+10. **Interní URL a tajemství v kódu.** Zdrojáky obsahují interní hostnames, testovací klíče a v root
+    POM hesla k DB v profilech. Při jakémkoli kopírování ven z repa je nutná sanitizace.
+11. **Java 8 update > 255 shodí Liferay 6.2.** Stará ICU4J v portálu nepřečte `1.8.0_504`. Detail
+    a řešení: [10-liferay62-v-dockeri.md](10-liferay62-v-dockeri.md).
+12. **Kolize `JSESSIONID` za jednou adresou.** Stará a nová aplikace (i SSO) za stejným hostem sdílejí cookies
+    bez ohledu na port/cestu `/`. Druhá aplikace musí mít vlastní název session cookie, nebo session nepoužívat.
+13. **Render fáze neumí přesměrovat ani nastavit cookie.** Kontrola přihlášení v render fázi portletu může jen
+    vykreslit odkaz; redirect funguje v action fázi. Klíčem sdílené session proto není vlastní cookie, ale
+    `SSO_ID`, kterou obě aplikace už mají.
+14. **Host a portlety.** Identitu má SSO, Liferay vidí hosta: každý portlet potřebuje VIEW pro Guest (stránka
+    + instance portletu, runtime portlet `add-default-resource`). Jinak „You do not have the roles required“.
+15. **Implicitní model mezi action a render.** Spring Portlet MVC přenese model (i validační chyby) z action
+    do renderu přes session (render parametr `implicitModel`). V servlet MVC to není – chyby se vykreslí
+    přímo (bez redirectu) nebo přes flash atributy.
 
-16. **Liferay premenuje WAR `…-portlets` na kontext `…-portlet`.** ID portletov sú potom `<meno>_WAR_<kontext bez pomlčiek>`
-    (`blacklist_WAR_customercareportlet`). Kto skladá ID ručne (hook, `$theme.runtime`, deeplinky), musí použiť
-    skutočný kontext – v deme preto `finalName` = `customercare-portlet`.
-17. **Dvojité escapovanie URL vo `<form:form>`.** Spring form tagy escapujú `action` aj `data-*` atribúty samy;
-    URL z vlastného tagu, ktorý už escapuje, skončí ako `&amp;amp;` a action/resource požiadavka nefunguje.
-    URL pre Spring form tagy treba brať neescapované (`escapeXml="false"`).
-18. **Oprávnenia z hooku pri prvom deployi.** Hook beží skôr, než sa zaregistrujú portlety toho istého WAR-u, takže
-    `setResourcePermissions` pre ich akcie zlyhá (`…#VIEW`). Hosť VIEW napriek tomu dostal z predvolených oprávnení
-    portletu pri umiestnení na stránku – na explicitné oprávnenia sa pri prvom štarte nespoliehaj.
+16. **Liferay přejmenuje WAR `…-portlets` na kontext `…-portlet`.** ID portletů jsou pak `<meno>_WAR_<kontext bez pomlček>`
+    (`blacklist_WAR_customercareportlet`). Kdo skládá ID ručně (hook, `$theme.runtime`, deeplinky), musí použít
+    skutečný kontext – v demu proto `finalName` = `customercare-portlet`.
+17. **Dvojité escapování URL ve `<form:form>`.** Spring form tagy escapují `action` i `data-*` atributy samy;
+    URL z vlastního tagu, který už escapuje, skončí jako `&amp;amp;` a action/resource požadavek nefunguje.
+    URL pro Spring form tagy je třeba brát neescapované (`escapeXml="false"`).
+18. **Oprávnění z hooku při prvním deployi.** Hook běží dřív, než se zaregistrují portlety téhož WAR, takže
+    `setResourcePermissions` pro jejich akce selže (`…#VIEW`). Host VIEW přesto dostal z výchozích oprávnění
+    portletu při umístění na stránku – na explicitní oprávnění se při prvním startu nespoléhej.
 
-19. **Flag zdroja čítania pri súbehu.** Kým stará appka číta `PORTLET`, nevidí nič, čo zapíše nová appka (tá starú
-    session nemá). Flag treba prepnúť na `REDIS` najneskôr s nasadením prvej zmigrovanej stránky.
-20. **JSON kontrakt medzi Java 8 a Java 21.** Zdieľané hodnoty sú len jednoduché DTO v JSON; nová appka musí ignorovať
-    neznáme polia a znášať `null` (Jackson 2 vs. Jackson 3 sa líšia predvoľbami).
-21. **Session cookie novej appky.** Za jedným hostom musí mať iný názov a cestu (`CRM_SESSION`, `/crm`) – inak prepíše
+19. **Flag zdroje čtení při souběhu.** Dokud stará aplikace čte `PORTLET`, nevidí nic, co zapíše nová aplikace (ta starou
+    session nemá). Flag je třeba přepnout na `REDIS` nejpozději s nasazením první zmigrované stránky.
+20. **JSON kontrakt mezi Java 8 a Java 21.** Sdílené hodnoty jsou jen jednoduchá DTO v JSON; nová aplikace musí ignorovat
+    neznámá pole a snášet `null` (Jackson 2 a Jackson 3 se liší výchozím nastavením).
+21. **Session cookie nové aplikace.** Za jedním hostem musí mít jiný název a cestu (`CRM_SESSION`, `/crm`) – jinak přepíše
     `JSESSIONID` portálu.
-22. **Liferay session prežije zmenu operátora v SSO.** Bez kontroly vlastníka (`SSO_ID`) vidí operátor B stav A.
-23. **`HtmlUtils.htmlEscape(text)` bez kódovania** mení slovenské znaky na entity (`&yacute;`). V tagoch a výstupe
-    používaj `htmlEscape(text, "UTF-8")` – escapujú sa len `& < > " '`.
-24. **Spring Boot 4 je rozdelený na moduly.** Napr. `RestClient.Builder` bez `spring-boot-starter-restclient` neexistuje,
-    hoci kód sa skompiluje – chyba sa ukáže až pri štarte kontextu.
-25. **Čiastočné bindovanie `@SessionAttributes`.** Pole, ktoré request neobsahuje, ostane z predchádzajúceho formulára
-    v session (v legacy aj po migrácii). Prehliadač posiela všetky polia, ručné testy (curl) musia tiež.
-26. **nginx `return 302` za proxy s iným portom** skladá absolútnu URL s interným portom – `absolute_redirect off`.
+22. **Liferay session přežije změnu operátora v SSO.** Bez kontroly vlastníka (`SSO_ID`) vidí operátor B stav A.
+23. **`HtmlUtils.htmlEscape(text)` bez kódování** mění slovenské znaky na entity (`&yacute;`). V tazích a výstupu
+    používej `htmlEscape(text, "UTF-8")` – escapují se jen `& < > " '`.
+24. **Spring Boot 4 je rozdělený na moduly.** Např. `RestClient.Builder` bez `spring-boot-starter-restclient` neexistuje,
+    přestože se kód zkompiluje – chyba se ukáže až při startu kontextu.
+25. **Částečné bindování `@SessionAttributes`.** Pole, které request neobsahuje, zůstane z předchozího formuláře
+    v session (v legacy i po migraci). Prohlížeč posílá všechna pole, ruční testy (curl) musí také.
+26. **nginx `return 302` za proxy s jiným portem** skládá absolutní URL s interním portem – `absolute_redirect off`.

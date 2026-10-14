@@ -1,53 +1,53 @@
-# Session: Liferay vs. Spring Boot (pred → po)
+# Session: Liferay vs. Spring Boot (před → po)
 
-Ako sa v legacy pristupuje do session, čím to nahradiť a čo je „duálna session“ z podkladov.
-Ukážky sú napísané nanovo podľa vzorov, ktoré sa v legacy kóde opakujú (kľúče a triedy sú anonymizované).
-Strana „Spring“ zodpovedá implementačnému plánu dema (`CrmSession`, `HttpSessionCrmSession`).
-Skratky viď [00-konvencie.md](00-konvencie.md), alias `J` (adresár controllerov) viď [06](06-playbook-migracie-portletu.md).
+Jak se v legacy přistupuje k session, čím to nahradit a co je „duální session“ z podkladů.
+Ukázky jsou napsané nově podle vzorů, které se v legacy kódu opakují (klíče a třídy jsou anonymizované).
+Strana „Spring“ odpovídá implementačnímu plánu dema (`CrmSession`, `HttpSessionCrmSession`).
+Zkratky viz [00-konvencie.md](00-konvencie.md), alias `J` (adresář controllerů) viz [06](06-playbook-migracie-portletu.md).
 
-## 1. Dva významy „zdieľanej session“
+## 1. Dva významy „sdílené session“
 
-### 1.1 Dnes: session zdieľaná so SSO portálom (legacy)
-- Prihlásený operátor a časť kontextu (napr. vybraný zákazník) nežijú v Liferay, ale v **SSO portáli**.
-  Fasáda session managera (`FBC/service/SessionManagerCustom.java`) ich odtiaľ číta cez service locator.
-- Controllery pristupujú k session prakticky len cez fasádu (`getSessionManager()` ~414× v ~114 súboroch).
-  Je to **jediný bod**, na ktorom stojí návrh v 1.2.
+### 1.1 Dnes: session sdílená se SSO portálem (legacy)
+- Přihlášený operátor a část kontextu (např. vybraný zákazník) nežijí v Liferay, ale v **SSO portálu**.
+  Fasáda session manageru (`FBC/service/SessionManagerCustom.java`) je odtamtud čte přes service locator.
+- Controllery přistupují k session prakticky jen přes fasádu (`getSessionManager()` ~414× v ~114 souborech).
+  Je to **jediný bod**, na kterém stojí návrh v 1.2.
 
-### 1.2 Pri migrácii: „duálna session“ (slide 12 prezentácie)
-Podklady: Spring Session + Redis, jediný zápisový bod = fasáda, feature flag pre zdroj čítania.
-Zvyšok tejto sekcie je **odvodený**, prezentácia ho ďalej nerozpracúva.
+### 1.2 Při migraci: „duální session“ (slide 12 prezentace)
+Podklady: Spring Session + Redis, jediný zápisový bod = fasáda, feature flag pro zdroj čtení.
+Zbytek této sekce je **odvozený**, prezentace ho dále nerozpracovává.
 
-Aplikácia sa nemigruje naraz, takže istý čas pobežia staré a nové stránky vedľa seba:
+Aplikace se nemigruje najednou, takže po určitou dobu poběží staré a nové stránky vedle sebe:
 
 ```
-prehliadač ──► reverse proxy (routing podľa URL)
+prohlížeč ──► reverse proxy (routing podle URL)
                  ├── stará Liferay app  (nezmigrované stránky)
                  └── nová Spring app    (zmigrované stránky)
 ```
 
-Operátor prechádza medzi starými a novými stránkami, obe aplikácie musia vidieť ten istý stav
-(operátor, aktuálny zákazník, rozpracovaná objednávka…; prezentácia uvádza 30+ objektov, neoverené).
+Operátor přechází mezi starými a novými stránkami, obě aplikace musí vidět stejný stav
+(operátor, aktuální zákazník, rozpracovaná objednávka…; prezentace uvádí 30+ objektů, neověřeno).
 
-- **Zápis:** fasáda zapisuje každú zmenu do oboch úložísk – stará `PortletSession`/`HttpSession` aj Redis.
-  Controllery o tom nevedia, kontrakt fasády sa nemení.
-- **Čítanie:** feature flag určuje zdroj. Najprv staré úložisko (kým sa Redis overí), potom Redis;
-  pri problémoch sa dá prepnúť späť bez nasadenia.
-- **Nová aplikácia** číta z Redisu cez Spring Session.
-- **Na konci** stará aplikácia zanikne, ostane len Redis (dáva zmysel aj pre cluster).
+- **Zápis:** fasáda zapisuje každou změnu do obou úložišť – staré `PortletSession`/`HttpSession` i Redis.
+  Controllery o tom nevědí, kontrakt fasády se nemění.
+- **Čtení:** feature flag určuje zdroj. Nejprve staré úložiště (dokud se Redis neověří), potom Redis;
+  při problémech lze přepnout zpět bez nasazení.
+- **Nová aplikace** čte z Redisu přes Spring Session.
+- **Na konci** stará aplikace zanikne, zůstane jen Redis (dává smysl i pro cluster).
 
-### 1.3 Pasce duálnej session (odvodené, nie z podkladov)
-- **Serializácia:** stará app Java 8 + `javax`, nová Java 21 + Jakarta. Ten istý objekt v Redise musia
-  prečítať obe → skôr JSON / jednoduché DTO než Java serializácia doménových tried.
-- **Cookie:** obe aplikácie musia nájsť tú istú session (rovnaká doména a path, spoločné ID session).
-- **Timeout a odhlásenie:** expirácia zosúladená v oboch úložiskách.
-- **Mutácia bez `setAttribute`:** Spring Session/Redis zapíše len atribút, ktorý sa znova nastavil.
-  Úprava zoznamu „na mieste“ (`list.add(...)`) sa nezreplikuje.
-- **Identita zo SSO portálu:** duálna session ju nevyrieši. Nová app stále musí vedieť, kto je prihlásený
+### 1.3 Pasti duální session (odvozené, ne z podkladů)
+- **Serializace:** stará aplikace Java 8 + `javax`, nová Java 21 + Jakarta. Stejný objekt v Redisu musí
+  přečíst obě → spíše JSON / jednoduchá DTO než Java serializace doménových tříd.
+- **Cookie:** obě aplikace musí najít stejnou session (stejná doména a path, společné ID session).
+- **Timeout a odhlášení:** expirace sladěná v obou úložištích.
+- **Mutace bez `setAttribute`:** Spring Session/Redis zapíše jen atribut, který se znovu nastavil.
+  Úprava seznamu „na místě“ (`list.add(...)`) se nezreplikuje.
+- **Identita ze SSO portálu:** duální session ji nevyřeší. Nová aplikace stále musí vědět, kdo je přihlášený
   ([ANALYZA](../docs/ANALYZA.md) kap. 4, riziko č. 1).
 
-## 2. Liferay (legacy): tri spôsoby prístupu
+## 2. Liferay (legacy): tři způsoby přístupu
 
-### 2.1 Priamo cez `PortletSession` so scope (~38× `PORTLET_SCOPE`, ~18× `APPLICATION_SCOPE`)
+### 2.1 Přímo přes `PortletSession` se scope (~38× `PORTLET_SCOPE`, ~18× `APPLICATION_SCOPE`)
 
 ```java
 @Controller
@@ -58,11 +58,11 @@ public class SearchController {
     public String view(RenderRequest request, Model model) {
         PortletSession ps = request.getPortletSession();
 
-        // PORTLET_SCOPE: vidí to len tento portlet
-        // (Liferay to v HttpSession uloží pod kľúčom "javax.portlet.p.<portletId>?LAST_FILTER")
+        // PORTLET_SCOPE: vidí to jen tento portlet
+        // (Liferay to v HttpSession uloží pod klíčem "javax.portlet.p.<portletId>?LAST_FILTER")
         SearchFilter filter = (SearchFilter) ps.getAttribute("LAST_FILTER", PortletSession.PORTLET_SCOPE);
 
-        // APPLICATION_SCOPE: zdieľané všetkými portletmi v tom istom WAR
+        // APPLICATION_SCOPE: sdílené všemi portlety v tomtéž WAR
         String tab = (String) ps.getAttribute("ACTIVE_TAB", PortletSession.APPLICATION_SCOPE);
         ...
     }
@@ -70,19 +70,19 @@ public class SearchController {
     @ActionMapping(params = "action=search")
     public void search(ActionRequest request, ActionResponse response, @ModelAttribute SearchFilter filter) {
         request.getPortletSession().setAttribute("LAST_FILTER", filter, PortletSession.PORTLET_SCOPE);
-        response.setRenderParameter("render", "result");   // action → render v tom istom portlete
+        response.setRenderParameter("render", "result");   // action → render v tomtéž portletu
     }
 }
 ```
 
-### 2.2 Cez fasádu session managera (hlavný spôsob)
+### 2.2 Přes fasádu session manageru (hlavní způsob)
 
 ```java
 public class DeactivationController extends BaseCrmController {
 
     @RenderMapping(params = "page=deactivation")
     public String form(Model model) {
-        CustomerCustom customer = getSessionManager().getCustomer();   // v skutočnosti zo SSO portálu
+        CustomerCustom customer = getSessionManager().getCustomer();   // ve skutečnosti ze SSO portálu
         if (customer == null) {
             getSessionManager().pushError("error.noCustomer");
             return "error";
@@ -92,25 +92,25 @@ public class DeactivationController extends BaseCrmController {
 }
 ```
 
-Controller nevie, odkiaľ dáta prichádzajú. Fasáda vnútri robí dve rôzne veci:
+Controller neví, odkud data přicházejí. Fasáda uvnitř dělá dvě různé věci:
 
 ```java
-// identita a zákazník: externá session SSO portálu
+// identita a zákazník: externí session SSO portálu
 public CustomerCustom getCustomer() {
     PortalSession ps = portalSessionManager.getPortalSession(requestAware.getRequest());
     return ps == null ? null : map(ps.getSessionCustomer());
 }
 
-// ostatné (objednávka, modely): PortletSession cez pomocníka
+// ostatní (objednávka, modely): PortletSession přes pomocníka
 public void setOrder(Order order) {
     requestAware.setSessionAttribute(KEY_ORDER, order, PortletSession.APPLICATION_SCOPE);
 }
 ```
 
-Najčastejšie volania fasády (orientačne z grepu): `pushError`, `getOrder`, `getCustomerRequest`,
+Nejčastější volání fasády (orientačně z grepu): `pushError`, `getOrder`, `getCustomerRequest`,
 `getCustomer`, `pushInfo`, `setOrder`, `flushAll`, `flushModel`.
 
-### 2.3 `@SessionAttributes` (~101×): model, ktorý prežije action → render
+### 2.3 `@SessionAttributes` (~101×): model, který přežije action → render
 
 ```java
 @Controller
@@ -122,21 +122,21 @@ public class CreateController {
     @ActionMapping(params = "action=save")
     public void save(@ModelAttribute("createForm") CreateForm form, SessionStatus status, ...) {
         ...
-        status.setComplete();            // bez tohto zostane formulár v session navždy
+        status.setComplete();            // bez tohoto zůstane formulář v session navždy
     }
 }
 ```
 
 ## 3. Spring Boot (demo)
 
-### 3.1 Náhrada `PortletSession` = obyčajná `HttpSession`
-Portletové scope neexistujú, je jedna session. Namespace treba nahradiť **prefixmi kľúčov**,
-inak sa kľúče bývalých portletov pobijú.
+### 3.1 Náhrada `PortletSession` = obyčejná `HttpSession`
+Portletové scope neexistují, je jedna session. Namespace je třeba nahradit **prefixy klíčů**,
+jinak se klíče bývalých portletů střetnou.
 
 ```java
 @GetMapping("/blacklist")
 public String view(HttpSession session, Model model) {
-    // bývalé PORTLET_SCOPE: namespace dávame do kľúča sami
+    // bývalé PORTLET_SCOPE: namespace dáváme do klíče sami
     SearchFilter filter = (SearchFilter) session.getAttribute("BLACKLIST_LAST_FILTER");
     ...
 }
@@ -148,8 +148,8 @@ public String search(@ModelAttribute SearchFilter filter, HttpSession session) {
 }
 ```
 
-### 3.2 Fasáda `CrmSession`: rovnaký kontrakt, iná implementácia
-Controller vyzerá takmer rovnako ako v legacy, mení sa len to, čo leží pod fasádou.
+### 3.2 Fasáda `CrmSession`: stejný kontrakt, jiná implementace
+Controller vypadá téměř stejně jako v legacy, mění se jen to, co leží pod fasádou.
 
 ```java
 @GetMapping("/dashboard/deactivation")
@@ -162,16 +162,16 @@ public String form(CrmSession crmSession, Model model) {      // injektuje CrmSe
 @PostMapping("/dashboard/deactivation")
 public String submit(@Valid DeactivationForm form, BindingResult result, CrmSession crmSession) {
     ...
-    crmSession.pushInfo("deactivation.done");     // hláška prežije redirect, layout ju zobrazí raz
+    crmSession.pushInfo("deactivation.done");     // hláška přežije redirect, layout ji zobrazí jednou
     return "redirect:/dashboard/deactivation/done";
 }
 ```
 
-Implementácia (skrátená):
+Implementace (zkrácená):
 
 ```java
 public final class HttpSessionCrmSession implements CrmSession {
-    static final String PREFIX = "APP_";          // náhrada za oddelenie portlet/application scope
+    static final String PREFIX = "APP_";          // náhrada za oddělení portlet/application scope
 
     public static CrmSession of(HttpServletRequest request) { return new HttpSessionCrmSession(request); }
 
@@ -184,17 +184,17 @@ public final class HttpSessionCrmSession implements CrmSession {
     private void push(UiMessage message) {
         List<UiMessage> messages = new ArrayList<>(current());
         messages.add(message);
-        // vždy znova setAttribute: Spring Session/Redis zmenu vnútri zoznamu nezaznamená
+        // vždy znovu setAttribute: Spring Session/Redis změnu uvnitř seznamu nezaznamená
         request.getSession(true).setAttribute(PREFIX + "MESSAGES", messages);
     }
     ...
 }
 ```
 
-V produkcii by pod touto fasádou bol Spring Session + Redis a feature flag „zdroj čítania“ (1.2).
-Controllery sa pri tom nemenia.
+V produkci by pod touto fasádou byl Spring Session + Redis a feature flag „zdroj čtení“ (1.2).
+Controllery se přitom nemění.
 
-### 3.3 `@SessionAttributes` funguje rovnako, len nad `HttpSession`
+### 3.3 `@SessionAttributes` funguje stejně, jen nad `HttpSession`
 
 ```java
 @Controller
@@ -209,114 +209,114 @@ public class BlacklistCreateController {
 }
 ```
 
-## 4. Ako sa nájde správna session
+## 4. Jak se najde správná session
 
-Automaticky: session manager nič nevyberá, vždy sa pýta **aktuálneho requestu** a ten svoju session pozná.
+Automaticky: session manager nic nevybírá, vždy se ptá **aktuálního requestu** a ten svou session zná.
 
-### 4.1 Cookie → `HttpSession` (servlet kontajner)
+### 4.1 Cookie → `HttpSession` (servlet kontejner)
 
 ```
-1. request:  bez cookie → Tomcat vytvorí session, pošle  Set-Cookie: JSESSIONID=ABC123
-2. request:  Cookie: JSESSIONID=ABC123 → Tomcat nájde v pamäti session "ABC123"
+1. request:  bez cookie → Tomcat vytvoří session, pošle  Set-Cookie: JSESSIONID=ABC123
+2. request:  Cookie: JSESSIONID=ABC123 → Tomcat najde v paměti session "ABC123"
 ```
 
-Kontajner drží mapu `id → HttpSession` a `request.getSession()` vráti session podľa cookie.
-Rovnaké v Liferay aj v Spring Boote, kód na to nesiaha.
+Kontejner drží mapu `id → HttpSession` a `request.getSession()` vrátí session podle cookie.
+Stejné v Liferay i ve Spring Bootu, kód na to nesahá.
 
 ### 4.2 Request → vlákno (`ThreadLocal`)
-Request spracúva jedno vlákno. Spring na začiatku uloží request do `RequestContextHolder` (`ThreadLocal`)
-a na konci ho zmaže (legacy: `DispatcherPortlet`, Boot: `DispatcherServlet`).
+Request zpracovává jedno vlákno. Spring na začátku uloží request do `RequestContextHolder` (`ThreadLocal`)
+a na konci ho smaže (legacy: `DispatcherPortlet`, Boot: `DispatcherServlet`).
 
-### 4.3 Legacy: cesta zo singletonu k session
-`sessionManager` je v XML konfigurácii **singleton** (jedna inštancia pre všetkých používateľov),
-session v sebe držať nemôže, vždy si ju dohľadá:
+### 4.3 Legacy: cesta ze singletonu k session
+`sessionManager` je v XML konfiguraci **singleton** (jedna instance pro všechny uživatele),
+session v sobě držet nemůže, vždy si ji dohledá:
 
 ```
 controller → getSessionManager().getOrder()
-   → requestAwareManager.getPortletRequest()     ← aktuálny request tohto vlákna
+   → requestAwareManager.getPortletRequest()     ← aktuální request tohoto vlákna
    → portletRequest.getPortletSession()          ← Liferay: obal nad HttpSession (4.1)
    → getAttribute(KEY, APPLICATION_SCOPE)
 ```
 
-- Odkiaľ `requestAwareManager` berie request, nie je overené (základná trieda je v chýbajúcom JAR-e).
-  Takmer určite z `RequestContextHolder`: testy pred volaním ručne nastavujú
+- Odkud `requestAwareManager` bere request, není ověřeno (základní třída je v chybějícím JAR).
+  Téměř jistě z `RequestContextHolder`: testy před voláním ručně nastavují
   `RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(mockRequest))` a jedna utilita
-  odtiaľ request číta rovnako.
-- Identita a zákazník: `portalSessionManager.getPortalSession(request)` hľadá session SSO portálu podľa
-  údajov z requestu. API je `provided` JAR, ako presne páruje (cookie / SSO ID), nie je známe.
+  odtud request čte stejně.
+- Identita a zákazník: `portalSessionManager.getPortalSession(request)` hledá session SSO portálu podle
+  údajů z requestu. API je `provided` JAR, jak přesně páruje (cookie / SSO ID), není známo.
 
 ### 4.4 Spring Boot demo: bez `ThreadLocal`
 
 ```
 request (Cookie: JSESSIONID=ABC123)
-  → DispatcherServlet → controller potrebuje parameter CrmSession
-  → CrmSessionArgumentResolver dostane od Springu aktuálny HttpServletRequest
-  → HttpSessionCrmSession.of(request)     ← nový ľahký obal pre každý request
-  → request.getSession()                  ← kontajner podľa cookie (4.1)
+  → DispatcherServlet → controller potřebuje parametr CrmSession
+  → CrmSessionArgumentResolver dostane od Springu aktuální HttpServletRequest
+  → HttpSessionCrmSession.of(request)     ← nový lehký obal pro každý request
+  → request.getSession()                  ← kontejner podle cookie (4.1)
 ```
 
-Fasáda sa vytvára pre každý request a request dostane priamo: je vidieť, odkiaľ session prišla,
-a v teste stačí `MockHttpServletRequest` (nič sa nenastavuje do `ThreadLocal`).
+Fasáda se vytváří pro každý request a request dostane přímo: je vidět, odkud session přišla,
+a v testu stačí `MockHttpServletRequest` (nic se nenastavuje do `ThreadLocal`).
 
-### 4.5 So Spring Session + Redis
-Pribudne `SessionRepositoryFilter`, ktorý obalí request:
+### 4.5 Se Spring Session + Redis
+Přibude `SessionRepositoryFilter`, který obalí request:
 
 ```
-Cookie: SESSION=xyz → filter → request.getSession() načíta session "xyz" z Redisu
+Cookie: SESSION=xyz → filter → request.getSession() načte session "xyz" z Redisu
 ```
 
-Kód nad tým sa nemení, `request.getSession()` len vráti session z Redisu namiesto pamäte kontajnera.
+Kód nad tím se nemění, `request.getSession()` jen vrátí session z Redisu místo paměti kontejneru.
 
-## 5. Zhrnutie
+## 5. Shrnutí
 
 | | Liferay | Spring Boot |
 |---|---|---|
 | Objekt session | `PortletSession` (obal nad `HttpSession` portálu) | `HttpSession` |
-| Oddelenie portletov | `PORTLET_SCOPE` (automatický namespace podľa portletId) | ručné prefixy kľúčov |
-| Zdieľanie medzi portletmi | `APPLICATION_SCOPE` | bežný kľúč v `HttpSession` |
-| Identita a zákazník | session SSO portálu (cez fasádu) | demo: fake login do `HttpSession`; produkcia: nevyriešené |
-| Controllery | `getSessionManager().x()` | `crmSession.x()`, rovnaký tvar |
-| Redis / cluster | – | doplní sa pod fasádu (Spring Session), controllery sa nemenia |
+| Oddělení portletů | `PORTLET_SCOPE` (automatický namespace podle portletId) | ruční prefixy klíčů |
+| Sdílení mezi portlety | `APPLICATION_SCOPE` | běžný klíč v `HttpSession` |
+| Identita a zákazník | session SSO portálu (přes fasádu) | demo: fake login do `HttpSession`; produkce: nevyřešeno |
+| Controllery | `getSessionManager().x()` | `crmSession.x()`, stejný tvar |
+| Redis / cluster | – | doplní se pod fasádu (Spring Session), controllery se nemění |
 
-## 6. Na čo si dať pozor pri migrácii
+## 6. Na co si dát pozor při migraci
 
 ```bash
-# priame prístupy so scope – tu sa stratí automatický namespace
+# přímé přístupy se scope – tady se ztratí automatický namespace
 grep -rn "getPortletSession()" J/portlet/controller/<oblasť>
 grep -rn "PORTLET_SCOPE\|APPLICATION_SCOPE" J/portlet/controller/<oblasť>
-# modely držané v session medzi fázami
+# modely držené v session mezi fázemi
 grep -rn "@SessionAttributes" J/portlet/controller/<oblasť>
-# práca mimo vlákna requestu – tam RequestContextHolder (a teda session manager) nefunguje
+# práce mimo vlákno requestu – tam RequestContextHolder (a tedy session manager) nefunguje
 grep -rn "@Async\|ExecutorService\|CompletableFuture\|new Thread" J
 ```
 
-- Priame `getPortletSession()` s `PORTLET_SCOPE`: po prechode na jednu `HttpSession` môžu dva bývalé
-  portlety potichu zdieľať ten istý kľúč → pridaj prefix podľa oblasti.
-- Volania cez fasádu sú bezpečné, stačí vymeniť implementáciu.
-- `@SessionAttributes` bez `status.setComplete()` = model visí v session do jej vypršania
-  (pri Redise to je aj pamäť a sieť).
-- Session manager cez `ThreadLocal` funguje len vo vlákne requestu. V `@Async`, vlastnom executore
-  alebo po skončení requestu vráti `RequestContextHolder` `null` (alebo request iného používateľa,
-  ak sa kontext nevyčistil). Údaje zo session treba načítať vopred a odovzdať ako parameter.
+- Přímé `getPortletSession()` s `PORTLET_SCOPE`: po přechodu na jednu `HttpSession` mohou dva bývalé
+  portlety potichu sdílet stejný klíč → přidej prefix podle oblasti.
+- Volání přes fasádu jsou bezpečná, stačí vyměnit implementaci.
+- `@SessionAttributes` bez `status.setComplete()` = model visí v session až do jejího vypršení
+  (u Redisu je to i paměť a síť).
+- Session manager přes `ThreadLocal` funguje jen ve vlákně requestu. V `@Async`, vlastním executoru
+  nebo po skončení requestu vrátí `RequestContextHolder` `null` (nebo request jiného uživatele,
+  pokud se kontext nevyčistil). Údaje ze session je třeba načíst předem a předat jako parametr.
 
-## 7. Implementované v deme: duálna session v starej appke
+## 7. Implementováno v demu: duální session ve staré aplikaci
 
-Stará appka (`legacy/`, Liferay 6.2) implementuje návrh z 1.2:
-- fasáda `SessionManagerCustom` (`legacy/frontend-base-customization/.../session/`): identita a zákazník zo SSO
-  mocku cez `sso-portal-api`, ostatné cez `SessionStore`;
-- `DualSessionStore`: zápis do `PortletSession` (`APPLICATION_SCOPE`, prefix `APP_`) aj do Redisu
-  (`RedisSessionStore`, hash `crm:session:{SSO_ID}`, JSON, TTL 30 min), čítanie podľa flagu
+Stará aplikace (`legacy/`, Liferay 6.2) implementuje návrh z 1.2:
+- fasáda `SessionManagerCustom` (`legacy/frontend-base-customization/.../session/`): identita a zákazník ze SSO
+  mocku přes `sso-portal-api`, ostatní přes `SessionStore`;
+- `DualSessionStore`: zápis do `PortletSession` (`APPLICATION_SCOPE`, prefix `APP_`) i do Redisu
+  (`RedisSessionStore`, hash `crm:session:{SSO_ID}`, JSON, TTL 30 min), čtení podle flagu
   `crm:flags:session-read-source` (`ReadSourceFlag`, default `PORTLET`);
-- zdieľa sa len register `SharedKeys` (hlášky, posledné kritériá, posledný záznam) – formuláre
-  v `@SessionAttributes` nie;
-- výpadok Redisu request nezhodí (zápis sa zaloguje, čítanie spadne späť na `PortletSession`).
+- sdílí se jen registr `SharedKeys` (hlášky, poslední kritéria, poslední záznam) – formuláře
+  v `@SessionAttributes` ne;
+- výpadek Redisu request neshodí (zápis se zaloguje, čtení spadne zpět na `PortletSession`).
 
-Ako to vidieť naživo: `legacy/README.md`, sekcia „Zdieľaná session naživo“.
+Jak to vidět naživo: `legacy/README.md`, sekce „Sdílená session živě“.
 
-## 8. Súbeh v praxi (demo)
+## 8. Souběh v praxi (demo)
 
-Stará appka (`legacy/`) a nová (`crm-web/`) bežia za jedným nginx a zdieľajú hash `crm:session:{SSO_ID}`:
-- nová appka zapisuje zdieľané kľúče len do Redisu, stará do PortletSession aj Redisu;
-- stará appka číta podľa flagu – pri `PORTLET` nevidí zápisy novej, pri `REDIS` áno;
-- identitu obe berú zo SSO (cookie `SSO_ID`), zákazníka mení len SSO portál.
-Preklikanie: `crm-web/README.md`; automaticky: `docker/smoke-migration.sh`.
+Stará aplikace (`legacy/`) a nová (`crm-web/`) běží za jedním nginx a sdílejí hash `crm:session:{SSO_ID}`:
+- nová aplikace zapisuje sdílené klíče jen do Redisu, stará do PortletSession i Redisu;
+- stará aplikace čte podle flagu – při `PORTLET` nevidí zápisy nové, při `REDIS` ano;
+- identitu obě berou ze SSO (cookie `SSO_ID`), zákazníka mění jen SSO portál.
+Proklikání: `crm-web/README.md`; automaticky: `docker/smoke-migration.sh`.
