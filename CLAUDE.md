@@ -70,9 +70,9 @@ Prereqs: Docker Desktop (~3 GB RAM for Liferay), JDK 21, Maven 3.9, Git Bash. Ev
 - One class: legacy `mvn -q -B -f legacy/pom.xml test -pl <module> -am -Dtest=ClassName -Dsurefire.failIfNoSpecifiedTests=false`
   (modules: `sso-portal-api`, `frontend-base-customization`, `customercare-portlets`, `customercare-theme`);
   crm-web `mvn -q -B -f crm-web/pom.xml test -Dtest=ClassName`.
-- Stack: `bash docker/build-and-deploy.sh` (builds all three, compose up, hot-deploys into Liferay and **blocks until the
+- Stack: `bash docker/build-and-deploy.sh [--with-rs]` (builds all three, compose up; `crm-web-rs` is an optional compose profile `rs`, started only with `--with-rs`, hot-deploys into Liferay and **blocks until the
   portlets are deployed**, max 10 min; first start 1–3 min) – don't write own wait loops, then `bash docker/smoke.sh` → `SMOKE OK` and `bash docker/smoke-migration.sh` → `MIGRATION SMOKE OK`
-  and `bash docker/smoke-rs.sh` → `RS SMOKE OK` (not concurrently with smoke-migration – both stop Redis).
+  and (with `--with-rs`) `bash docker/smoke-rs.sh` → `RS SMOKE OK` (not concurrently with smoke-migration – both stop Redis).
   Liferay admin :8080 `test@liferay.com`/`test`; demo operators `spravca` (all) / `citatel` (read-only); customers `C-1001`, `C-1002`.
 - Load test Java vs Rust: `bash docker/bench.sh` (needs only `docker compose up -d redis sso-mock crm-web crm-web-rs`;
   oha in Docker, results in `docs/BENCHMARK.md`).

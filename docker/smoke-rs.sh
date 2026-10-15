@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Rust kópia (crm-web-rs) v bežiacom stacku cez nginx (http://localhost:8000): SSO identita, zdieľaná session
 # s Java appkou (crm-web), AJAX, ACL, vlastná session cookie a návrat po výpadku Redisu.
-# Spúšťať po docker/build-and-deploy.sh a nie súčasne so smoke-migration.sh (oba vypínajú Redis).
+# Spúšťať po docker/build-and-deploy.sh --with-rs a nie súčasne so smoke-migration.sh (oba vypínajú Redis).
 set -u
 cd "$(dirname "$0")"
 B="http://localhost:8000"
@@ -28,7 +28,7 @@ login() {
 
 echo "== 0. Rust appka beží za nginx"
 if [ "$(curl -s -o /dev/null -w '%{http_code}' "$B/crm-rs/blacklist/search")" != "302" ]; then
-    echo "FAIL  /crm-rs neodpovedá – spusti najprv bash docker/build-and-deploy.sh"
+    echo "FAIL  /crm-rs neodpovedá – spusti najprv bash docker/build-and-deploy.sh --with-rs"
     exit 1
 fi
 

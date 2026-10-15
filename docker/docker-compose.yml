@@ -24,12 +24,14 @@ services:
     ports: ["8081:8080"]
     depends_on: [redis, sso-mock]
 
-  # Rust kópia crm-web (podprojekt 3). Za nginx pod /crm-rs/, priamo na :8082/crm-rs.
+  # Rust kópia crm-web (podprojekt 3), voliteľný bonus – štartuje len s profilom "rs"
+  # (build-and-deploy.sh --with-rs, alebo docker compose --profile rs up -d). Za nginx pod /crm-rs/, priamo na :8082/crm-rs.
   # Build kontext je koreň repa – appka pri kompilácii číta texty a servíruje statické súbory z crm-web (jeden zdroj).
   crm-web-rs:
     build:
       context: ..
       dockerfile: crm-web-rs/Dockerfile
+    profiles: [rs]
     environment:
       CRM_SSO_APIURL: http://sso-mock:8090/sso
       CRM_REDIS_HOST: redis
@@ -55,7 +57,7 @@ services:
     ports: ["8000:80"]
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on: [liferay, sso-mock, crm-web, crm-web-rs]
+    depends_on: [liferay, sso-mock, crm-web]
 
 volumes:
   liferay-data:

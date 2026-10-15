@@ -10,9 +10,9 @@ vede dál na ni.
 Rust není třeba instalovat – build i testy běží v Dockeru.
 
 ```bash
-bash crm-web-rs/test.sh            # cargo test v kontejneru + dočasný Redis (první běh několik minut)
-bash docker/build-and-deploy.sh    # celý stack včetně crm-web-rs
-bash docker/smoke-rs.sh            # na konci "RS SMOKE OK"
+bash crm-web-rs/test.sh                     # cargo test v kontejneru + dočasný Redis (první běh několik minut)
+bash docker/build-and-deploy.sh --with-rs   # celý stack včetně crm-web-rs (bez přepínače se nespouští)
+bash docker/smoke-rs.sh                     # na konci "RS SMOKE OK"
 ```
 
 | Adresa | Co |
