@@ -1,6 +1,6 @@
 # Migrace Liferay 6.2 → Spring Boot: demo projektového vedení
 
-![Souběh staré a nové aplikace za nginx se sdílenou session](docs/img/architektura-subeh.svg)
+![Souběh staré a nové aplikace za nginx se sdílenou session a databází](docs/img/architektura-subeh.svg)
 
 Reálný projekt je velký: legacy CRM pro zákaznickou podporu na **Liferay 6.2** (Java 8, Spring Portlet MVC, JSP),
 13 portletů, **1 241 JSP pohledů**, ~235 tis. řádků Javy v modulu portletů, backend ve stejném JVM
