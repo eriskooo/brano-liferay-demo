@@ -71,4 +71,23 @@ class BlacklistCreateFormValidationTest {
         form.setIdentifierValue("87654321");
         return form;
     }
+    @Test
+    @org.junit.jupiter.api.DisplayName("Meno a priezvisko nad 100 znakov (dĺžka stĺpca v DB) sú chyba poľa, nie 500")
+    void should_rejectNamesLongerThanColumn_when_validating() {
+        BlacklistCreateForm form = validForm();
+        form.setFirstName("x".repeat(101));
+        form.setLastName("y".repeat(101));
+
+        assertThat(violations(form)).containsExactlyInAnyOrder("firstName", "lastName");
+    }
+
+    @Test
+    @org.junit.jupiter.api.DisplayName("Meno presne na hranici 100 znakov je platné")
+    void should_acceptNamesAtColumnLength_when_validating() {
+        BlacklistCreateForm form = validForm();
+        form.setFirstName("x".repeat(100));
+
+        assertThat(violations(form)).isEmpty();
+    }
+
 }

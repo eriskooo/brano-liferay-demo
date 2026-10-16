@@ -31,6 +31,9 @@
         <junit.version>5.10.5</junit.version>
         <mockito.version>4.11.0</mockito.version>
         <assertj.version>3.27.3</assertj.version>
+        <dbcp2.version>2.1.1</dbcp2.version>
+        <postgresql.version>42.7.4</postgresql.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -89,6 +92,28 @@
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${jedis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jdbc</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <!-- Pool z éry legacy: commons-logging a commons-pool2 (Jedis) už vo WAR sú, nepribudne slf4j. -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-dbcp2</artifactId>
+                <version>${dbcp2.version}</version>
+            </dependency>
+            <!-- Novší než postgresql.jar v lib/ext bundlu Liferay (ten nevie SCRAM); WAR classloader je child-first. -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>${testcontainers.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

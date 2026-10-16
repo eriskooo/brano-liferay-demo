@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.example.crm.common.NotFoundException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import static com.example.crm.blacklist.BlacklistState.ACTIVE;
@@ -31,6 +32,8 @@ import static com.example.crm.blacklist.StateReason.FRAUD;
  * reálny backend rieši konzistenciu transakciou v DB.
  */
 @Service
+// Default bez DB: existujúce @SpringBootTest testy bežia bez Postgresu; v Dockeri profil jpa.
+@ConditionalOnProperty(name = "crm.blacklist.store", havingValue = "memory", matchIfMissing = true)
 public class InMemoryBlacklistService implements BlacklistService {
 
     private final Clock clock;
@@ -89,14 +92,7 @@ public class InMemoryBlacklistService implements BlacklistService {
 
     @Override
     public List<ConditionType> allowedConditionTypes(StateReason reason) {
-        if (reason == null) {
-            return List.of(ConditionType.values());
-        }
-        return switch (reason) {
-            case FRAUD -> List.of(BLOCK_ALL);
-            case DEBT -> List.of(REQUIRE_DEPOSIT, MANUAL_APPROVAL);
-            case ABUSE -> List.of(MANUAL_APPROVAL, BLOCK_ALL);
-        };
+        return ConditionType.allowedFor(reason);
     }
 
     private BlacklistRecord require(long id) {

@@ -11,6 +11,8 @@ a mechanismy jako legacy CRM, napsané znovu a anonymizované. Podprojekt 2 je z
 | Java | 8 (Zulu 8u252 – update musí být ≤ 255, viz `poznamky/10`) |
 | Framework | Spring 4.3.6 Portlet MVC, JSP + JSTL, vlastní taglibs |
 | Sdílená session | Redis 7.4 (Jedis 2.9), JSON |
+| Data blacklistu | Postgres 16 (schéma `blacklist`, sdílené s novou aplikací), Spring JDBC – DAO po tabulkách jako originál, pool commons-dbcp2 |
+| Log portletu | `log4j.xml` ve WAR → `docker/logs/liferay/customercare-portlet.log` (audit `AUDIT event=…`) |
 | SSO portál | mock – Spring Boot 4.1.1 / Java 21 (`../sso-mock`) |
 
 ## Moduly (stejné členění jako legacy)
@@ -106,6 +108,7 @@ http://localhost:8080/web/crm/blacklist. Návod na proklikání souběhu: [`../c
 mvn -q -B -f legacy/pom.xml verify     # unit + wiring testy (JUnit 5, portlet mocky Spring 4.3)
 mvn -q -B -f sso-mock/pom.xml verify   # SSO mock (MockMvc)
 bash docker/smoke.sh                   # běžící stack end-to-end
+bash docker/e2e.sh legacy              # charakterizační e2e testy (Chrome, UI + DB + log), viz ../e2e/README.md
 ```
 
 ## Známá omezení (vědomě)
@@ -113,4 +116,4 @@ bash docker/smoke.sh                   # běžící stack end-to-end
 - Render fáze portletu neumí přesměrovat – bez SSO session portlet ukáže odkaz „Prihlásiť“, ne redirect.
 - Theme nedědí z Liferay `_styled`, admin dockbar je proto bez stylů.
 - Pro Liferay je každý operátor host; identitu zná jen SSO mock (v legacy autologin přes SSO portál).
-- HSQL místo Oracle, Tomcat místo JBoss, `params="page=…"` místo vlastního dashboard dispatche.
+- HSQL (portál) a Postgres (blacklist) místo Oracle, Tomcat místo JBoss, `params="page=…"` místo vlastního dashboard dispatche.

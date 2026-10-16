@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,10 +16,13 @@ import org.springframework.format.annotation.DateTimeFormat;
  */
 public class BlacklistCreateForm {
 
+    // Dĺžky podľa stĺpcov zdieľanej DB – inak by dlhý vstup skončil chybou 500 namiesto chyby poľa.
     @NotBlank(message = "{validation.required}")
+    @Size(max = 100, message = "{validation.maxLength}")
     private String firstName;
 
     @NotBlank(message = "{validation.required}")
+    @Size(max = 100, message = "{validation.maxLength}")
     private String lastName;
 
     @NotNull(message = "{validation.required}")

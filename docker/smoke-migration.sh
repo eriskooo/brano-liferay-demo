@@ -4,6 +4,7 @@
 set -u
 cd "$(dirname "$0")"
 B="http://localhost:8000"
+L="http://localhost:8080"   # Liferay priamo (starý blacklist mimo nginx – na :8000 ho presmeruje strangler)
 WORK="$(mktemp -d)"
 JAR="$WORK/cookies.txt"
 FAILS=0
@@ -15,6 +16,13 @@ expect_not() { if grep -qF -- "$2" "$3"; then fail "$1 (nemá tam byť: $2)"; el
 fetch() { curl -s -L -b "$JAR" -c "$JAR" -o "$2" "$B$1"; }
 post()  { local path="$1" out="$2"; shift 2; curl -s -L -b "$JAR" -c "$JAR" -o "$out" "$@" "$B$path"; }
 rc()    { docker compose exec -T redis redis-cli "$@" | tr -d '\r'; }
+# Atribút elementu s daným id (Liferay môže vrátiť HTML na jednom riadku).
+attr_of() {
+    grep -oE "<[a-z]+ id=\"$1\"[^>]*>" "$2" | head -1 | grep -oE " $3=\"[^\"]*\"" | head -1 \
+        | sed -E "s/^ $3=\"//; s/\"$//; s/&amp;/\&/g"
+}
+# Obe appky zdieľajú DB blacklistu – výsledok nesmie závisieť od toho, čo zmenil predchádzajúci beh.
+reset_db() { docker compose exec -T postgres psql -q -U postgres -d crm -f /docker-entrypoint-initdb.d/02-blacklist-seed.sql > /dev/null; }
 cookie() { grep -E "[[:space:]]$1[[:space:]]" "$JAR" | awk '{print $7}' | head -1; }
 login() {
     rm -f "$JAR"
@@ -29,6 +37,8 @@ for _ in $(seq 1 90); do
     [ "$a" = "200" ] && [ "$b" = "302" ] && curl -s "$B/web/crm/dashboard" | grep -q 'id="sessionDebug"' && break
     sleep 5
 done
+
+reset_db
 
 echo "== 1. Strangler v nginx"
 loc="$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$B/web/crm/blacklist")"
@@ -59,7 +69,7 @@ expect "diakritika: Mária nájdená" 'Mária Príkladová' "$WORK/result1.html"
 post /crm/blacklist/searchAction "$WORK/result2.html" -d firstName= -d lastName=Vzork -d identifierValue= -d state=
 expect "výsledok: Peter Vzorka" 'Peter Vzorka' "$WORK/result2.html"
 post "/crm/blacklist/changeAction?detailId=7" "$WORK/changed.html" -d state=INACTIVE -d validTo=
-expect "zmena stavu: hláška po PRG" 'Záznam bol zmenený.' "$WORK/changed.html"
+expect "zmena stavu: hláška po PRG" 'Stav záznamu bol zmenený.' "$WORK/changed.html"
 fetch "/crm/blacklist/detail?detailId=1" "$WORK/detail.html"
 expect "detail: AB123456" 'AB123456' "$WORK/detail.html"
 code="$(curl -s -o /dev/null -w '%{http_code}' -H 'X-Requested-With: XMLHttpRequest' \
@@ -111,7 +121,17 @@ expect "akcia (POST + redirect) počas výpadku prejde" 'Tomáš Fiktívny' "$WO
 if [ "$took" -le 10 ]; then ok "akcia počas výpadku trvala ${took} s (<= 10 s)"; else fail "akcia počas výpadku trvala ${took} s"; fi
 docker compose start redis > /dev/null 2>&1
 
+echo "== 11. Zdieľaná DB: zmena z novej appky je vidieť v starej"
+# Záznam 7 zmenila nová appka v kroku 4 (INACTIVE); Liferay ho číta z tej istej DB. Krok je posledný – detail v Liferay
+# prepíše „posledný otvorený záznam“ v zdieľanej session, na ktorý sa spoliehajú kroky 6 a 7. Starý blacklist ide mimo nginx (strangler).
+curl -s -L -b "$JAR" -c "$JAR" -o "$WORK/l-search.html" "$L/web/crm/blacklist"
+curl -s -L -b "$JAR" -c "$JAR" -o "$WORK/l-result.html" -d firstName= -d "lastName=Modelov" -d identifierValue= -d state= \
+    "$(attr_of searchForm "$WORK/l-search.html" action)"
+curl -s -L -b "$JAR" -c "$JAR" -o "$WORK/l-detail.html" "$(attr_of detail-7 "$WORK/l-result.html" href)"
+expect "Liferay: záznam 7 je Neaktívny" 'id="recordState">Neaktívny' "$WORK/l-detail.html"
+
 rc SET crm:flags:session-read-source PORTLET > /dev/null
+reset_db
 rm -rf "$WORK"
 echo
 if [ "$FAILS" -eq 0 ]; then echo "MIGRATION SMOKE OK"; else echo "MIGRATION SMOKE: $FAILS zlyhaní"; fi

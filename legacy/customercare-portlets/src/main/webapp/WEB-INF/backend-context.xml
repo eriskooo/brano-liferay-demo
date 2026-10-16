@@ -4,10 +4,26 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!--
-      In-memory náhrada backendu. V legacy tento kontext pochádza z backend JAR-u a obsahuje DAO, transakcie
+      Backend „v tom istom JVM“. V legacy tento kontext pochádza z backend JAR-u a obsahuje DAO, transakcie
       a klientov integračnej vrstvy – všetko v jednom JVM s frontendom (riziko č. 2 z analýzy).
+      Blacklist ide do zdieľanej DB (JDBC DAO po tabuľkách ako originál); dashboard ostáva in-memory.
     -->
-    <bean id="blacklistService" class="com.example.crm.frontend.backend.blacklist.InMemoryBlacklistService">
+
+    <!--
+      Zdieľaná DB backendu blacklistu (schéma blacklist, rovnaká ako v novej appke). V legacy DataSource z JNDI
+      kontajnera; tu pool vo WAR-e, nastavenie z CATALINA_OPTS (-Dcrm.db.*). Pool sa pripojí až pri prvom dotaze,
+      takže kontext sa načíta aj bez DB (PortletContextWiringTest).
+    -->
+    <bean id="blacklistDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="url" value="${crm.db.url:jdbc:postgresql://localhost:5432/crm}"/>
+        <property name="username" value="${crm.db.user:crm_app}"/>
+        <property name="password" value="${crm.db.password:crm_app}"/>
+        <property name="maxTotal" value="10"/>
+        <property name="maxWaitMillis" value="2000"/>
+    </bean>
+    <bean id="blacklistService" class="com.example.crm.frontend.backend.blacklist.JdbcBlacklistService">
+        <constructor-arg ref="blacklistDataSource"/>
         <constructor-arg ref="clock"/>
     </bean>
     <bean id="customerProductService"

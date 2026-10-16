@@ -27,9 +27,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class BlacklistDetailController {
 
     private final BlacklistService service;
+    private final AuditLog audit;
 
-    public BlacklistDetailController(BlacklistService service) {
+    public BlacklistDetailController(BlacklistService service, AuditLog audit) {
         this.service = service;
+        this.audit = audit;
     }
 
     @GetMapping("/detail")
@@ -50,6 +52,9 @@ public class BlacklistDetailController {
             return renderDetail(detailId, model);
         }
         service.change(detailId, form.getState(), form.getValidTo());
+        BlacklistRecord changed = load(detailId);
+        // Audit s platnosťou po doplnení dneška službou – rovnaká hodnota, akú vidí operátor a DB.
+        audit.recordChanged(detailId, session.operatorLogin(), changed.getState(), changed.getValidTo());
         session.pushInfo("blacklist.detail.changed");
         return "redirect:/blacklist/detail?detailId=" + detailId;
     }
@@ -63,6 +68,7 @@ public class BlacklistDetailController {
         }
         String author = session.getOperator().map(OperatorUser::displayName).orElseThrow();
         service.addNote(detailId, form.getText(), author);
+        audit.noteAdded(detailId, session.operatorLogin());
         session.pushInfo("blacklist.detail.noteAdded");
         return "redirect:/blacklist/detail?detailId=" + detailId;
     }
@@ -70,9 +76,11 @@ public class BlacklistDetailController {
     /** Resource fáza → AJAX endpoint. Vracia HTML fragment rovnako ako legacy – JS na stránke sa nemení. */
     @PostMapping("/resource/removeIdentAction")
     @RequiresPrivilege(Privilege.BLACKLIST_MODIFY)
-    public String removeIdentifier(@RequestParam long detailId, @RequestParam long identId, Model model) {
+    public String removeIdentifier(@RequestParam long detailId, @RequestParam long identId, Model model,
+                                   CrmSession session) {
         try {
             model.addAttribute("identifiers", service.removeIdentifier(detailId, identId));
+            audit.identifierRemoved(detailId, identId, session.operatorLogin());
         } catch (BlacklistRuleException e) {
             model.addAttribute("identifiers", load(detailId).getIdentifiers());
             model.addAttribute("errorKey", e.getMessageKey());

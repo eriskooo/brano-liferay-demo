@@ -10,6 +10,8 @@ import org.springframework.validation.Validator;
  */
 public class BlacklistCreateValidator implements Validator {
 
+    static final int NAME_MAX_LENGTH = 100;
+
     private static final String REQUIRED = "validation.required";
 
     private final BlacklistService blacklistService;
@@ -34,6 +36,9 @@ public class BlacklistCreateValidator implements Validator {
         requireValue(errors, "validFrom", form.getValidFrom());
         requireValue(errors, "identifierType", form.getIdentifierType());
         requireText(errors, "identifierValue", form.getIdentifierValue());
+        // Dĺžky podľa stĺpcov zdieľanej DB – inak by dlhý vstup skončil chybou 500 namiesto chyby poľa.
+        maxLength(errors, "firstName", form.getFirstName(), NAME_MAX_LENGTH);
+        maxLength(errors, "lastName", form.getLastName(), NAME_MAX_LENGTH);
         if (form.getValidFrom() != null && form.getValidTo() != null && form.getValidTo().isBefore(form.getValidFrom())) {
             errors.rejectValue("validTo", "validation.validToBeforeValidFrom");
         }
@@ -62,5 +67,11 @@ public class BlacklistCreateValidator implements Validator {
 
     private static boolean hasText(String value) {
         return value != null && !value.trim().isEmpty();
+    }
+
+    private static void maxLength(Errors errors, String field, String value, int max) {
+        if (value != null && value.trim().length() > max && !errors.hasFieldErrors(field)) {
+            errors.rejectValue(field, "validation.maxLength");
+        }
     }
 }

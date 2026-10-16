@@ -112,6 +112,17 @@ class DispatcherPortletCustomTest {
     }
 
     @Test
+    @DisplayName("Resource (AJAX fragment) má UTF-8 – inak portál pošle ISO-8859-1 a „ž“, „ť“ sa zmenia na „?“")
+    void should_setUtf8ContentType_when_resourceRequested() throws Exception {
+        when(guard.decide(anyBoolean(), any())).thenReturn(AccessDecision.LOGIN_REQUIRED);
+        MockResourceResponse response = new MockResourceResponse();
+
+        portlet.doResourceService(new MockResourceRequest(), response);
+
+        assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+    }
+
+    @Test
     @DisplayName("Pred každou fázou sa overí vlastník session (zmena operátora v SSO)")
     void should_checkSessionOwner_when_anyPhaseStarts() throws Exception {
         when(guard.decide(anyBoolean(), any())).thenReturn(AccessDecision.LOGIN_REQUIRED);

@@ -27,7 +27,7 @@ bash docker/smoke-rs.sh                     # na konci "RS SMOKE OK"
 2. Hlavička ukazuje *CRM – nová appka (Rust)* a ladicí řádek *zdroj čítania = Redis (Rust appka)*.
 3. Vyhledej `vzork`, otevři **Peter Vzorka**. Ve druhém tabu otevři Java aplikaci `/crm/blacklist/search` – její hlavička
    ukáže *Naposledy otvorený záznam: Peter Vzorka* (zapsala ho Rust aplikace).
-4. V Rust aplikaci změň stav záznamu a hned otevři Java aplikaci – hláška *Záznam bol zmenený.* se zobrazí tam, a jen jednou.
+4. V Rust aplikaci změň stav záznamu a hned otevři Java aplikaci – hláška *Stav záznamu bol zmenený.* se zobrazí tam, a jen jednou.
 5. Při flagu `REDIS` (`bash docker/session-flag.sh REDIS`) totéž vidí i dashboard v Liferay.
 
 ## Co je kde
@@ -47,6 +47,8 @@ Srovnání Java vs Rust: [`../docs/RUST.md`](../docs/RUST.md).
 
 ## Vědomá omezení
 
-- Vlastní in-memory data blacklistu (stejný seed) – změna v Rust aplikaci se v Java aplikaci neprojeví; sdílí se jen session a identita.
+- Vlastní in-memory data blacklistu (stejný seed). Java aplikace (stará i nová) už sdílejí Postgres, Rust kopie ne – data se
+  po první změně rozcházejí; sdílí se jen session a identita. Prázdná poznámka hlásí `validation.required` (Java už má
+  hlášku legacy `blacklist.detail.noteEmpty`) – Rust kopie není součástí e2e sady.
 - Lokální session (kritéria vyhledávání) je v paměti procesu – restart kontejneru ji smaže (jako HttpSession bez replikace).
 - Neplatné datum/enum ve formuláři ukáže „Neplatná hodnota.“ (Java ukáže technickou hlášku Springu).

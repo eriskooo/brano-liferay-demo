@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -95,17 +94,7 @@ public class InMemoryBlacklistService implements BlacklistService {
 
     @Override
     public List<ConditionType> allowedConditionTypes(StateReason reason) {
-        if (reason == null) {
-            return Arrays.asList(ConditionType.values());
-        }
-        switch (reason) {
-            case FRAUD:
-                return Collections.singletonList(BLOCK_ALL);
-            case DEBT:
-                return Arrays.asList(REQUIRE_DEPOSIT, MANUAL_APPROVAL);
-            default:
-                return Arrays.asList(MANUAL_APPROVAL, BLOCK_ALL);
-        }
+        return ConditionType.allowedFor(reason);
     }
 
     private BlacklistRecord require(long id) {

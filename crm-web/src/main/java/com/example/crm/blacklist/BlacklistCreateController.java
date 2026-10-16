@@ -28,10 +28,12 @@ public class BlacklistCreateController {
 
     private final BlacklistService service;
     private final Clock clock;
+    private final AuditLog audit;
 
-    public BlacklistCreateController(BlacklistService service, Clock clock) {
+    public BlacklistCreateController(BlacklistService service, Clock clock, AuditLog audit) {
         this.service = service;
         this.clock = clock;
+        this.audit = audit;
     }
 
     /**
@@ -83,6 +85,7 @@ public class BlacklistCreateController {
             return "blacklist/create";
         }
         BlacklistRecord created = service.create(form.toCommand());
+        audit.recordCreated(created.getId(), session.operatorLogin());
         session.pushInfo("blacklist.create.created");
         return "redirect:/blacklist/detail?detailId=" + created.getId();
     }

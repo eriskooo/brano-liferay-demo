@@ -12,6 +12,11 @@ public interface CrmSession {
 
     Optional<OperatorUser> getOperator();
 
+    /** Login operátora pre audit (displayName je pre UI); „?“ ak identita chýba – handler ju má zaručenú cez ACL. */
+    default String operatorLogin() {
+        return getOperator().map(OperatorUser::login).orElse("?");
+    }
+
     Optional<CustomerContext> getCustomer();
 
     void setGlobalAttribute(String key, Serializable value);

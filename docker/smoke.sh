@@ -22,6 +22,8 @@ attr_of() {
         | sed -E "s/^ $3=\"//; s/\"$//; s/&amp;/\&/g"
 }
 rc()    { docker compose exec -T redis redis-cli "$@" | tr -d '\r'; }
+# Obe appky zdieľajú DB blacklistu – výsledok nesmie závisieť od toho, čo zmenil predchádzajúci beh.
+reset_db() { docker compose exec -T postgres psql -q -U postgres -d crm -f /docker-entrypoint-initdb.d/02-blacklist-seed.sql > /dev/null; }
 login() {
     rm -f "$JAR"
     curl -s -c "$JAR" -b "$JAR" -o /dev/null -X POST "$B/sso/login" \
@@ -37,6 +39,8 @@ for _ in $(seq 1 90); do
     sleep 5
 done
 [ "$code" = "200" ] || { echo "Liferay neodpovedá (posledný HTTP $code)"; exit 1; }
+
+reset_db
 
 echo "== 1. Bez prihlásenia"
 rm -f "$JAR"
@@ -121,6 +125,7 @@ expect_not "čitateľ nevidí „Nový záznam“" 'id="gotoCreateForm"' "$WORK/
 fetch /web/crm/dashboard "$WORK/reader-dashboard.html"
 expect "čitateľ na dashboarde dostane 403" 'crm-error-403' "$WORK/reader-dashboard.html"
 
+reset_db
 rm -rf "$WORK"
 echo
 if [ "$FAILS" -eq 0 ]; then echo "SMOKE OK"; else echo "SMOKE: $FAILS zlyhaní"; fi

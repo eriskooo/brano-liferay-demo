@@ -68,9 +68,9 @@ expect "Java hlavička: posledný záznam z Rust appky" 'Naposledy otvorený zá
 echo "== 6. Hláška z Rust appky sa zobrazí raz – v Java appke"
 expect_code "zmena stavu v Rust appke (PRG)" 302 "$(code -X POST "$B/crm-rs/blacklist/changeAction?detailId=7" -d state=INACTIVE -d validTo=)"
 fetch /crm/blacklist/search "$WORK/java-msg.html"
-expect "Java appka zobrazí hlášku z Rust appky" 'Záznam bol zmenený.' "$WORK/java-msg.html"
+expect "Java appka zobrazí hlášku z Rust appky" 'Stav záznamu bol zmenený.' "$WORK/java-msg.html"
 fetch /crm-rs/blacklist/search "$WORK/rs-after.html"
-expect_not "hláška sa nezobrazí druhýkrát" 'Záznam bol zmenený.' "$WORK/rs-after.html"
+expect_not "hláška sa nezobrazí druhýkrát" 'Stav záznamu bol zmenený.' "$WORK/rs-after.html"
 
 echo "== 7. AJAX"
 curl -s -b "$JAR" -H 'X-Requested-With: XMLHttpRequest' -o "$WORK/conditions.html" \

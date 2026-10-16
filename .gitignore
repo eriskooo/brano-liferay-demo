@@ -19,3 +19,6 @@ Thumbs.db
 # Docker: WAR-y na hot deploy a API JAR kopírovaný do image Liferay (build výstupy)
 /docker/deploy/
 /docker/liferay/sso-portal-api.jar
+
+# Logy appiek z bind mountov (čítajú ich e2e testy)
+/docker/logs/

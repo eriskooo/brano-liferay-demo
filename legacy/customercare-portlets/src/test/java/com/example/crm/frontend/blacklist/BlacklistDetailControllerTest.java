@@ -43,11 +43,13 @@ class BlacklistDetailControllerTest {
     private final OperatorAcl acl = mock(OperatorAcl.class);
     private final BlacklistDetailController controller = new BlacklistDetailController(service);
     private final MockActionResponse response = new MockActionResponse();
+    private final List<String> auditLines = new java.util.ArrayList<String>();
 
     @BeforeEach
     void wire() {
         controller.setSessionManager(sessionManager);
         controller.setOperatorAcl(acl);
+        controller.setAuditLog(new AuditLog(auditLines::add));
         when(sessionManager.getOperator()).thenReturn(new PortalOperator("spravca", "Správca"));
     }
 
@@ -146,4 +148,54 @@ class BlacklistDetailControllerTest {
         assertThat(response.getProperty(ResourceResponse.HTTP_STATUS_CODE)).isEqualTo("405");
         assertThat(service.findById(1).get().getIdentifiers()).hasSize(2);
     }
+
+    @Test
+    @DisplayName("Zmena stavu zapíše audit s platnosťou doplnenou službou")
+    void should_auditEffectiveValidTo_when_stateChanged() {
+        controller.change(5, BlacklistState.INACTIVE, null, response);
+
+        assertThat(auditLines).containsExactly(
+                "AUDIT event=blacklist.change recordId=5 operator=spravca state=INACTIVE validTo=2026-10-08");
+    }
+
+    @Test
+    @DisplayName("Prázdna poznámka audit nezapíše, platná áno (bez textu)")
+    void should_auditOnlyValidNote_when_addingNotes() {
+        controller.addNote(6, "   ", response);
+        controller.addNote(6, "Tajný text", response);
+
+        assertThat(auditLines).containsExactly("AUDIT event=blacklist.note recordId=6 operator=spravca");
+    }
+
+    @Test
+    @DisplayName("Odstránenie identifikátora zapíše audit, odmietnutie posledného nie")
+    void should_auditOnlySuccessfulRemoval_when_removingIdentifiers() {
+        controller.removeIdentifier(1, 2, post(), new MockResourceResponse());
+        controller.removeIdentifier(4, 5, post(), new MockResourceResponse());
+
+        assertThat(auditLines).containsExactly(
+                "AUDIT event=blacklist.identifier.remove recordId=1 identifierId=2 operator=spravca");
+    }
+
+    @Test
+    @DisplayName("Zmena neexistujúceho záznamu audit nezapíše")
+    void should_notAudit_when_recordUnknown() {
+        assertThatThrownBy(() -> controller.change(999, BlacklistState.ACTIVE, null, response))
+                .isInstanceOf(NotFoundException.class);
+        assertThat(auditLines).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Poznámka nad 2000 znakov (dĺžka stĺpca v DB) je chyba, neuloží sa a nezapíše audit")
+    void should_rejectNote_when_longerThanColumn() {
+        char[] text = new char[2001];
+        java.util.Arrays.fill(text, 'x');
+
+        controller.addNote(6, new String(text), response);
+
+        verify(sessionManager).pushError("validation.maxLength");
+        assertThat(service.findById(6).get().getNotes()).isEmpty();
+        assertThat(auditLines).isEmpty();
+    }
+
 }

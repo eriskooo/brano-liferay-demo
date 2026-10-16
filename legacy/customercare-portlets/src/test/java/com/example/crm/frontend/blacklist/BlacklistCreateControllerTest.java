@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.example.crm.frontend.backend.blacklist.ConditionType;
 import com.example.crm.frontend.backend.blacklist.IdentifierType;
@@ -14,6 +15,7 @@ import com.example.crm.frontend.base.acl.AclDeniedException;
 import com.example.crm.frontend.base.acl.OperatorAcl;
 import com.example.crm.frontend.base.acl.Privilege;
 import com.example.crm.frontend.base.session.SessionManagerCustom;
+import com.example.sso.api.PortalOperator;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,11 +40,14 @@ class BlacklistCreateControllerTest {
     private final OperatorAcl acl = mock(OperatorAcl.class);
     private final BlacklistCreateController controller = new BlacklistCreateController(service, CLOCK);
     private final MockActionResponse response = new MockActionResponse();
+    private final List<String> auditLines = new java.util.ArrayList<String>();
 
     @BeforeEach
     void wire() {
         controller.setSessionManager(sessionManager);
         controller.setOperatorAcl(acl);
+        controller.setAuditLog(new AuditLog(auditLines::add));
+        when(sessionManager.getOperator()).thenReturn(new PortalOperator("spravca", "Správca"));
     }
 
     @Test
@@ -88,6 +93,26 @@ class BlacklistCreateControllerTest {
         verify(sessionManager).pushInfo("blacklist.create.created");
         assertThat(response.getRenderParameter("viewPage")).isEqualTo("detail");
         assertThat(response.getRenderParameter("detailId")).isEqualTo("9");
+    }
+
+    @Test
+    @DisplayName("Vytvorenie záznamu zapíše audit s novým ID")
+    void should_auditNewId_when_recordCreated() {
+        CreateForm form = validForm();
+
+        controller.createAction(form, bindingResult(form), new SimpleSessionStatus(), response);
+
+        assertThat(auditLines).containsExactly("AUDIT event=blacklist.create recordId=9 operator=spravca");
+    }
+
+    @Test
+    @DisplayName("Neplatný formulár audit nezapíše")
+    void should_notAudit_when_formInvalid() {
+        CreateForm form = new CreateForm();
+
+        controller.createAction(form, bindingResult(form), new SimpleSessionStatus(), response);
+
+        assertThat(auditLines).isEmpty();
     }
 
     @Test
@@ -168,4 +193,25 @@ class BlacklistCreateControllerTest {
         return errors.getFieldErrors().stream().filter(e -> code.equals(e.getCode()))
                 .map(e -> e.getField()).collect(Collectors.toList());
     }
+    @Test
+    @DisplayName("Meno a priezvisko nad 100 znakov (dĺžka stĺpca v DB) sú chyby polí, nič nevznikne")
+    void should_rejectValuesLongerThanColumns_when_formValidated() {
+        CreateForm form = validForm();
+        form.setFirstName(repeat('x', 101));
+        form.setLastName(repeat('y', 101));
+        BindingResult errors = bindingResult(form);
+
+        controller.createAction(form, errors, new SimpleSessionStatus(), response);
+
+        assertThat(fieldsWithCode(errors, "validation.maxLength")).containsExactlyInAnyOrder("firstName", "lastName");
+        assertThat(service.findById(9).isPresent()).isFalse();
+        assertThat(auditLines).isEmpty();
+    }
+
+    private static String repeat(char c, int count) {
+        char[] chars = new char[count];
+        java.util.Arrays.fill(chars, c);
+        return new String(chars);
+    }
+
 }

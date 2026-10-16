@@ -46,6 +46,16 @@ class BaseCrmControllerTest {
     }
 
     @Test
+    @DisplayName("Login operátora pre audit, „?“ bez identity")
+    void should_returnLogin_when_operatorPresent() {
+        when(sessionManager.getOperator()).thenReturn(new PortalOperator("spravca", "Správca"));
+        assertThat(controller().operatorLogin()).isEqualTo("spravca");
+
+        when(sessionManager.getOperator()).thenReturn(null);
+        assertThat(controller().operatorLogin()).isEqualTo("?");
+    }
+
+    @Test
     @DisplayName("checkPrivilege deleguje na ACL")
     void should_delegateToAcl_when_checkingPrivilege() {
         doThrow(new AclDeniedException(Privilege.BLACKLIST_MODIFY)).when(acl).checkPrivilege(Privilege.BLACKLIST_MODIFY);

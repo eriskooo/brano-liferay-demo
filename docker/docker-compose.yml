@@ -5,6 +5,24 @@ services:
     image: redis:7.4-alpine
     ports: ["6379:6379"]
 
+  # Zdieľaná DB backendu blacklistu pre starú aj novú appku (schéma blacklist). Port na hoste kvôli e2e testom a DBeaveru.
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: crm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    # Na hoste 5433 – 5432 býva obsadený lokálnou inštaláciou PostgreSQL (služba Windows); v sieti compose ostáva 5432.
+    ports: ["5433:5432"]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "crm"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
   # GUI na zdieľanú session: http://localhost:5540 (databázu "crm-shared-session" zaregistruje build-and-deploy cez API).
   redisinsight:
     image: redis/redisinsight:3.6.0
@@ -21,8 +39,21 @@ services:
     environment:
       CRM_SSO_APIURL: http://sso-mock:8090/sso
       SPRING_DATA_REDIS_HOST: redis
+      # Zdieľaná DB backendu so starou appkou (rovnaká schéma blacklist) cez JPA.
+      SPRING_PROFILES_ACTIVE: jpa
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/crm
+      # Log aj do súboru – ako na reálnom serveri; e2e testy ho čítajú cez bind mount.
+      LOGGING_FILE_NAME: /logs/crm-web.log
     ports: ["8081:8080"]
-    depends_on: [redis, sso-mock]
+    volumes:
+      - ./logs/crm-web:/logs
+    depends_on:
+      redis:
+        condition: service_started
+      sso-mock:
+        condition: service_started
+      postgres:
+        condition: service_healthy
 
   # Rust kópia crm-web (podprojekt 3), voliteľný bonus – štartuje len s profilom "rs"
   # (build-and-deploy.sh --with-rs, alebo docker compose --profile rs up -d). Za nginx pod /crm-rs/, priamo na :8082/crm-rs.
@@ -46,11 +77,22 @@ services:
         -Dsso.portal.api-url=http://sso-mock:8090/sso
         -Dsso.portal.login-url=/sso/login
         -Dcrm.redis.host=redis
+        -Dcrm.db.url=jdbc:postgresql://postgres:5432/crm
+        -Dcrm.db.user=crm_app
+        -Dcrm.db.password=crm_app
     ports: ["8080:8080"]
     volumes:
       - liferay-data:/opt/liferay/data
       - ./deploy:/opt/liferay/deploy
-    depends_on: [redis, sso-mock]
+      # Log portletu (log4j.xml vo WAR-e) – e2e testy ho čítajú na hoste.
+      - ./logs/liferay:/opt/liferay/logs
+    depends_on:
+      redis:
+        condition: service_started
+      sso-mock:
+        condition: service_started
+      postgres:
+        condition: service_healthy
 
   nginx:
     image: nginx:1.27-alpine
@@ -61,3 +103,4 @@ services:
 
 volumes:
   liferay-data:
+  postgres-data:

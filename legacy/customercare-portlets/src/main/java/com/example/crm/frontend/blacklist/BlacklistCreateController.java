@@ -37,11 +37,18 @@ public class BlacklistCreateController extends BaseCrmController {
     private final Clock clock;
     private final BlacklistCreateValidator validator;
 
+    // Bez Spring beanu: audit nemá závislosti; setter len pre testy (legacy štýl setter injection).
+    private AuditLog auditLog = new AuditLog();
+
     @Autowired
     public BlacklistCreateController(BlacklistService blacklistService, Clock clock) {
         this.blacklistService = blacklistService;
         this.clock = clock;
         this.validator = new BlacklistCreateValidator(blacklistService);
+    }
+
+    void setAuditLog(AuditLog auditLog) {
+        this.auditLog = auditLog;
     }
 
     /** Nový formulár (len ak ešte nie je v session). */
@@ -92,6 +99,7 @@ public class BlacklistCreateController extends BaseCrmController {
             return;
         }
         BlacklistRecord created = blacklistService.create(form.toNewRecord());
+        auditLog.recordCreated(created.getId(), operatorLogin());
         status.setComplete();
         getSessionManager().pushInfo("blacklist.create.created");
         response.setRenderParameter("viewPage", "detail");

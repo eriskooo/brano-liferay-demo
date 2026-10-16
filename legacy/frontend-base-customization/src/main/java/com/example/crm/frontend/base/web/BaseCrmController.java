@@ -59,6 +59,12 @@ public abstract class BaseCrmController {
         return operator == null ? "?" : operator.getDisplayName();
     }
 
+    /** Login operátora pre audit (meno je pre UI); „?“ ak identita chýba. */
+    protected String operatorLogin() {
+        PortalOperator operator = sessionManager.getOperator();
+        return operator == null ? "?" : operator.getLogin();
+    }
+
     /** Spoločné editory pre všetky controllery. */
     @InitBinder
     public void initBaseBinder(WebDataBinder binder) {

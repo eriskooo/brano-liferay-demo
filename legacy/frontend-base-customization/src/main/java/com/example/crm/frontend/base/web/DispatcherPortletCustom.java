@@ -85,6 +85,10 @@ public class DispatcherPortletCustom extends DispatcherPortlet {
 
     @Override
     protected void doResourceService(ResourceRequest request, ResourceResponse response) throws Exception {
+        // page contentType vo vloženom JSP fragmente resource odpoveď neovplyvní – bez toho portál pošle ISO-8859-1
+        // a znaky mimo Latin-1 (ž, ť, č) prídu ako „?“. Odhalil to e2e test; handler s JSON si typ prepíše.
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
         ensureSessionOwner();
         AccessDecision decision = guard().decide(loginRequired, requiredPrivilege);
         if (decision == AccessDecision.ALLOWED) {

@@ -56,10 +56,10 @@ async fn should_change_state_and_show_message_once_when_valid() {
     let action = browser.post("/crm-rs/blacklist/changeAction?detailId=7", "state=INACTIVE&validTo=").await;
     assert_eq!((action.status, action.location()), (StatusCode::FOUND, "/crm-rs/blacklist/detail?detailId=7"));
     let detail = browser.get("/crm-rs/blacklist/detail?detailId=7").await;
-    assert!(detail.body.contains("Záznam bol zmenený."));
+    assert!(detail.body.contains("Stav záznamu bol zmenený."));
     assert!(detail.body.contains(r#"<td id="recordState">Neaktívny</td>"#));
     assert!(detail.body.contains("2026-10-14"));
-    assert!(!browser.get("/crm-rs/blacklist/detail?detailId=7").await.body.contains("Záznam bol zmenený."));
+    assert!(!browser.get("/crm-rs/blacklist/detail?detailId=7").await.body.contains("Stav záznamu bol zmenený."));
 }
 
 /// Chýbajúci stav: detail sa vykreslí znova s chybou pri poli (bez redirectu).

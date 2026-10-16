@@ -58,15 +58,26 @@ bash docker/smoke-migration.sh       # souběh – na konci "MIGRATION SMOKE OK"
 | hlavička (náhrada theme + portletu header) | `webapp/WEB-INF/jsp/layout/header.jspf`, `web/portlet/LayoutModelInterceptor.java` |
 | tagy se stejným rozhraním | `web/tag/*`, `webapp/WEB-INF/tld/*.tld` |
 | blacklist | `blacklist/*Controller.java`, `webapp/WEB-INF/jsp/blacklist/*.jsp` |
+| perzistence (JPA nad sdílenou DB) | `blacklist/jpa/*Entity.java`, `BlacklistRecordRepository.java`, `BlacklistSpecifications.java`, `blacklist/BlacklistEntityMapper.java`, `JpaBlacklistService.java` |
+| audit log (kontrakt se starou aplikací) | `blacklist/AuditLog.java` – řádek `AUDIT event=… k=v` v `docker/logs/crm-web/crm-web.log` |
 
 ## Testy
 
 ```bash
-mvn -q -B -f crm-web/pom.xml verify    # unit, MockMvc, Tomcat + Jasper, Redis přes Testcontainers (potřebuje Docker)
+mvn -q -B -f crm-web/pom.xml verify    # unit, MockMvc, Tomcat + Jasper, Redis a Postgres přes Testcontainers (potřebuje Docker)
+bash docker/e2e.sh migrated            # charakterizační e2e testy (UI + DB + log) proti běžícímu stacku, viz ../e2e/README.md
 ```
+
+## Perzistence
+
+- Blacklist čte a zapisuje **sdílenou DB se starou aplikací** (Postgres, schéma `blacklist`) přes **JPA** (Hibernate,
+  Spring Data). Legacy má k týmž tabulkám JDBC DAO – demo tak ukazuje migrační krok JDBC → JPA nad stejnými daty.
+- Schéma vlastní init skript `docker/postgres/init/` – Hibernate ho nikdy negeneruje; v profilu `jpa` ho jen validuje
+  (`ddl-auto=validate`), takže rozchod mapování a tabulek spadne už při startu.
+- Implementaci portu vybírá `crm.blacklist.store`: `memory` (výchozí – testy bez DB) nebo `jpa` (profil `jpa`, Docker).
+- Entity se převádějí na doménové objekty v transakci služby (`open-in-view=false`) – JSP nedostanou lazy kolekce.
 
 ## Vědomá omezení
 
-- Každá aplikace má vlastní in-memory data blacklistu (stejný seed). Legacy backend běží v JVM Liferay, nová aplikace ho
-  sdílet nemůže – změna v nové aplikaci se ve starém blacklistu na :8080 neprojeví. Sdílí se jen session.
+- Dashboard (zrušení služby) a Rust kopie mají dál in-memory data; blacklist obou Java aplikací je ve sdílené DB.
 - Stránky nové aplikace berou CSS z Liferay (`/html/themes/classic/…`) přes nginx – mimo :8000 mají jen základní styl.

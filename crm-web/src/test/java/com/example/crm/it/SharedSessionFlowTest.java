@@ -127,7 +127,7 @@ class SharedSessionFlowTest {
         WebClient admin = new WebClient(port).addCookie("SSO_ID", "it-admin");
         HttpResponse<String> changed = admin.post("/crm/blacklist/changeAction?detailId=7",
                 Map.of("state", "INACTIVE", "validTo", ""));
-        assertThat(changed.body()).contains("Záznam bol zmenený.");
+        assertThat(changed.body()).contains("Stav záznamu bol zmenený.");
 
         WebClient reader = new WebClient(port).addCookie("SSO_ID", "it-reader");
         assertThat(reader.post("/crm/blacklist/changeAction?detailId=7", Map.of("state", "ACTIVE", "validTo", ""))
