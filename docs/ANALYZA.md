@@ -126,6 +126,13 @@ jsou starší než `customercare-web/target/classes` ✔ (např. `TariffDeactiva
   remoting ani EJB (`CP/resources/context-jboss.xml`).
 - Nejčastěji importované služby ⚠: property accessor, požadavky zákazníka, číselníky, vyhledávání
   adres, splátky, dokumenty, ceny, závazky, scoring, přenos čísla, platební brána.
+- **Hranice transakcí leží ve frontendu** ✔ (grep v produkčním kódu `CP`): 8 tříd typu *manager* otevírá transakci
+  samo – 12× `@Transactional` (2× na úrovni třídy, 1× `propagation = SUPPORTS`) a `TransactionTemplate` ve 4 třídách,
+  z toho 3× jako samostatná transakce (`…NewTx`). Uvnitř transakce se volá **několik backendových služeb**
+  (např. odebrání kontaktů v cyklu); některé metody mění backendový doménový objekt přímo ve frontendu.
+  `<tx:annotation-driven>` je v 7 kontextech portletů, transaction manager dodává backendový kontext.
+- ⚠ Neověřeno (chybí zdroje backendu): zda jsou transakční i backendové služby a s jakou propagací, zda jde
+  o JTA/XA přes více zdrojů (DB + broker) a zda služby vracejí Hibernate entity (lazy loading), nebo DTO.
 
 ### 3.6 Co říkají logy (`input/*_war*.log`) ✔
 - Logy pocházejí z **PoC `customercare-web`**, ne z legacy portálu. Jde o dva starty Tomcatu na portu 8080.
@@ -156,7 +163,12 @@ jsou starší než `customercare-web/target/classes` ✔ (např. `TariffDeactiva
 2. **Backend ve stejném kontextu, starý stack.** Frontend s sebou táhne celý backend (Spring 4, Hibernate 4,
    `javax.*`). Moderní Spring Boot (3+/4, Jakarta) nelze použít bez upgradu backendu nebo bez
    oddělení FE a BE (REST klient nebo adaptér). Spojení „odstranění Liferay + upgrade Javy“
-   (komentář klienta) toto riziko násobí.
+   (komentář klienta) toto riziko násobí. Kontejnerizace sama nepomůže: backend je knihovna uvnitř WAR,
+   oddělení vyžaduje síťové API.
+   **Transakce:** dnes je otevírá frontend a obepínají několik backendových volání (kap. 3.5). Přes hranici
+   procesu transakce nejde – kdyby se managery přenesly do nového frontendu beze změny, každé volání by mělo
+   vlastní transakci a chyba uprostřed by zanechala částečný zápis. Řez FE/BE se proto vede **po hranici
+   transakce**: transakční operace zůstává na straně backendu jako jedna API operace (viz `README.md`, Strategie).
 3. **Vlastní dispatch** (dashboard podle `page`, objednávky jako page-flow scénář). Je nutné ho
    transformovat na URL routování. Týká se dvou největších oblastí (~970 JSP).
 4. **Skryté Liferay závislosti ve vlastních tazích.** JSP vypadají „čistě“, ale `portal:*URL` a další

@@ -132,6 +132,7 @@ a lze ho vrátit jedním přesměrováním.
 | Riziko | Opatření |
 |---|---|
 | Backend ve stejném JVM se starým stackem (`javax` vs. `jakarta`) | oddělení za rozhraní; varianta po analýze backendu |
+| Transakce otevřené frontendem nad více backendovými voláními (8 tříd) | operace zůstává u backendu jako jedno volání API s původní transakcí; test atomičnosti |
 | Vlastní navigace ve velkých modulech (~970 JSP) | převod na standardní adresy; samostatný krok s vlastními testy |
 | Skryté závislosti na Liferay ve vlastních tazích | tagy se stejným rozhraním bez Liferay |
 | Rozdíly portletových fází a HTTP | zdokumentované vzory, pokryté testy |
@@ -146,6 +147,8 @@ Předchozí PoC měřil počet převedených JSP; stránky se vykreslily, část
 Následující oblasti pilot zatím neověřil:
 
 - **Backend:** zdrojové kódy backendových modulů nejsou k dispozici; způsob napojení se určí před pilotem.
+- **Transakce:** hranice ve frontendu jsou zmapovány; propagace v backendu a případné distribuované transakce
+  (databáze + message broker) je třeba ověřit v jeho kódu.
 - **JBoss:** Spring Boot standardně běží jako samostatný proces; nasazení na JBoss je technicky možné, neověřeno.
 - **Výkon:** srovnání staré a nové aplikace dosud neměřeno; nástroj pro zátěžový test je k dispozici, scénář pro starou aplikaci je třeba doplnit.
 - **Odkazy a překlady:** generování interních odkazů a překlady z externího CMS jsou v plánu (krok 7).

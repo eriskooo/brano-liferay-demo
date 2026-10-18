@@ -64,3 +64,9 @@
 25. **Částečné bindování `@SessionAttributes`.** Pole, které request neobsahuje, zůstane z předchozího formuláře
     v session (v legacy i po migraci). Prohlížeč posílá všechna pole, ruční testy (curl) musí také.
 26. **nginx `return 302` za proxy s jiným portem** skládá absolutní URL s interním portem – `absolute_redirect off`.
+27. **Transakce otevřená frontendem.** Managery ve frontendu (`@Transactional`, `TransactionTemplate`) obepínají několik
+    backendových volání ve stejném JVM. Po oddělení backendu (jiný proces/kontejner) by každé volání mělo vlastní
+    transakci → částečný zápis při chybě uprostřed. Takový manager nepřenášej do nového frontendu; přesuň ho k backendu
+    jako jednu API operaci se stejnou hranicí a propagací (pozor na `…NewTx` = REQUIRES_NEW a `SUPPORTS`).
+    Najdeš je: `grep -rln "@Transactional\|TransactionTemplate" CP/java`. Kontejnerizace sama nic neřeší –
+    backend je knihovna uvnitř WAR.

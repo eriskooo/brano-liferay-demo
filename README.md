@@ -37,6 +37,11 @@ identita, session a databáze, nginx jako jediný vstup a e2e testy, které drž
 5. **Stejné rozhraní, nová implementace.** Tagy `portal:*`/`common:*`, session fasáda a ACL drží kontrakt legacy,
    takže JSP se přenášejí téměř beze změny ([`docs/MIGRACIA.md`](docs/MIGRACIA.md)).
 6. **Pokrok se měří funkčními scénáři**, ne počtem přepsaných souborů.
+7. **Řez mezi frontendem a backendem vede po hranici transakce.** V legacy otevírá transakci frontendový kód
+   a uvnitř volá několik backendových služeb ve stejném JVM ([`docs/ANALYZA.md`](docs/ANALYZA.md) kap. 3.5).
+   Přes síť transakce nejde, proto se transakční operace přesouvá k backendu jako **jedna API operace**
+   s původní hranicí transakce; nový frontend ji volá jedním voláním. Modul se přepne, až když existují
+   operace pro všechny jeho transakce, a atomičnost ověří e2e scénář s vyvolanou chybou uprostřed operace.
 
 ## Plán krok po kroku
 
@@ -77,6 +82,7 @@ Demo není měřením pracnosti; dává **jednotku a postup**, kterými se odhad
 | resource/AJAX volání | každé = endpoint + JS | např. zrušení služby 9× resource |
 | backendové služby za portem | adaptéry, testovací data | blacklist 1 služba, zrušení služby 7+ |
 | stav v session (`@SessionAttributes`, fasáda) | sdílený kontrakt, pasti PRG | všechny formuláře |
+| transakční operace nad více službami | každá = nová API operace backendu, DTO místo entit, test atomičnosti | 8 tříd *manager* (12× `@Transactional`, 4× `TransactionTemplate`) |
 
 **Postup odhadu:**
 1. Rozdělit oblasti do tříd složitosti (S: blacklist, vyhledávání; M: vyúčtování, požadavky; XL: dashboard, objednávky).
@@ -94,6 +100,7 @@ zelené na legacy i na nové aplikaci a (c) je možné ji vrátit jedním přesm
 |---|---|
 | Session a identita ze SSO portálu | SSO vlastní identitu; Redis session se stejným kontraktem; feature flag zdroje čtení |
 | Backend ve stejném JVM se starým stackem | port + adaptér; sdílená DB; e2e ověří, že přepis datové vrstvy (JDBC → JPA) nezměnil chování |
+| Transakce otevřené frontendem nad více backendovými voláními | řez po hranici transakce (Strategie 7); v demu zatím nemodelováno – transakce blacklistu leží ve službě |
 | Vlastní dispatch (~970 JSP) | krok 6 – dashboard |
 | Skryté Liferay závislosti v tazích (~16 000 použití) | tagy se stejným rozhraním a servletovou implementací |
 | Sémantika portletových fází | PRG, explicitní model, past `@SessionAttributes` popsaná v [`poznamky/07`](poznamky/07-pasce.md) |

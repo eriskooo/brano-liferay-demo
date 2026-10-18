@@ -42,11 +42,16 @@ grep -rhoE "<[a-z]+:[A-Za-z]+" CP/webapp/WEB-INF/jsp/<portlet> | sort | uniq -c 
 3. Vypiš JSP a tagy, které používají; pro každý vlastní tag zjisti třídu v TLD a zda sahá na Liferay/portlet API.
 4. Zjisti ACL oprávnění (`aclPageFilterTag privilegeType=...`) → budoucí pravidla autorizace.
 5. Zjisti, odkud se na portlet odkazuje (deeplinky, `dashboardUrl`, jiné portlety) → URL kontrakt.
+6. **Mapa transakcí:** které managery volané z controllerů portletu otevírají transakci (`@Transactional`,
+   `TransactionTemplate`), s jakou propagací a které backendové služby v ní volají → seznam API operací backendu
+   ([07-pasce.md](07-pasce.md) bod 27).
 
 ## 2. Návrh cíle
 - URL: každá render fáze → `GET /oblasť/...`, action → `POST` + redirect, resource → JSON endpoint.
 - Session: co musí přežít mezi requesty? Co je kontext uživatele/zákazníka (přijde odjinud)?
 - Backend: zůstává stejné rozhraní. Nejprve postav adaptér/port, za ním stub, potom reálnou implementaci.
+- Transakce: port odpovídá **celé transakční operaci** (ne jednotlivým službám uvnitř ní); její hranice a propagace
+  zůstávají na straně backendu. Data přes port jen jako DTO, ne entity s lazy kolekcemi.
 
 ## 3. Implementace (po malých krocích, každý s testem)
 1. Port (rozhraní) pro backendovou službu + in-memory implementace.
@@ -61,6 +66,7 @@ grep -rhoE "<[a-z]+:[A-Za-z]+" CP/webapp/WEB-INF/jsp/<portlet> | sort | uniq -c 
 - [ ] všechny `@ModelAttribute`/`@SessionAttributes` zmapované
 - [ ] end-to-end scénáře projdou proti stubu i reálnému backendu
 - [ ] ACL pravidla ověřená testem
+- [ ] každá transakční operace má e2e scénář s chybou uprostřed (nic se nezapíše, resp. REQUIRES_NEW zápis zůstane)
 
 ## Ukázka v demu
 Celý postup na jednom portletu (blacklist) i se souběhem staré a nové aplikace: `docs/MIGRACIA.md`

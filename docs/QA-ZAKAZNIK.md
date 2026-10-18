@@ -70,9 +70,14 @@ Ne. Obě aplikace pracují nad stejnou databází a stejnými tabulkami. Nová a
 
 ### 11. Musíte přepsat backendové služby a integrace (REST/SOAP, message broker)?
 Rozsah migrace je frontend; backendové služby zůstávají. Jejich napojení je ale hlavní technické riziko. Backend
-dnes běží ve stejném JVM se starým stackem (Java 8, `javax.*`), nová aplikace používá Jakarta EE. Řešením je
-oddělit backend za rozhraní (port + adaptér), případně ho zpřístupnit jako službu. Varianta se zvolí po analýze
-backendových modulů, které zatím nemáme k dispozici.
+je dnes knihovna uvnitř frontendové aplikace se starým stackem (Java 8, `javax.*`), nová aplikace používá
+Jakarta EE. Kontejnerizace oddělení provozně usnadní, sama ho ale nezajistí: backend potřebuje síťové rozhraní,
+které dnes nemá.
+
+Klíčové jsou transakce. Ve stávajícím kódu je otevírá frontend a v jedné transakci volá několik backendových
+služeb (8 tříd). Přes síť transakce nejde, proto se tyto operace nepřenášejí do nového frontendu, ale zůstávají
+na straně backendu jako **jedna operace API** s původní hranicí transakce. Atomičnost ověříme testem s vyvolanou
+chybou uprostřed operace. Rozsah API a způsob napojení potvrdíme nad zdrojovými kódy backendu.
 
 ### 12. Zůstanou oprávnění operátorů stejná?
 Ano. Zůstávají stejná privilegia a stejná pravidla. V nové aplikaci je oprávnění deklarováno přímo u stránky
@@ -108,7 +113,8 @@ aplikaci, (b) její e2e scénáře jsou zelené na staré i nové aplikaci a (c)
 Každý krok plánu má výstup, který lze předvést.
 
 ### 18. Kde vidíte největší rizika?
-1. Napojení backendu ve stejném JVM (otázka 11).
+1. Napojení backendu, který dnes běží ve stejném procesu, včetně transakcí obepínajících několik backendových
+   volání (otázka 11).
 2. Vlastní navigace uvnitř velkých oblastí: dashboard a objednávky vybírají stránku parametrem, ne adresou
    (~970 JSP). Musí se převést na běžné URL; v plánu je to samostatný krok s vlastními e2e scénáři.
 3. Skryté závislosti na Liferay ve vlastních tazích (~16 000 použití). Řeší je tagy se stejným rozhraním.
@@ -134,6 +140,7 @@ AI nástroje používáme jako pomoc při přenosu kódu, ne jako náhradu ově�
 | Bod | Stav | Kdy se rozhodne |
 |---|---|---|
 | Napojení backendu (`javax` → `jakarta`, oddělení za rozhraní) | analýza čeká na zdrojové kódy backendu | před pilotem |
+| Transakce nad více backendovými voláními | hranice ve frontendu zmapovány (8 tříd); propagace a JTA/XA v backendu neověřeny | před pilotem |
 | Provoz na JBoss | technicky možné, neověřeno | pilot |
 | Výkon proti staré aplikaci | neměřeno | pilot (zátěžový test) |
 | Deeplinky a odkazy „zpět“, překlady z CMS | v plánu jako průřezová témata (krok 7) | po druhé oblasti |
