@@ -79,6 +79,23 @@ Uživatel přechod mezi starou a novou částí nerozpozná.
 
 ---
 
+# Úpravy stávající aplikace
+
+Malé, předem známé a **přidávající**: nemění chování, nasazují se před přepnutím prvního modulu.
+
+| Část | Úprava |
+|---|---|
+| Stávající frontend | session fasáda zapisuje i do sdílené session, čtení podle přepínače |
+| Stávající frontend | kontrola vlastníka session při změně operátora |
+| Stávající frontend | zneplatnění dat v session po změně v nové aplikaci |
+| Backend | nové API nad stávajícími službami včetně transakčních operací; stávající použití beze změny |
+| Infrastruktura | nginx před aplikací |
+
+Úpravy ověří tytéž automatické testy jako novou aplikaci.
+Upgrade backendu na nový stack na místě nedoporučujeme: vylučuje postupnou migraci.
+
+---
+
 # Ověření shodného chování
 
 Charakterizační e2e testy: zapisují se a ověřují na staré aplikaci, beze změny musí projít na nové.
@@ -163,6 +180,7 @@ Následující oblasti pilot zatím neověřil:
 - klíčoví uživatelé pro definici scénářů jednotlivých modulů
 - rozhodnutí o cílovém provozu (samostatný proces vs. JBoss)
 - potvrzení, že se bezpečnostní model během migrace nemění
+- zařazení úprav stávající aplikace a backendu do standardního release procesu
 
 ---
 
