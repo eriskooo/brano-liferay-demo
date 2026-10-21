@@ -7,7 +7,7 @@ Znalostní báze tohoto repa (struktura projektu + pasti a koncepty z [`poznamky
 **graf** v Neo4j. Místo čtení a grepování textu se ptáš dotazem a odpověď vidíš jako obrázek: co s čím souvisí,
 co na čem závisí, na co si dát pozor, když něco měníš.
 
-Jak graf vzniká a jak do něj přidat poznatek: [GENEROVANI.md](GENEROVANI.md).
+Jak graf vzniká a jak do něj přidat poznatek: generátor v [`extractor/`](extractor/README.md) (vlastní Maven projekt a návod).
 
 ## Spuštění
 
@@ -134,4 +134,4 @@ RETURN n.id, n.title, count(r) AS odkazu ORDER BY odkazu DESC LIMIT 5
 ## Graf je jen kopie
 
 Databáze se při každém `kb.sh load` smaže a naplní znovu ze souborů v repu. Co upravíš přímo v Browseru, další load
-zahodí – trvalé změny patří do zdrojových souborů, viz [GENEROVANI.md](GENEROVANI.md).
+zahodí – trvalé změny patří do zdrojových souborů, viz [`extractor/README.md`](extractor/README.md).
