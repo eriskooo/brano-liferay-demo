@@ -18,6 +18,7 @@ Output layout (outside `input/`):
 - `legacy/`, `sso-mock/`, `docker/` – the runnable "before" app on Liferay 6.2 (sub-project 1, done; see `legacy/README.md`).
 - `crm-web/` – the migrated Spring Boot "after" app (sub-project 2, done; see `crm-web/README.md`, `docs/MIGRACIA.md`).
 - `crm-web-rs/` – Rust (axum + askama) copy of crm-web under `/crm-rs` (sub-project 3; see `crm-web-rs/README.md`, `docs/RUST.md`).
+- `kb-graph/` – knowledge base in Neo4j: structure extracted from code + lessons, saved Cypher queries (bonus outside the migration project; see `kb-graph/README.md`).
 
 Docs and notes (`README.md` files, `docs/*.md`, `poznamky/`) are written in **Czech**, like the source materials.
 Exception: `docs/superpowers/` (specs and plans) stay in Slovak as historical records.
@@ -36,6 +37,12 @@ Exception: `docs/superpowers/` (specs and plans) stay in Slovak as historical re
      suite `e2e/` written on legacy, green on both apps (UI + DB + audit log). Introduced shared Postgres for the
      blacklist (legacy Spring JDBC DAO per table like the original, crm-web JPA/Hibernate), audit log contract,
      file logs. Decisions and pitfalls are summarized in `poznamky/12-*` §5–6.
+  5. Bonus, NOT part of the migration project: knowledge base in a graph (Neo4j learning demo, 2026-10-21) – spec + plan `docs/superpowers/*/2026-10-21-kb-graph-neo4j*`.
+     `kb-graph/`: Java extractor generates the repo structure from code (POM, compose, nginx, portlet.xml, endpoints,
+     DDL, `poznamky/*.md`) into `graph/structure.json`; hand-written lessons in `lessons/*.json` (every pitfall of
+     `poznamky/07` + concept map `05`) anchored to structure nodes; `load` validates anchors, wipes and refills Neo4j
+     (disposable DB); 11 saved queries → generated Browser guide. Adding a pitfall to `poznamky/07` requires a lesson
+     in `kb-graph/lessons/pitfalls.json` (test `RealLessonsTest` fails otherwise).
 - Next (user request 2026-10-16): rewrite root `README.md` as a project-lead showcase of the migration – step-by-step
   migration plan (current step: e2e safety net), strategy, estimates, technology presentation.
 - Git: the user allows commits only when they explicitly ask; never push.
@@ -94,6 +101,10 @@ Prereqs: Docker Desktop (~3 GB RAM for Liferay), JDK 21, Maven 3.9, Git Bash. Ev
 - Load test Java vs Rust: `bash docker/bench.sh` (needs only `docker compose up -d redis sso-mock crm-web crm-web-rs`;
   oha in Docker, results in `docs/BENCHMARK.md`).
 - Shared session: `bash docker/show-session.sh`, `bash docker/session-flag.sh PORTLET|REDIS`.
+- Knowledge graph (independent of the stack): `bash kb-graph/kb.sh up|load|check|guide|down` (Neo4j Browser :7474,
+  `neo4j`/`kbdemo123`, guide server :7475); tests `mvn -q -B -f kb-graph/extractor/pom.xml verify` (needs Docker).
+  After changing compose/nginx/POM/controllers/DDL/`poznamky` run `kb.sh extract` so `structure.json` stays current
+  (`kb.sh check` → exit 1 when stale).
 - Legacy modules compile with `--release 8` – Java 8 API only (no records, `var`, `List.of`, `isBlank`, `toList()`).
 
 ## "After" app architecture and conventions

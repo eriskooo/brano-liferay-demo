@@ -1,0 +1,138 @@
+<article class="guide">
+<carousel class="deck container-fluid">
+<h4>Znalostní báze v grafu</h4>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Znalostní báze projektu v grafu</h3>
+    <p>Graf má dvě vrstvy: <b>strukturu</b> vygenerovanou z kódu (moduly, služby, trasy nginx, portlety,
+    endpointy, tabulky, poznámky) a ručně psané <b>lekce</b> (pasti z poznamky/07, koncepty z poznamky/05)
+    ukotvené na strukturu.</p>
+    <p>Na každém dalším slajdu je blok s dotazem: tlačítko <b>Execute in Query tab</b> (▶) ho rovnou
+    spustí, <b>Edit in Cypher editor</b> ho jen vloží do editoru. Výsledek uvidíš jako graf; záložkami
+    Graph / Table / Raw nad výsledkem ho zobrazíš i jako tabulku.</p>
+    <p>Uzel (kroužek) má <b>label</b> (barva) a vlastnosti; vztah (šipka) má <b>typ</b> a směr.</p>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>1. Jeden uzel a jeho sousedé</h3>
+    <p>Začni u služby Redis: kdo na ni míří a kam míří ona. Uvidíš uzly různých labelů (Service, Lesson, Concept) a šipky s typem vztahu – závislosti z docker-compose i lekce, které jsou na Redis ukotvené.</p>
+    <p><em>Cypher: MATCH, uzel s labelem a vlastností, vztah bez směru</em></p>
+    <pre class="pre-scrollable code runnable">MATCH (n:Service {id: 'redis'})-[r]-(m)
+RETURN n, r, m</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>2. Topologie běhu</h3>
+    <p>Všechny služby z docker/docker-compose.yml a jejich depends_on. Graf vznikl z kódu – kdo změní compose, po dalším load uvidí změnu tady, aniž by cokoli psal ručně.</p>
+    <p><em>Cypher: filtrování podle labelu a typu vztahu, směr šipky</em></p>
+    <pre class="pre-scrollable code runnable">MATCH (a:Service)-[r:DEPENDS_ON]-&gt;(b:Service)
+RETURN a, r, b</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>3. Cesta požadavku od nginx po tabulku</h3>
+    <p>Strangler v jednom obrázku: nginx posílá /crm/ do nové aplikace a vše ostatní (/*) do Liferay, obě aplikace sahají do stejných tabulek sdílené databáze.</p>
+    <p><em>Cypher: cesta (path) jako proměnná p, řetězení vzorů</em></p>
+    <pre class="pre-scrollable code runnable">MATCH p = (:Service {id: 'nginx'})-[:ROUTES]-&gt;(:Route)-[:PROXIES_TO]-&gt;(:Service)
+          -[:DEPENDS_ON]-&gt;(:Service {id: 'postgres'})-[:OWNS]-&gt;(:Table)
+RETURN p</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>4. Co spadne, když spadne Redis?</h3>
+    <p>Hvězdička znamená „přes libovolný počet kroků“. Dotaz najde i nepřímé závislé – nginx na Redis sám nezávisí, ale závisí na crm-web, který ano. Grep tohle neodpoví jedním příkazem.</p>
+    <p><em>Cypher: proměnná délka cesty *, tranzitivní závislosti</em></p>
+    <pre class="pre-scrollable code runnable">MATCH p = (s:Service)-[:DEPENDS_ON*]-&gt;(:Service {id: 'redis'})
+RETURN p</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>5. Co přebuildovat po změně modulu</h3>
+    <p>Obdoba dotazu z článku: po změně sso-portal-api je třeba přebuildovat všechny moduly, které na něm závisejí přímo i nepřímo. Hrany DEPENDS_ON vznikly z pom.xml.</p>
+    <p><em>Cypher: proměnná délka cesty nad moduly Maven</em></p>
+    <pre class="pre-scrollable code runnable">MATCH p = (m:Module)-[:DEPENDS_ON*]-&gt;(:Module {id: 'sso-portal-api'})
+RETURN p</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>6. Pasti k tématu session a kam míří</h3>
+    <p>Ručně psané lekce (Lesson) visí na tématu (Topic) a jsou ukotvené na strukturu z kódu. OPTIONAL MATCH vrátí i lekce bez kotvy – ty se týkají jen původního projektu.</p>
+    <p><em>Cypher: OPTIONAL MATCH, propojení dvou vrstev grafu</em></p>
+    <pre class="pre-scrollable code runnable">MATCH (t:Topic {id: 'session'})&lt;-[:ABOUT]-(l:Lesson)
+OPTIONAL MATCH (l)-[a:ANCHORED_TO]-&gt;(x)
+RETURN t, l, a, x</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>7. Na co si dát pozor, když měním crm-web</h3>
+    <p>Lekce ukotvené na modul crm-web, jeho endpointy, jejich soubory nebo službu, která se z něj builduje. To je otázka, kterou si klade agent před úpravou souboru: „co bych měl vědět o tom, na co sahám?“</p>
+    <p><em>Cypher: WHERE se vzorem, výsledek jako tabulka</em></p>
+    <pre class="pre-scrollable code runnable">MATCH (m:Module {id: 'crm-web'}), (l:Lesson)-[:ANCHORED_TO]-&gt;(x)
+WHERE x = m
+   OR (m)-[:DECLARES]-&gt;(x)
+   OR (m)-[:DECLARES]-&gt;(:Endpoint)-[:DEFINED_IN]-&gt;(x)
+   OR (x)-[:BUILT_FROM]-&gt;(m)
+RETURN DISTINCT l.id AS lekce, l.title AS nazev, labels(x)[0] AS kotva, x.id AS na
+ORDER BY lekce</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>8. Legacy koncept → náhrada a kde je vidět</h3>
+    <p>Mapa konceptů z poznamky/05 jako graf: koncept Liferay (side legacy) vede přes REPLACED_BY na náhradu ve Spring Boot a SEEN_IN ukazuje, kde se v demu vyskytuje před a po migraci.</p>
+    <p><em>Cypher: více OPTIONAL MATCH, vlastnost v podmínce</em></p>
+    <pre class="pre-scrollable code runnable">MATCH (c:Concept {side: 'legacy'})-[r:REPLACED_BY]-&gt;(t:Concept)
+OPTIONAL MATCH (c)-[s1:SEEN_IN]-&gt;(pred)
+OPTIONAL MATCH (t)-[s2:SEEN_IN]-&gt;(po)
+RETURN c, r, t, s1, pred, s2, po</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>9. Legacy koncepty, které demo neukazuje</h3>
+    <p>Koncepty bez hrany SEEN_IN – demo je nepokrývá, na reálném projektu je třeba je ověřit zvlášť.</p>
+    <p><em>Cypher: negace vzoru WHERE NOT</em></p>
+    <pre class="pre-scrollable code runnable">MATCH (c:Concept {side: 'legacy'})
+WHERE NOT (c)-[:SEEN_IN]-&gt;()
+RETURN c.name AS koncept, c.description AS popis
+ORDER BY koncept</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>10. Nejprovázanější poznámky</h3>
+    <p>Kolik lekcí a odkazů míří na každou poznámku z poznamky/. Kde začít číst, když přicházíš na projekt.</p>
+    <p><em>Cypher: agregace count, ORDER BY, LIMIT</em></p>
+    <pre class="pre-scrollable code runnable">MATCH (n:Note)
+OPTIONAL MATCH (n)&lt;-[r:DESCRIBED_IN|LINKS_TO]-()
+RETURN n.id AS poznamka, n.title AS nazev, count(r) AS odkazu
+ORDER BY odkazu DESC, poznamka
+LIMIT 5</pre>
+  </div>
+</slide>
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>11. Srovnání se SQL</h3>
+    <p>Otázka z dotazu 4 jako tabulka jmen. V relační databázi by hrany byly tabulka depends_on(source, target) a tranzitivní uzávěr by potřeboval rekurzivní CTE – v Cypheru stačí hvězdička.</p>
+    <p><em>Cypher: proč graf – stejná otázka v Cypheru a v SQL</em></p>
+    <pre class="pre-scrollable code runnable">MATCH (s:Service)-[:DEPENDS_ON*]-&gt;(:Service {id: 'redis'})
+RETURN DISTINCT s.id AS sluzba
+ORDER BY sluzba</pre>
+    <p>Totéž v SQL (jen pro srovnání, nespouští se):</p>
+    <pre class="pre-scrollable code">WITH RECURSIVE dependants(id) AS (
+    SELECT source FROM depends_on WHERE target = 'redis'
+  UNION
+    SELECT d.source FROM depends_on d JOIN dependants x ON d.target = x.id
+)
+SELECT id FROM dependants ORDER BY id;</pre>
+  </div>
+</slide>
+</carousel>
+</article>

@@ -18,6 +18,7 @@ lokálního, git-ignorovaného souboru `LOCAL-aliasy.md`, který se přenáší 
 | [10-liferay62-v-dockeri.md](10-liferay62-v-dockeri.md) | jak rozběhnout Liferay 6.2 lokálně (Java 8 ≤ 255, HSQL, deploy, oprávnění hosta, nginx) |
 | [11-appka-v-inom-jazyku.md](11-appka-v-inom-jazyku.md) | kontrakt pro další aplikaci v jiném jazyce za stranglerem (identita, Redis session, cookies) – ověřeno Rust kopií |
 | [12-charakterizacni-e2e-testy.md](12-charakterizacni-e2e-testy.md) | charakterizační e2e testy (UI + DB + log) napsané na legacy jako akceptační kritérium migrace; co se mění při přenosu, pasti |
+| [../kb-graph/README.md](../kb-graph/README.md) | znalostní báze v grafu (Neo4j): struktura repa z kódu + pasti a koncepty jako lekce, uložené dotazy, jak přidat poznatek |
 
 Doporučené pořadí na reálném projektu: 00 → 01 → 03 → 05 → 06 → 12 → 07 (→ 04, pokud se navazuje na PoC).
 Detailní analýza s odkazy na soubory: [`../docs/ANALYZA.md`](../docs/ANALYZA.md).

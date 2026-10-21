@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.fx</groupId>
+    <artifactId>fx-parent</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+    <dependencyManagement>
+        <dependencies>
+            <dependency><groupId>org.example</groupId><artifactId>managed</artifactId><version>9</version></dependency>
+        </dependencies>
+    </dependencyManagement>
+    <build>
+        <plugins>
+            <plugin><groupId>org.example</groupId><artifactId>some-plugin</artifactId>
+                <dependencies><dependency><groupId>org.example</groupId><artifactId>plugin-dep</artifactId></dependency></dependencies>
+            </plugin>
+        </plugins>
+    </build>
+</project>

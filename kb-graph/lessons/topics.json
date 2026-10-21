@@ -1,0 +1,16 @@
+[
+  {"id": "session", "title": "Session a sdílený stav"},
+  {"id": "redis", "title": "Sdílená session v Redis"},
+  {"id": "cookies", "title": "Cookies za jednou adresou"},
+  {"id": "url-routing", "title": "URL, routování a strangler"},
+  {"id": "security", "title": "Identita, oprávnění a tajemství"},
+  {"id": "jsp-tags", "title": "JSP a vlastní tagy"},
+  {"id": "mvc-phases", "title": "Fáze portletu vs. Spring MVC"},
+  {"id": "transactions", "title": "Transakce a hranice backendu"},
+  {"id": "liferay-runtime", "title": "Běh Liferay 6.2"},
+  {"id": "db", "title": "Sdílená databáze"},
+  {"id": "testing", "title": "Testování a měření pokroku"},
+  {"id": "java-platform", "title": "Java, Jakarta a Spring Boot"},
+  {"id": "tooling", "title": "Nástroje a prostředí vývojáře"},
+  {"id": "target-runtime", "title": "Cílový runtime nové aplikace"}
+]

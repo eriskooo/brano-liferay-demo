@@ -23,6 +23,7 @@ identita, session a databáze, nginx jako jediný vstup a e2e testy, které drž
 | **Postgres** | sdílená DB blacklistu (schéma `blacklist`) – stará aplikace přes JDBC, nová přes JPA | :5433 |
 | **e2e** – [`e2e/`](e2e/README.md) | charakterizační testy (Chrome): UI + DB + audit log, stejná sada na obě aplikace | `bash docker/e2e.sh` |
 | *bonus* **crm-web-rs** – [`crm-web-rs/`](crm-web-rs/README.md) | tentýž blacklist v Rustu: kontrakt identity a session nezávisí na jazyku | `/crm-rs/…` |
+| *bonus* **kb-graph** – [`kb-graph/`](kb-graph/README.md) | mimo projekt migrace: učební demo Neo4j – znalostní báze v grafu (struktura repa z kódu + pasti z `poznamky/` jako lekce), klikací guide | http://localhost:7474 |
 
 ## Strategie
 
@@ -133,6 +134,9 @@ bash docker/smoke-migration.sh      # souběh obou aplikací         → MIGRATI
 bash docker/e2e.sh all              # charakterizační e2e testy    → E2E OK
 ```
 
+Znalostní báze v grafu (samostatně, nepotřebuje běžící stack): `bash kb-graph/kb.sh up && bash kb-graph/kb.sh load`,
+pak http://localhost:7474 – podrobnosti v [`kb-graph/README.md`](kb-graph/README.md).
+
 Testy modulů: `mvn -q -B -f legacy/pom.xml verify`, `mvn -q -B -f crm-web/pom.xml verify` (potřebují Docker –
 Testcontainers), `mvn -q -B -f sso-mock/pom.xml verify`. Proklikání souběhu: [`crm-web/README.md`](crm-web/README.md).
 
@@ -147,6 +151,7 @@ docker/      compose (nginx, Liferay, crm-web, SSO, Redis, Postgres), skripty bu
 docs/        analýza, migrace před → po, benchmark, prezentace; docs/superpowers = specifikace a plány kroků
 poznamky/    přenositelná znalostní báze pro reálný projekt
 crm-web-rs/  bonus: Rust kopie nové aplikace (volitelná, mimo plán migrace)
+kb-graph/    bonus mimo migraci: učební demo Neo4j – znalostní báze v grafu, extraktor z kódu, uložené dotazy
 input/       klientské podklady – git-ignorované, read-only, nejsou součástí repa
 ```
 

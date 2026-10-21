@@ -1,0 +1,308 @@
+[
+  {
+    "id": "pitfall-01",
+    "title": "Ztracený form objekt v modelu",
+    "text": "Metody @ModelAttribute na úrovni portletového controlleru se při slučování do webového controlleru snadno ztratí a formulář pak spadne na chybějícím objektu. U každého controlleru je vypsat a ověřit.",
+    "topics": ["mvc-phases", "jsp-tags"],
+    "anchors": [
+      {"label": "Portlet", "id": "blacklist"},
+      {"label": "File", "id": "crm-web/src/main/java/com/example/crm/blacklist/BlacklistSearchController.java"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-02",
+    "title": "Action → render",
+    "text": "Portletová action nic nevrací a render následuje automaticky. V servletu je nutné explicitní POST → redirect → GET.",
+    "topics": ["mvc-phases"],
+    "anchors": [
+      {"label": "Endpoint", "id": "POST /crm/blacklist/searchAction"},
+      {"label": "Endpoint", "id": "POST /crm/blacklist/createAction"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-03",
+    "title": "Skrytá závislost na Liferay v tazích",
+    "text": "JSP vypadá čistě, ale tag handler uvnitř pracuje s Liferay URL. Závislosti hledat i ve třídách tagů, nejen v JSP.",
+    "topics": ["jsp-tags"],
+    "anchors": [{"label": "Module", "id": "frontend-base-customization"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-04",
+    "title": "Kompatibilní tagy, které nic nedělají",
+    "text": "No-op náhrada tagu stránku vykreslí, ale funkce potichu zmizí. Každý takový tag patří do seznamu technického dluhu.",
+    "topics": ["jsp-tags", "testing"],
+    "anchors": [{"label": "Module", "id": "crm-web"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-05",
+    "title": "Dispatch podle parametru",
+    "text": "Část obrazovek nevybírá controller podle URL, ale podle parametru stránky. Při migraci je třeba to rozložit na skutečné URL.",
+    "topics": ["url-routing", "mvc-phases"],
+    "anchors": [{"label": "Portlet", "id": "dashboard"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-06",
+    "title": "Session je sdílená se SSO portálem",
+    "text": "Identitu a kontext zákazníka drží externí portál, ne Liferay. Bez něj aplikace neví, kdo je přihlášený – je to architektonický, ne přepisovací problém.",
+    "topics": ["session", "security"],
+    "anchors": [
+      {"label": "Service", "id": "sso-mock"},
+      {"label": "Module", "id": "sso-portal-api"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-07",
+    "title": "Backend in-process",
+    "text": "Frontend importuje backendové Spring kontexty, takže s sebou táhne starý classpath. Moderní Spring Boot to bez oddělení backendu nedovolí.",
+    "topics": ["java-platform", "transactions", "target-runtime"],
+    "anchors": [{"label": "Module", "id": "customercare-portlets"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-08",
+    "title": "javax → jakarta",
+    "text": "Spring Boot 3+ stojí na Jakarta EE. Tagy, validátory i servlet API je nutné přepsat na balíky jakarta.*.",
+    "topics": ["java-platform"],
+    "anchors": [
+      {"label": "Module", "id": "crm-web"},
+      {"label": "Module", "id": "customercare-portlets"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-09",
+    "title": "Měření pokroku",
+    "text": "Procento převedených JSP neříká nic o funkčnosti. Pokrok měřit end-to-end scénáři.",
+    "topics": ["testing"],
+    "anchors": [{"label": "Module", "id": "crm-e2e"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-10",
+    "title": "Interní URL a tajemství v kódu",
+    "text": "Zdrojáky původního projektu obsahují interní adresy a hesla. Cokoli kopírovaného ven musí projít sanitizací.",
+    "topics": ["security"],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-11",
+    "title": "Java 8 update > 255 shodí Liferay 6.2",
+    "text": "Stará knihovna ICU v portálu nepřečte novější formát verze Javy. Pro Liferay držet Javu 8 do updatu 255.",
+    "topics": ["liferay-runtime", "java-platform"],
+    "anchors": [{"label": "Service", "id": "liferay"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-12",
+    "title": "Kolize JSESSIONID za jednou adresou",
+    "text": "Aplikace za stejným hostem sdílejí cookies bez ohledu na port. Druhá aplikace potřebuje vlastní název session cookie.",
+    "topics": ["cookies", "session"],
+    "anchors": [
+      {"label": "Service", "id": "nginx"},
+      {"label": "Route", "id": "/crm/"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-13",
+    "title": "Render fáze neumí přesměrovat ani nastavit cookie",
+    "text": "V render fázi portletu jde jen vykreslit odkaz. Klíčem sdílené session je proto cookie SSO, kterou už mají obě aplikace.",
+    "topics": ["mvc-phases", "cookies"],
+    "anchors": [
+      {"label": "Portlet", "id": "blacklist"},
+      {"label": "Service", "id": "sso-mock"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-14",
+    "title": "Host a oprávnění portletů",
+    "text": "Identitu drží SSO, Liferay vidí hosta. Každý portlet proto potřebuje oprávnění VIEW pro hosta.",
+    "topics": ["liferay-runtime", "security"],
+    "anchors": [
+      {"label": "Service", "id": "liferay"},
+      {"label": "Portlet", "id": "blacklist"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-15",
+    "title": "Implicitní model mezi action a render",
+    "text": "Portletové MVC přenáší model včetně validačních chyb z action do renderu přes session. V servlet MVC se chyby vykreslí přímo nebo přes flash atributy.",
+    "topics": ["mvc-phases"],
+    "anchors": [{"label": "Endpoint", "id": "POST /crm/blacklist/createAction"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-16",
+    "title": "Liferay přejmenuje kontext WAR",
+    "text": "Liferay odvozuje ID portletů ze skutečného kontextu WAR, který se liší od názvu artefaktu. Kdo skládá ID ručně, musí použít skutečný kontext.",
+    "topics": ["liferay-runtime"],
+    "anchors": [
+      {"label": "Module", "id": "customercare-portlets"},
+      {"label": "Service", "id": "liferay"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-17",
+    "title": "Dvojité escapování URL ve formulářích",
+    "text": "Spring form tagy escapují atributy samy. URL z tagu, který už escapuje, se rozbije – brát ji neescapovanou.",
+    "topics": ["jsp-tags"],
+    "anchors": [{"label": "Module", "id": "crm-web"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-18",
+    "title": "Oprávnění z hooku při prvním deployi",
+    "text": "Hook běží dřív, než se zaregistrují portlety téhož WAR, takže nastavení jejich oprávnění selže. Na explicitní oprávnění se při prvním startu nespoléhat.",
+    "topics": ["liferay-runtime", "security"],
+    "anchors": [
+      {"label": "Service", "id": "liferay"},
+      {"label": "Module", "id": "customercare-portlets"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-19",
+    "title": "Flag zdroje čtení při souběhu",
+    "text": "Dokud stará aplikace čte session z portletu, nevidí, co zapsala nová. Flag přepnout na Redis nejpozději s první zmigrovanou stránkou.",
+    "topics": ["session", "redis"],
+    "anchors": [{"label": "Service", "id": "redis"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-20",
+    "title": "JSON kontrakt mezi Java 8 a Java 21",
+    "text": "Sdílená data jsou jednoduchá DTO v JSON. Nová aplikace musí ignorovat neznámá pole a snést null.",
+    "topics": ["session", "redis", "java-platform"],
+    "anchors": [
+      {"label": "Service", "id": "redis"},
+      {"label": "Module", "id": "crm-web"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-21",
+    "title": "Session cookie nové aplikace",
+    "text": "Nová aplikace za stejným hostem musí mít jiný název i cestu session cookie, jinak přepíše session portálu.",
+    "topics": ["cookies"],
+    "anchors": [
+      {"label": "Route", "id": "/crm/"},
+      {"label": "Service", "id": "crm-web"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-22",
+    "title": "Liferay session přežije změnu operátora",
+    "text": "Bez kontroly vlastníka session vidí nově přihlášený operátor stav předchozího.",
+    "topics": ["session", "security"],
+    "anchors": [
+      {"label": "Service", "id": "sso-mock"},
+      {"label": "Service", "id": "liferay"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-23",
+    "title": "Escapování HTML bez kódování",
+    "text": "Escapování bez určení kódování mění diakritiku na entity. Používat variantu s UTF-8.",
+    "topics": ["jsp-tags"],
+    "anchors": [{"label": "Module", "id": "crm-web"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-24",
+    "title": "Spring Boot 4 je rozdělený na moduly",
+    "text": "Část tříd existuje jen s konkrétním starterem. Kód se zkompiluje, chyba se ukáže až při startu kontextu.",
+    "topics": ["java-platform"],
+    "anchors": [{"label": "Module", "id": "crm-web"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-25",
+    "title": "Částečné bindování @SessionAttributes",
+    "text": "Pole, které request nepošle, zůstane v session z minulého formuláře. Ruční testy musí posílat všechna pole jako prohlížeč.",
+    "topics": ["session", "mvc-phases"],
+    "anchors": [
+      {"label": "Endpoint", "id": "POST /crm/blacklist/searchAction"},
+      {"label": "File", "id": "crm-web/src/main/java/com/example/crm/blacklist/BlacklistSearchController.java"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-26",
+    "title": "Absolutní přesměrování za proxy",
+    "text": "nginx za proxy s jiným portem skládá přesměrování s interním portem. Pomůže relativní přesměrování.",
+    "topics": ["url-routing"],
+    "anchors": [
+      {"label": "Route", "id": "/web/crm/blacklist"},
+      {"label": "Service", "id": "nginx"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-27",
+    "title": "Transakce otevřená frontendem",
+    "text": "Frontendové managery obepínají několik backendových volání jednou transakcí. Po oddělení backendu je třeba tuto hranici přesunout k backendu jako jednu API operaci.",
+    "topics": ["transactions", "db"],
+    "anchors": [
+      {"label": "Table", "id": "blacklist.blacklist_record"},
+      {"label": "Module", "id": "customercare-portlets"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-28",
+    "title": "Dispatch dashboardu je byznys logika",
+    "text": "Výběr obrazovky dashboardu závisí na kontextu zákazníka a mění stav objednávek. Rozhodovací funkci přenést 1:1 a pokrýt tabulkovým testem.",
+    "topics": ["url-routing", "mvc-phases"],
+    "anchors": [{"label": "Portlet", "id": "dashboard"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-29",
+    "title": "Core knihovna dodavatele je portletová",
+    "text": "Base controller, session manager a page-flow dědí z externí knihovny plné portletového API. V nové aplikaci je to další kód k náhradě.",
+    "topics": ["target-runtime", "java-platform"],
+    "anchors": [{"label": "Module", "id": "frontend-base-customization"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-30",
+    "title": "Spring Boot 4 a JBoss",
+    "text": "Boot 4 vyžaduje novější servlet API a nepodporuje web vrstvu JBoss. Nová aplikace proto běží jako samostatný proces.",
+    "topics": ["target-runtime", "java-platform"],
+    "anchors": [
+      {"label": "Module", "id": "crm-web"},
+      {"label": "Service", "id": "liferay"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-31",
+    "title": "Servlet ve WARu portletů sdílí session",
+    "text": "Servlet ve stejném WAR vidí session portletů i Spring kontext. Umožňuje to méně invazivní most pro sdílení session při souběhu.",
+    "topics": ["session", "target-runtime"],
+    "anchors": [
+      {"label": "Module", "id": "customercare-portlets"},
+      {"label": "Service", "id": "redis"}
+    ],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-32",
+    "title": "Git Bash přepisuje absolutní cesty",
+    "text": "Absolutní cesta v argumentu příkazu pro kontejner se v Git Bash přepíše na cestu Windows. Soubor předat přes stdin.",
+    "topics": ["tooling"],
+    "anchors": [{"label": "Service", "id": "postgres"}],
+    "note": "07-pasce.md"
+  }
+]

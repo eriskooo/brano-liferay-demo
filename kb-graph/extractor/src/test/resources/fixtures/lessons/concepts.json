@@ -1,0 +1,17 @@
+[
+  {
+    "id": "action-mapping",
+    "name": "@ActionMapping",
+    "description": "POST bez výstupu, potom render",
+    "side": "legacy",
+    "replacedBy": ["post-mapping-prg"],
+    "seenIn": [{"label": "Portlet", "id": "blacklist"}],
+    "note": "05-mapa-konceptov.md"
+  },
+  {
+    "id": "post-mapping-prg",
+    "name": "@PostMapping + redirect (PRG)",
+    "side": "target",
+    "seenIn": [{"label": "Endpoint", "id": "POST /crm/blacklist/searchAction"}]
+  }
+]

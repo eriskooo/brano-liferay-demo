@@ -1,0 +1,17 @@
+[
+  {
+    "id": "pitfall-02",
+    "title": "Action → render",
+    "text": "Po POST musí přijít redirect.",
+    "topics": ["mvc-phases"],
+    "anchors": [{"label": "Endpoint", "id": "POST /crm/blacklist/searchAction"}],
+    "note": "07-pasce.md"
+  },
+  {
+    "id": "pitfall-10",
+    "title": "Tajemství v kódu",
+    "text": "Bez obdoby v demu.",
+    "topics": ["session"],
+    "note": "07-pasce.md"
+  }
+]

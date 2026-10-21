@@ -1,0 +1,2094 @@
+{
+  "nodes" : [
+    {
+      "label" : "Endpoint",
+      "id" : "GET /crm/",
+      "props" : {
+        "controller" : "HomeController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "GET /crm/blacklist",
+      "props" : {
+        "controller" : "HomeController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "GET /crm/blacklist/create",
+      "props" : {
+        "controller" : "BlacklistCreateController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "GET /crm/blacklist/detail",
+      "props" : {
+        "controller" : "BlacklistDetailController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "GET /crm/blacklist/newSearch",
+      "props" : {
+        "controller" : "BlacklistSearchController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "GET /crm/blacklist/resource/refreshCreateConditionTypes",
+      "props" : {
+        "controller" : "BlacklistCreateController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "GET /crm/blacklist/search",
+      "props" : {
+        "controller" : "BlacklistSearchController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "GET /crm/blacklist/searchresult",
+      "props" : {
+        "controller" : "BlacklistSearchController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "POST /crm/blacklist/addNoteAction",
+      "props" : {
+        "controller" : "BlacklistDetailController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "POST /crm/blacklist/changeAction",
+      "props" : {
+        "controller" : "BlacklistDetailController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "POST /crm/blacklist/createAction",
+      "props" : {
+        "controller" : "BlacklistCreateController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "POST /crm/blacklist/resource/removeIdentAction",
+      "props" : {
+        "controller" : "BlacklistDetailController"
+      }
+    },
+    {
+      "label" : "Endpoint",
+      "id" : "POST /crm/blacklist/searchAction",
+      "props" : {
+        "controller" : "BlacklistSearchController"
+      }
+    },
+    {
+      "label" : "File",
+      "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistCreateController.java",
+      "props" : { }
+    },
+    {
+      "label" : "File",
+      "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistDetailController.java",
+      "props" : { }
+    },
+    {
+      "label" : "File",
+      "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistSearchController.java",
+      "props" : { }
+    },
+    {
+      "label" : "File",
+      "id" : "crm-web/src/main/java/com/example/crm/web/HomeController.java",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "com.fasterxml.jackson.core:jackson-databind",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "com.liferay.portal:portal-service",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "com.microsoft.playwright:playwright",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "javax.portlet:portlet-api",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "javax.servlet.jsp:jsp-api",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "javax.servlet:javax.servlet-api",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "javax.servlet:jstl",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.apache.commons:commons-dbcp2",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.apache.tomcat.embed:tomcat-embed-jasper",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.assertj:assertj-core",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.glassfish.web:jakarta.servlet.jsp.jstl",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.junit.jupiter:junit-jupiter",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.mockito:mockito-core",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.neo4j.driver:neo4j-java-driver",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.postgresql:postgresql",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.slf4j:slf4j-simple",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework.boot:spring-boot-starter-data-jpa",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework.boot:spring-boot-starter-data-redis",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework.boot:spring-boot-starter-restclient",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework.boot:spring-boot-starter-validation",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework.boot:spring-boot-starter-webmvc",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework.boot:spring-boot-starter-webmvc-test",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework:spring-jdbc",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework:spring-test",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.springframework:spring-webmvc-portlet",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.testcontainers:testcontainers",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.testcontainers:testcontainers-junit-jupiter",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.testcontainers:testcontainers-neo4j",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "org.yaml:snakeyaml",
+      "props" : { }
+    },
+    {
+      "label" : "Library",
+      "id" : "redis.clients:jedis",
+      "props" : { }
+    },
+    {
+      "label" : "Module",
+      "id" : "crm-e2e",
+      "props" : {
+        "app" : "e2e",
+        "packaging" : "jar",
+        "path" : "e2e"
+      }
+    },
+    {
+      "label" : "Module",
+      "id" : "crm-web",
+      "props" : {
+        "app" : "crm-web",
+        "packaging" : "war",
+        "path" : "crm-web"
+      }
+    },
+    {
+      "label" : "Module",
+      "id" : "customercare-portlets",
+      "props" : {
+        "app" : "legacy",
+        "packaging" : "war",
+        "path" : "legacy/customercare-portlets"
+      }
+    },
+    {
+      "label" : "Module",
+      "id" : "customercare-theme",
+      "props" : {
+        "app" : "legacy",
+        "packaging" : "war",
+        "path" : "legacy/customercare-theme"
+      }
+    },
+    {
+      "label" : "Module",
+      "id" : "frontend-base-customization",
+      "props" : {
+        "app" : "legacy",
+        "packaging" : "jar",
+        "path" : "legacy/frontend-base-customization"
+      }
+    },
+    {
+      "label" : "Module",
+      "id" : "kb-graph-extractor",
+      "props" : {
+        "app" : "kb-graph",
+        "packaging" : "jar",
+        "path" : "kb-graph/extractor"
+      }
+    },
+    {
+      "label" : "Module",
+      "id" : "legacy-parent",
+      "props" : {
+        "app" : "legacy",
+        "packaging" : "pom",
+        "path" : "legacy"
+      }
+    },
+    {
+      "label" : "Module",
+      "id" : "sso-mock",
+      "props" : {
+        "app" : "sso-mock",
+        "packaging" : "jar",
+        "path" : "sso-mock"
+      }
+    },
+    {
+      "label" : "Module",
+      "id" : "sso-portal-api",
+      "props" : {
+        "app" : "legacy",
+        "packaging" : "jar",
+        "path" : "legacy/sso-portal-api"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "00-konvencie.md",
+      "props" : {
+        "title" : "Konvence poznámek a anonymizace"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "01-zadanie-z-podkladov.md",
+      "props" : {
+        "title" : "Zadání podle podkladů (prezentace + Q&A dokument)"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "02-logy.md",
+      "props" : {
+        "title" : "Co říkají logy (`input/*_war.log`, `input/*_war_error.log`)"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "03-legacy-portlety.md",
+      "props" : {
+        "title" : "Legacy modul `customercare-portlets` – co a jak používá z Liferay"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "04-poc-modul-customercare-web.md",
+      "props" : {
+        "title" : "Předchozí PoC: modul `customercare-web` (Spring MVC bez Liferay)"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "05-mapa-konceptov.md",
+      "props" : {
+        "title" : "Mapa: Liferay / Portlet koncept → čím ho nahradit"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "06-playbook-migracie-portletu.md",
+      "props" : {
+        "title" : "Playbook: jak zmigrovat jeden portlet / jednu obrazovku na reálném projektu"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "07-pasce.md",
+      "props" : {
+        "title" : "Pasti při migraci (zjištěné z kódu a logů)"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "09-session-liferay-vs-spring.md",
+      "props" : {
+        "title" : "Session: Liferay vs. Spring Boot (před → po)"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "10-liferay62-v-dockeri.md",
+      "props" : {
+        "title" : "Liferay 6.2 lokálně v Dockeru (jak rozběhnout „starou“ aplikaci)"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "11-appka-v-inom-jazyku.md",
+      "props" : {
+        "title" : "Další aplikace v jiném jazyce za stranglerem"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "12-charakterizacni-e2e-testy.md",
+      "props" : {
+        "title" : "Charakterizační e2e testy jako záchranná síť migrace"
+      }
+    },
+    {
+      "label" : "Note",
+      "id" : "README.md",
+      "props" : {
+        "title" : "Znalostní báze: migrace legacy CRM z Liferay 6.2"
+      }
+    },
+    {
+      "label" : "Portlet",
+      "id" : "blacklist",
+      "props" : {
+        "class" : "com.example.crm.frontend.base.web.DispatcherPortletCustom"
+      }
+    },
+    {
+      "label" : "Portlet",
+      "id" : "dashboard",
+      "props" : {
+        "class" : "com.example.crm.frontend.base.web.DispatcherPortletCustom"
+      }
+    },
+    {
+      "label" : "Portlet",
+      "id" : "header",
+      "props" : {
+        "class" : "com.example.crm.frontend.base.web.DispatcherPortletCustom"
+      }
+    },
+    {
+      "label" : "Route",
+      "id" : "/",
+      "props" : {
+        "exact" : true,
+        "kind" : "redirect"
+      }
+    },
+    {
+      "label" : "Route",
+      "id" : "/*",
+      "props" : {
+        "kind" : "proxy"
+      }
+    },
+    {
+      "label" : "Route",
+      "id" : "/crm-rs/",
+      "props" : {
+        "kind" : "proxy"
+      }
+    },
+    {
+      "label" : "Route",
+      "id" : "/crm/",
+      "props" : {
+        "kind" : "proxy"
+      }
+    },
+    {
+      "label" : "Route",
+      "id" : "/sso/",
+      "props" : {
+        "kind" : "proxy"
+      }
+    },
+    {
+      "label" : "Route",
+      "id" : "/web/crm/blacklist",
+      "props" : {
+        "kind" : "redirect"
+      }
+    },
+    {
+      "label" : "Service",
+      "id" : "crm-web",
+      "props" : {
+        "build" : "../crm-web",
+        "ports" : "8081:8080"
+      }
+    },
+    {
+      "label" : "Service",
+      "id" : "crm-web-rs",
+      "props" : {
+        "build" : "..",
+        "ports" : "8082:8080",
+        "profile" : "rs"
+      }
+    },
+    {
+      "label" : "Service",
+      "id" : "liferay",
+      "props" : {
+        "build" : "./liferay",
+        "ports" : "8080:8080"
+      }
+    },
+    {
+      "label" : "Service",
+      "id" : "nginx",
+      "props" : {
+        "image" : "nginx:1.27-alpine",
+        "ports" : "8000:80"
+      }
+    },
+    {
+      "label" : "Service",
+      "id" : "postgres",
+      "props" : {
+        "image" : "postgres:16-alpine",
+        "ports" : "5433:5432"
+      }
+    },
+    {
+      "label" : "Service",
+      "id" : "redis",
+      "props" : {
+        "image" : "redis:7.4-alpine",
+        "ports" : "6379:6379"
+      }
+    },
+    {
+      "label" : "Service",
+      "id" : "redisinsight",
+      "props" : {
+        "image" : "redis/redisinsight:3.6.0",
+        "ports" : "5540:5540"
+      }
+    },
+    {
+      "label" : "Service",
+      "id" : "sso-mock",
+      "props" : {
+        "build" : "../sso-mock"
+      }
+    },
+    {
+      "label" : "Table",
+      "id" : "blacklist.blacklist_identifier",
+      "props" : { }
+    },
+    {
+      "label" : "Table",
+      "id" : "blacklist.blacklist_note",
+      "props" : { }
+    },
+    {
+      "label" : "Table",
+      "id" : "blacklist.blacklist_record",
+      "props" : { }
+    }
+  ],
+  "edges" : [
+    {
+      "type" : "BUILT_FROM",
+      "from" : {
+        "label" : "Service",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      }
+    },
+    {
+      "type" : "BUILT_FROM",
+      "from" : {
+        "label" : "Service",
+        "id" : "liferay"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      }
+    },
+    {
+      "type" : "BUILT_FROM",
+      "from" : {
+        "label" : "Service",
+        "id" : "liferay"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "customercare-theme"
+      }
+    },
+    {
+      "type" : "BUILT_FROM",
+      "from" : {
+        "label" : "Service",
+        "id" : "sso-mock"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "sso-mock"
+      }
+    },
+    {
+      "type" : "CHILD_OF",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "legacy-parent"
+      }
+    },
+    {
+      "type" : "CHILD_OF",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-theme"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "legacy-parent"
+      }
+    },
+    {
+      "type" : "CHILD_OF",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "legacy-parent"
+      }
+    },
+    {
+      "type" : "CHILD_OF",
+      "from" : {
+        "label" : "Module",
+        "id" : "sso-portal-api"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "legacy-parent"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/create"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/detail"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/newSearch"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/resource/refreshCreateConditionTypes"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/search"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/searchresult"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/addNoteAction"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/changeAction"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/createAction"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/resource/removeIdentAction"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/searchAction"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Portlet",
+        "id" : "blacklist"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Portlet",
+        "id" : "dashboard"
+      }
+    },
+    {
+      "type" : "DECLARES",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Portlet",
+        "id" : "header"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/web/HomeController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/web/HomeController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/create"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistCreateController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/detail"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistDetailController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/newSearch"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistSearchController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/resource/refreshCreateConditionTypes"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistCreateController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/search"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistSearchController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "GET /crm/blacklist/searchresult"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistSearchController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/addNoteAction"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistDetailController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/changeAction"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistDetailController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/createAction"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistCreateController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/resource/removeIdentAction"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistDetailController.java"
+      }
+    },
+    {
+      "type" : "DEFINED_IN",
+      "from" : {
+        "label" : "Endpoint",
+        "id" : "POST /crm/blacklist/searchAction"
+      },
+      "to" : {
+        "label" : "File",
+        "id" : "crm-web/src/main/java/com/example/crm/blacklist/BlacklistSearchController.java"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-e2e"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "com.microsoft.playwright:playwright"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-e2e"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.assertj:assertj-core"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-e2e"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.junit.jupiter:junit-jupiter"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-e2e"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.postgresql:postgresql"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.apache.tomcat.embed:tomcat-embed-jasper"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.glassfish.web:jakarta.servlet.jsp.jstl"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.postgresql:postgresql"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework.boot:spring-boot-starter-data-jpa"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework.boot:spring-boot-starter-data-redis"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework.boot:spring-boot-starter-restclient"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework.boot:spring-boot-starter-validation"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework.boot:spring-boot-starter-webmvc"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework.boot:spring-boot-starter-webmvc-test"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.testcontainers:testcontainers-junit-jupiter"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "com.fasterxml.jackson.core:jackson-databind"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "com.liferay.portal:portal-service"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "javax.portlet:portlet-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "javax.servlet.jsp:jsp-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "javax.servlet:javax.servlet-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "javax.servlet:jstl"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.apache.commons:commons-dbcp2"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.postgresql:postgresql"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework:spring-jdbc"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework:spring-test"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework:spring-webmvc-portlet"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.testcontainers:testcontainers"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "customercare-portlets"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "sso-portal-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "com.fasterxml.jackson.core:jackson-databind"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "com.liferay.portal:portal-service"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "javax.portlet:portlet-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "javax.servlet.jsp:jsp-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "javax.servlet:javax.servlet-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework:spring-test"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework:spring-webmvc-portlet"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "redis.clients:jedis"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "frontend-base-customization"
+      },
+      "to" : {
+        "label" : "Module",
+        "id" : "sso-portal-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "kb-graph-extractor"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "com.fasterxml.jackson.core:jackson-databind"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "kb-graph-extractor"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.assertj:assertj-core"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "kb-graph-extractor"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.junit.jupiter:junit-jupiter"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "kb-graph-extractor"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.neo4j.driver:neo4j-java-driver"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "kb-graph-extractor"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.slf4j:slf4j-simple"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "kb-graph-extractor"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.testcontainers:testcontainers-junit-jupiter"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "kb-graph-extractor"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.testcontainers:testcontainers-neo4j"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "kb-graph-extractor"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.yaml:snakeyaml"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "legacy-parent"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.assertj:assertj-core"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "legacy-parent"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.junit.jupiter:junit-jupiter"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "legacy-parent"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.mockito:mockito-core"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "sso-mock"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework.boot:spring-boot-starter-webmvc"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "sso-mock"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "org.springframework.boot:spring-boot-starter-webmvc-test"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "sso-portal-api"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "com.fasterxml.jackson.core:jackson-databind"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Module",
+        "id" : "sso-portal-api"
+      },
+      "to" : {
+        "label" : "Library",
+        "id" : "javax.servlet:javax.servlet-api"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "postgres"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "redis"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "crm-web"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "sso-mock"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "crm-web-rs"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "redis"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "crm-web-rs"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "sso-mock"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "liferay"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "postgres"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "liferay"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "redis"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "liferay"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "sso-mock"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "crm-web"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "liferay"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "sso-mock"
+      }
+    },
+    {
+      "type" : "DEPENDS_ON",
+      "from" : {
+        "label" : "Service",
+        "id" : "redisinsight"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "redis"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "01-zadanie-z-podkladov.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "00-konvencie.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "01-zadanie-z-podkladov.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "07-pasce.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "04-poc-modul-customercare-web.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "07-pasce.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "05-mapa-konceptov.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "03-legacy-portlety.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "06-playbook-migracie-portletu.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "07-pasce.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "07-pasce.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "10-liferay62-v-dockeri.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "09-session-liferay-vs-spring.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "00-konvencie.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "09-session-liferay-vs-spring.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "06-playbook-migracie-portletu.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "00-konvencie.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "01-zadanie-z-podkladov.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "02-logy.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "03-legacy-portlety.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "04-poc-modul-customercare-web.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "05-mapa-konceptov.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "06-playbook-migracie-portletu.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "07-pasce.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "09-session-liferay-vs-spring.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "10-liferay62-v-dockeri.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "11-appka-v-inom-jazyku.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "12-charakterizacni-e2e-testy.md"
+      }
+    },
+    {
+      "type" : "OWNS",
+      "from" : {
+        "label" : "Service",
+        "id" : "postgres"
+      },
+      "to" : {
+        "label" : "Table",
+        "id" : "blacklist.blacklist_identifier"
+      }
+    },
+    {
+      "type" : "OWNS",
+      "from" : {
+        "label" : "Service",
+        "id" : "postgres"
+      },
+      "to" : {
+        "label" : "Table",
+        "id" : "blacklist.blacklist_note"
+      }
+    },
+    {
+      "type" : "OWNS",
+      "from" : {
+        "label" : "Service",
+        "id" : "postgres"
+      },
+      "to" : {
+        "label" : "Table",
+        "id" : "blacklist.blacklist_record"
+      }
+    },
+    {
+      "type" : "PROXIES_TO",
+      "from" : {
+        "label" : "Route",
+        "id" : "/*"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "liferay"
+      }
+    },
+    {
+      "type" : "PROXIES_TO",
+      "from" : {
+        "label" : "Route",
+        "id" : "/crm-rs/"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "crm-web-rs"
+      }
+    },
+    {
+      "type" : "PROXIES_TO",
+      "from" : {
+        "label" : "Route",
+        "id" : "/crm/"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "crm-web"
+      }
+    },
+    {
+      "type" : "PROXIES_TO",
+      "from" : {
+        "label" : "Route",
+        "id" : "/sso/"
+      },
+      "to" : {
+        "label" : "Service",
+        "id" : "sso-mock"
+      }
+    },
+    {
+      "type" : "REDIRECTS_TO",
+      "from" : {
+        "label" : "Route",
+        "id" : "/"
+      },
+      "to" : {
+        "label" : "Route",
+        "id" : "/web/crm/blacklist"
+      }
+    },
+    {
+      "type" : "REDIRECTS_TO",
+      "from" : {
+        "label" : "Route",
+        "id" : "/web/crm/blacklist"
+      },
+      "to" : {
+        "label" : "Route",
+        "id" : "/crm/"
+      }
+    },
+    {
+      "type" : "ROUTES",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Route",
+        "id" : "/"
+      }
+    },
+    {
+      "type" : "ROUTES",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Route",
+        "id" : "/*"
+      }
+    },
+    {
+      "type" : "ROUTES",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Route",
+        "id" : "/crm-rs/"
+      }
+    },
+    {
+      "type" : "ROUTES",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Route",
+        "id" : "/crm/"
+      }
+    },
+    {
+      "type" : "ROUTES",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Route",
+        "id" : "/sso/"
+      }
+    },
+    {
+      "type" : "ROUTES",
+      "from" : {
+        "label" : "Service",
+        "id" : "nginx"
+      },
+      "to" : {
+        "label" : "Route",
+        "id" : "/web/crm/blacklist"
+      }
+    }
+  ]
+}

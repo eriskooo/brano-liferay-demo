@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" version="2.0">
+    <portlet>
+        <portlet-name>blacklist</portlet-name>
+        <portlet-class>com.example.DispatcherPortletCustom</portlet-class>
+    </portlet>
+    <portlet>
+        <portlet-name>header</portlet-name>
+        <portlet-class>com.example.HeaderPortlet</portlet-class>
+    </portlet>
+</portlet-app>

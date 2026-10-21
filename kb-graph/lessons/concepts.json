@@ -1,0 +1,109 @@
+[
+  {"id": "portlet", "name": "Portlet (portlet.xml)", "description": "Samostatná aplikace v části stránky", "side": "legacy",
+   "replacedBy": ["controller-group"], "seenIn": [{"label": "Portlet", "id": "blacklist"}], "note": "05-mapa-konceptov.md"},
+  {"id": "controller-group", "name": "Skupina controllerů pod URL prefixem", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "portal-page", "name": "Stránka s více portlety", "description": "Portál skládá stránku z portletů", "side": "legacy",
+   "replacedBy": ["layout-template"], "seenIn": [{"label": "Portlet", "id": "header"}], "note": "05-mapa-konceptov.md"},
+  {"id": "layout-template", "name": "Layout šablona + fragmenty", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "dispatcher-portlet", "name": "DispatcherPortlet", "description": "Spring kontext na portlet", "side": "legacy",
+   "replacedBy": ["dispatcher-servlet"], "seenIn": [{"label": "Module", "id": "customercare-portlets"}], "note": "05-mapa-konceptov.md"},
+  {"id": "dispatcher-servlet", "name": "DispatcherServlet (Spring Boot)", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "render-mapping", "name": "@RenderMapping", "description": "GET vykreslení", "side": "legacy",
+   "replacedBy": ["get-mapping"], "seenIn": [{"label": "Portlet", "id": "blacklist"}], "note": "05-mapa-konceptov.md"},
+  {"id": "get-mapping", "name": "@GetMapping", "side": "target",
+   "seenIn": [{"label": "Endpoint", "id": "GET /crm/blacklist/search"}]},
+
+  {"id": "action-mapping", "name": "@ActionMapping", "description": "POST bez výstupu, potom render", "side": "legacy",
+   "replacedBy": ["post-mapping-prg"], "seenIn": [{"label": "Portlet", "id": "blacklist"}], "note": "05-mapa-konceptov.md"},
+  {"id": "post-mapping-prg", "name": "@PostMapping + redirect (PRG)", "side": "target",
+   "seenIn": [{"label": "Endpoint", "id": "POST /crm/blacklist/searchAction"}]},
+
+  {"id": "resource-mapping", "name": "@ResourceMapping", "description": "AJAX, JSON, download", "side": "legacy",
+   "replacedBy": ["ajax-endpoint"], "seenIn": [{"label": "Portlet", "id": "blacklist"}], "note": "05-mapa-konceptov.md"},
+  {"id": "ajax-endpoint", "name": "Endpoint vracející fragment/JSON", "side": "target",
+   "seenIn": [{"label": "Endpoint", "id": "GET /crm/blacklist/resource/refreshCreateConditionTypes"}]},
+
+  {"id": "render-params", "name": "Render parametry", "description": "Stav navigace v URL portálu", "side": "legacy",
+   "replacedBy": ["path-variables"], "seenIn": [{"label": "Portlet", "id": "dashboard"}], "note": "05-mapa-konceptov.md"},
+  {"id": "path-variables", "name": "Normální cesty a path variables", "side": "target"},
+
+  {"id": "session-attributes", "name": "@SessionAttributes (portlet)", "description": "Model držený mezi fázemi", "side": "legacy",
+   "replacedBy": ["session-attributes-servlet"], "seenIn": [{"label": "Portlet", "id": "blacklist"}], "note": "05-mapa-konceptov.md"},
+  {"id": "session-attributes-servlet", "name": "@SessionAttributes (servlet MVC)", "side": "target",
+   "seenIn": [{"label": "File", "id": "crm-web/src/main/java/com/example/crm/blacklist/BlacklistSearchController.java"}]},
+
+  {"id": "portlet-session", "name": "PortletSession (PORTLET/APPLICATION scope)", "description": "Session per portlet / sdílená", "side": "legacy",
+   "replacedBy": ["http-session-redis"], "seenIn": [{"label": "Module", "id": "customercare-portlets"}], "note": "05-mapa-konceptov.md"},
+  {"id": "http-session-redis", "name": "HttpSession + sdílená session v Redis", "side": "target",
+   "seenIn": [{"label": "Service", "id": "redis"}]},
+
+  {"id": "portlet-url", "name": "PortletURL, <portlet:actionURL>", "description": "URL do portálu se zakódovaným ID portletu", "side": "legacy",
+   "replacedBy": ["uri-builder"], "seenIn": [{"label": "Module", "id": "frontend-base-customization"}], "note": "05-mapa-konceptov.md"},
+  {"id": "uri-builder", "name": "UriComponentsBuilder / <c:url> / REST cesty", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "friendly-url-mapper", "name": "Friendly URL mapper", "description": "Hezké URL pro portlet", "side": "legacy",
+   "replacedBy": ["path-mapping"], "note": "05-mapa-konceptov.md"},
+  {"id": "path-mapping", "name": "@GetMapping s cestou", "side": "target"},
+
+  {"id": "portal-util-request", "name": "PortalUtil.getHttpServletRequest", "description": "Cesta k servlet requestu", "side": "legacy",
+   "replacedBy": ["direct-request"], "seenIn": [{"label": "Module", "id": "frontend-base-customization"}], "note": "05-mapa-konceptov.md"},
+  {"id": "direct-request", "name": "Request je k dispozici přímo", "side": "target"},
+
+  {"id": "theme-display", "name": "ThemeDisplay", "description": "Info o uživateli, stránce, cestě k theme", "side": "legacy",
+   "replacedBy": ["controller-advice-bean"], "seenIn": [{"label": "Module", "id": "customercare-portlets"}], "note": "05-mapa-konceptov.md"},
+  {"id": "controller-advice-bean", "name": "Request-scoped bean / @ControllerAdvice", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "language-util", "name": "LanguageUtil, <liferay-ui:message>", "description": "Překlady", "side": "legacy",
+   "replacedBy": ["message-source"], "seenIn": [{"label": "Module", "id": "frontend-base-customization"}], "note": "05-mapa-konceptov.md"},
+  {"id": "message-source", "name": "Spring MessageSource", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "liferay-permissions", "name": "Liferay permissions", "description": "Autorizace portálu (projekt ji nepoužívá)", "side": "legacy",
+   "replacedBy": ["spring-security"], "note": "05-mapa-konceptov.md"},
+  {"id": "spring-security", "name": "Spring Security nad existujícím ACL", "side": "target"},
+
+  {"id": "service-builder", "name": "Service Builder", "description": "Generovaná perzistence (projekt ji nepoužívá)", "side": "legacy",
+   "replacedBy": ["spring-data-jpa"], "note": "05-mapa-konceptov.md"},
+  {"id": "spring-data-jpa", "name": "Spring Data JPA / existující služby", "side": "target",
+   "seenIn": [{"label": "Table", "id": "blacklist.blacklist_record"}]},
+
+  {"id": "startup-hook", "name": "Hook: portal.properties, startup action", "description": "Zásah do portálu při startu", "side": "legacy",
+   "replacedBy": ["no-portal"], "seenIn": [{"label": "Module", "id": "customercare-portlets"}], "note": "05-mapa-konceptov.md"},
+  {"id": "no-portal", "name": "Odpadá (není portál)", "side": "target"},
+
+  {"id": "custom-jsp-hook", "name": "Hook: custom-jsp-dir", "description": "Přepis JSP portálu", "side": "legacy",
+   "replacedBy": ["error-pages"], "note": "05-mapa-konceptov.md"},
+  {"id": "error-pages", "name": "@ControllerAdvice + chybové stránky", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "liferay-theme", "name": "Theme (samostatný WAR)", "description": "Vzhled a layout", "side": "legacy",
+   "replacedBy": ["static-assets"], "seenIn": [{"label": "Module", "id": "customercare-theme"}], "note": "05-mapa-konceptov.md"},
+  {"id": "static-assets", "name": "Statické CSS/JS + layout šablona", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "liferay-cms", "name": "Liferay CMS (Journal)", "description": "Webový obsah", "side": "legacy",
+   "replacedBy": ["external-cms"], "note": "05-mapa-konceptov.md"},
+  {"id": "external-cms", "name": "Externí CMS / statické soubory", "side": "target"},
+
+  {"id": "portlet-filter", "name": "Portlet filter", "description": "Filtr na fáze portletu", "side": "legacy",
+   "replacedBy": ["servlet-filter"], "note": "05-mapa-konceptov.md"},
+  {"id": "servlet-filter", "name": "Servlet Filter / HandlerInterceptor", "side": "target"},
+
+  {"id": "portlet-interceptor", "name": "HandlerInterceptor (portlet)", "description": "Před/po zpracování", "side": "legacy",
+   "replacedBy": ["servlet-interceptor"], "seenIn": [{"label": "Module", "id": "customercare-portlets"}], "note": "05-mapa-konceptov.md"},
+  {"id": "servlet-interceptor", "name": "HandlerInterceptor (servlet)", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]},
+
+  {"id": "jboss-deployment", "name": "JBoss modulové závislosti", "description": "jboss-deployment-structure.xml", "side": "legacy",
+   "replacedBy": ["boot-artifact"], "note": "05-mapa-konceptov.md"},
+  {"id": "boot-artifact", "name": "Spring Boot artefakt, závislosti v POM", "side": "target",
+   "seenIn": [{"label": "Module", "id": "crm-web"}]}
+]

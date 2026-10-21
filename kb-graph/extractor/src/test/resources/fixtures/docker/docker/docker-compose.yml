@@ -1,0 +1,38 @@
+name: fixture
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    ports: ["6379:6379"]
+
+  postgres:
+    image: postgres:16-alpine
+    ports: ["5433:5432"]
+
+  crm-web:
+    build: ../crm-web
+    ports: ["8081:8080"]
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+
+  crm-web-rs:
+    build:
+      context: ..
+      dockerfile: crm-web-rs/Dockerfile
+    profiles: [rs]
+    depends_on: [redis]
+
+  liferay:
+    build: ./liferay
+    ports: ["8080:8080"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["8000:80"]
+    depends_on: [liferay, crm-web]
