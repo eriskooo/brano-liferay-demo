@@ -1,159 +1,137 @@
-# Znalostní báze projektu v grafu (Neo4j)
+# Znalostní báze projektu v grafu (Neo4j) – návod k použití
 
-> **Bonus – není součástí projektu migrace.** Samostatné učební demo nad tímto repem: nic z migrace na něm
-> nezávisí, nepotřebuje běžící stack (`docker/`) a lze ho kdykoli smazat.
+> **Bonus – není součástí projektu migrace.** Samostatné učební demo: nic z migrace na něm nezávisí, nepotřebuje
+> běžící stack (`docker/`) a lze ho kdykoli smazat.
 
-Učební demo: jak vypadá znalostní báze tohoto repa, když ji místo textu držíme jako **graf** v Neo4j, a proč se to
-vyplatí lidem i agentům. Inspirace: článek kolegy *„Moving a project's knowledge base into a graph, and why it pays
-off for me and for the agents“* (Medium). Demo přenáší jeho čtyři hlavní myšlenky:
+Znalostní báze tohoto repa (struktura projektu + pasti a koncepty z [`poznamky/`](../poznamky/README.md)) uložená jako
+**graf** v Neo4j. Místo čtení a grepování textu se ptáš dotazem a odpověď vidíš jako obrázek: co s čím souvisí,
+co na čem závisí, na co si dát pozor, když něco měníš.
 
-1. **Pravda je JSON v gitu, Neo4j je jen lupa.** Databáze se plní z JSON a dá se kdykoli zahodit. Nic se do ní nepíše
-   ručně – další `load` by to smazal.
-2. **Struktura se generuje z kódu** (extraktor), takže nemůže zastarat.
-3. **Lekce píše člověk** a ukotví je na konkrétní kus systému (modul, službu, endpoint…). Najdou se pak podle toho,
-   na čem právě pracuji.
-4. **Uložené dotazy** odpovídají na otázky přes několik kroků („co všechno spadne, když…“), na které grep nestačí.
+Jak graf vzniká a jak do něj přidat poznatek: [GENEROVANI.md](GENEROVANI.md).
 
-## Návod krok za krokem
+## Spuštění
 
-Předpoklady: Docker Desktop, JDK 21, Maven 3.9 (Git Bash nebo PowerShell). Vše z kořene repa.
+Předpoklady: Docker Desktop, JDK 21, Maven 3.9. Z kořene repa (PowerShell: `.\kb-graph\kb.ps1 up` / `load`):
 
-1. **Spusť Neo4j** (a malý server pro guide) – kontejnery jsou dostupné jen z localhostu:
-
-   ```bash
-   bash kb-graph/kb.sh up            # PowerShell: .\kb-graph\kb.ps1 up
-   ```
-
-2. **Naplň graf** – extrakce struktury z kódu, načtení lekcí, kontrola kotev, smazání a naplnění Neo4j, vygenerování
-   guide. Na konci vypíše např. `Nahraté: 182 uzlov, 348 vzťahov`:
-
-   ```bash
-   bash kb-graph/kb.sh load
-   ```
-
-3. **Otevři Neo4j Browser** na http://localhost:7474 a přihlas se: uživatel `neo4j`, heslo `kbdemo123`
-   (protokol `neo4j://`, adresa `localhost:7687` jsou předvyplněné).
-4. **Projdi guide.** Po přihlášení se vlevo sám otevře panel *Znalostní báze v grafu* (12 kroků, tlačítka
-   *Next* / *Previous*). Pokud ne, napiš do editoru nahoře `:play http://localhost:7475/kb.html` a spusť.
-5. **Spusť dotaz.** U bloku s dotazem klikni na *Execute in Query tab* (▶) – výsledek se vykreslí vpravo jako graf.
-   Záložky *Graph / Table / Raw* přepínají zobrazení, kliknutím na uzel uvidíš jeho vlastnosti.
-   *Edit in Cypher editor* dotaz jen vloží do editoru – můžeš ho upravit a zkoušet vlastní varianty.
-6. **Zkus vlastní dotaz**, např. `MATCH (n) RETURN labels(n)[0] AS label, count(*) ORDER BY label` (co v grafu je).
-7. **Po změně kódu nebo lekcí** stačí znovu `bash kb-graph/kb.sh load` (databáze se vždy naplní znovu z JSON).
-8. **Úklid:** `bash kb-graph/kb.sh down` (databáze nemá volume – zmizí, příští `load` ji vytvoří znovu).
-
-Další příkazy: `bash kb-graph/kb.sh extract` (jen přegeneruje `graph/structure.json`), `check` (exit 1, když commitnutý
-`structure.json` neodpovídá kódu), `guide` (přegeneruje `guide/kb.html`), `down`. Ve PowerShellu totéž přes
-`.\kb-graph\kb.ps1 <příkaz>`. Testy: `mvn -q -B -f kb-graph/extractor/pom.xml verify` (potřebuje Docker – Testcontainers).
-
-## Co je grafová databáze a kdy dává smysl
-
-Relační databáze ukládá **tabulky**; vztahy jsou cizí klíče a dotaz přes vztahy je `JOIN`. Grafová databáze ukládá
-**uzly a vztahy přímo**; dotaz popisuje **vzor**, který se v grafu hledá. Vyplatí se, když jsou hlavní otázky
-o vztazích, a hlavně o vztazích přes víc kroků: „kdo na tom závisí, i nepřímo“, „jaká je cesta z A do B“,
-„co je s tím spojené“. Přesně takové jsou otázky nad strukturou projektu.
-
-| Pojem | Co to je | Příklad v tomto grafu |
-|---|---|---|
-| **uzel** (node) | věc | služba `redis`, modul `crm-web`, pasti č. 19 |
-| **label** | druh uzlu (jako „tabulka“), v Browseru barva | `Service`, `Module`, `Lesson` |
-| **vlastnost** (property) | hodnota na uzlu nebo vztahu | `image: "redis:7.4-alpine"`, `ports: "6379:6379"` |
-| **vztah** (relationship) | orientovaná hrana mezi dvěma uzly | `(crm-web)-[:DEPENDS_ON]->(redis)` |
-| **typ vztahu** | druh hrany | `DEPENDS_ON`, `ANCHORED_TO`, `REPLACED_BY` |
-| **cesta** (path) | posloupnost uzlů a vztahů | `nginx → /crm/ → crm-web → postgres → tabulka` |
-
-## Cypher v kostce
-
-Cypher kreslí vzory „ASCII artem“: uzel je `(závorka)`, vztah `-[hranatá]->`.
-
-```cypher
-MATCH (s:Service {id: 'crm-web'})-[:DEPENDS_ON]->(d:Service)   // vzor: crm-web závisí na d
-RETURN s, d                                                      // co vrátit (graf nebo tabulka)
+```bash
+bash kb-graph/kb.sh up && bash kb-graph/kb.sh load
 ```
 
-| Konstrukce | Význam | Dotaz v guide |
+Pak otevři http://localhost:7474 a přihlas se `neo4j` / `kbdemo123` (adresa `localhost:7687` je předvyplněná).
+Úklid: `bash kb-graph/kb.sh down`.
+
+## Prohlížení v Neo4j Browseru
+
+- Po přihlášení se vlevo sám otevře **guide** *Znalostní báze v grafu* – 12 kroků s vysvětlením (*Next* / *Previous*).
+  Pokud se neotevře, napiš do editoru nahoře `:play http://localhost:7475/kb.html`.
+- U bloku s dotazem: **Execute in Query tab** (▶) dotaz spustí, **Edit in Cypher editor** ho jen vloží do editoru.
+- Výsledek je vpravo jako graf. Záložky **Graph / Table / Raw** přepínají zobrazení. Kliknutím na uzel uvidíš jeho
+  vlastnosti, dvojklikem rozbalíš sousedy.
+- Vlastní dotaz napíšeš do editoru nahoře a spustíš tlačítkem *Run* (nebo Ctrl+Enter).
+
+## Jak jsou informace uspořádané
+
+Graf má dvě vrstvy. **Struktura** popisuje, z čeho se projekt skládá (vzniká z kódu). **Lekce** jsou poznatky, které
+napsal člověk, a každá je **ukotvená** na konkrétní kus struktury – proto je najdeš podle toho, na čem pracuješ.
+
+| Label (druh uzlu) | Co to je | Příklad `id` |
 |---|---|---|
-| `MATCH (n:Label {k: v})` | najdi uzly podle labelu a vlastnosti | 1 |
-| `-[r]-`, `-[:TYP]->` | vztah libovolný / daného typu a směru | 1, 2 |
-| `p = (…)-[…]->(…)` | celá cesta jako proměnná | 3 |
-| `-[:TYP*]->` | libovolný počet kroků (tranzitivně) | 4, 5, 11 |
-| `OPTIONAL MATCH` | jako LEFT JOIN – vrátí i to, co vzor nesplní | 6, 8 |
-| `WHERE` se vzorem, `WHERE NOT (…)` | podmínka na existenci / neexistenci vztahu | 7, 9 |
-| `count(…)`, `ORDER BY`, `LIMIT` | agregace a řazení | 10 |
+| `Module` | Maven modul | `crm-web`, `customercare-portlets` |
+| `Service` | kontejner z `docker/docker-compose.yml` | `redis`, `crm-web`, `liferay` |
+| `Route` | cesta v nginx | `/crm/`, `/web/crm/blacklist`, `/*` (vše ostatní) |
+| `Portlet` | portlet staré aplikace | `blacklist`, `dashboard` |
+| `Endpoint`, `File` | URL nové aplikace a soubor controlleru | `GET /crm/blacklist/search` |
+| `Table` | tabulka sdílené databáze | `blacklist.blacklist_record` |
+| `Note` | soubor z `poznamky/` | `07-pasce.md` |
+| `Lesson` | past z `poznamky/07` (`title`, `text`, `source`) | `pitfall-19` |
+| `Topic` | téma lekcí | `session`, `redis`, `cookies`, `security` |
+| `Concept` | koncept z `poznamky/05`, `side` = `legacy` / `target` | `action-mapping` → `post-mapping-prg` |
 
-## Prohlídka dotazy (guide)
+| Vztah | Význam |
+|---|---|
+| `DEPENDS_ON` | závisí na (služba na službě, modul na modulu nebo knihovně) |
+| `ROUTES`, `PROXIES_TO`, `REDIRECTS_TO` | nginx má trasu → trasa posílá na službu / přesměrovává |
+| `BUILT_FROM`, `DECLARES`, `DEFINED_IN`, `OWNS` | služba se builduje z modulu, modul deklaruje portlet/endpoint, endpoint je v souboru, Postgres vlastní tabulku |
+| `ABOUT`, `ANCHORED_TO`, `DESCRIBED_IN` | lekce patří k tématu, týká se uzlu struktury, je popsaná v poznámce |
+| `REPLACED_BY`, `SEEN_IN` | legacy koncept → náhrada, kde se koncept v demu vyskytuje |
 
-Dotazy leží v [`queries/`](queries) – jeden soubor = jeden slajd; komentář nahoře je text slajdu. Guide
-[`guide/kb.html`](guide/kb.html) se z nich generuje (`kb.sh guide`), takže se se soubory nerozejde.
+Každý uzel má vlastnost `id`; podle ní uzly hledáš.
 
-1. **Jeden uzel a jeho sousedé** – Redis a vše, co s ním souvisí: závislosti z compose i lekce ukotvené na Redis.
-2. **Topologie běhu** – služby z `docker/docker-compose.yml` a jejich `depends_on`.
-3. **Cesta požadavku** – strangler v jednom obrázku: `/crm/` do nové aplikace, `/*` do Liferay, obě do stejných tabulek.
-4. **Co spadne, když spadne Redis?** – i nepřímé závislosti (nginx → crm-web → redis).
-5. **Co přebuildovat** – moduly závislé na `sso-portal-api`, obdoba dotazu z článku.
-6. **Pasti k session** – propojení vrstev: téma → lekce → kotva ve struktuře.
-7. **Na co si dát pozor v crm-web** – lekce ukotvené na modul, jeho endpointy, soubory nebo službu; otázka, kterou si
-   má klást agent před úpravou souboru.
-8. **Koncept → náhrada** – mapa z `poznamky/05` jako graf, včetně výskytu v demu před a po.
-9. **Koncepty mimo demo** – negace vzoru: co demo neukazuje a na reálném projektu se musí ověřit zvlášť.
-10. **Nejprovázanější poznámky** – kde začít číst.
-11. **Srovnání se SQL** – dotaz 4 v Cypheru vedle rekurzivního CTE.
+## Jak vyhledávat (Cypher v kostce)
 
-## Model grafu
+Dotazovací jazyk Cypher kreslí hledaný vzor „ASCII artem“: uzel je `(n:Label {vlastnost: hodnota})`,
+vztah `-[:TYP]->`. `MATCH` hledá vzor, `WHERE` filtruje, `RETURN` říká, co vrátit.
 
-**Struktura** (generuje extraktor z kódu, [`graph/structure.json`](graph/structure.json)):
+| Zápis | Význam |
+|---|---|
+| `MATCH (n:Service {id: 'redis'})` | uzel podle labelu a vlastnosti |
+| `(a)-[:DEPENDS_ON]->(b)` | vztah daného typu a směru; `-[r]-` libovolný vztah v obou směrech |
+| `-[:DEPENDS_ON*]->` | přes libovolný počet kroků (i nepřímé závislosti) |
+| `p = (…)-[…]->(…)` | celá cesta jako jeden výsledek |
+| `OPTIONAL MATCH` | jako LEFT JOIN – vrátí i to, co druhou část vzoru nesplní |
+| `WHERE NOT (c)-[:SEEN_IN]->()` | podmínka, že vztah neexistuje |
+| `toLower(l.text) CONTAINS 'redis'` | fulltextové hledání v textu |
+| `count(…)`, `ORDER BY`, `LIMIT` | agregace a řazení |
 
-| Label | Zdroj | Vztahy |
-|---|---|---|
-| `Module`, `Library` | všechny `pom.xml` (mimo `input/`, `target/`, `src/test`) | `DEPENDS_ON`, `CHILD_OF` |
-| `Service` | `docker/docker-compose.yml` | `DEPENDS_ON`, `BUILT_FROM` → `Module` |
-| `Route` | `docker/nginx/default.conf` | `(nginx)-[:ROUTES]->`, `PROXIES_TO` → `Service`, `REDIRECTS_TO` → `Route` |
-| `Portlet` | `legacy/**/WEB-INF/portlet.xml` | `(Module)-[:DECLARES]->` |
-| `Endpoint`, `File` | `@GetMapping`/`@PostMapping` v `crm-web` | `(Module)-[:DECLARES]->`, `DEFINED_IN` → `File` |
-| `Table` | `docker/postgres/init/01-*.sql` | `(postgres)-[:OWNS]->` |
-| `Note` | `poznamky/*.md` | `LINKS_TO` (odkazy mezi poznámkami) |
+## Příklady dotazů
 
-**Lekce** (píše člověk, [`lessons/`](lessons)):
+Zkopíruj do editoru a spusť. Dalších 11 dotazů s vysvětlením je v guide (soubory v [`queries/`](queries)).
 
-| Label | Zdroj | Vztahy |
-|---|---|---|
-| `Topic` | `topics.json` | – |
-| `Lesson` | `pitfalls.json` – každá past z `poznamky/07` | `ABOUT` → `Topic`, `ANCHORED_TO` → uzel struktury, `DESCRIBED_IN` → `Note` |
-| `Concept` | `concepts.json` – řádky `poznamky/05` | `REPLACED_BY` (legacy → target), `SEEN_IN` → uzel struktury, `DESCRIBED_IN` |
+**Co v grafu je** (tabulka počtů):
+```cypher
+MATCH (n) RETURN labels(n)[0] AS druh, count(*) AS pocet ORDER BY druh
+```
 
-## Proč struktura z kódu a proč je databáze jednorazová
+**Všechno o jedné věci** – služba Redis a vše, co s ní souvisí:
+```cypher
+MATCH (n:Service {id: 'redis'})-[r]-(m) RETURN n, r, m
+```
 
-- **Struktura z kódu.** Kdo přidá službu do compose, endpoint do controlleru nebo modul do POM, uvidí ho po dalším
-  `load` v grafu – nikdo nic nepřepisuje ručně. Extraktor čte soubory jako text/XML/YAML (ne kompilátor) a **selže
-  nahlas**: když najde méně uzlů, než je minimum (např. < 5 modulů), graf nezapíše. Radši chyba než tiše prázdný graf.
-- **`check` patří do CI.** Commitnutý `structure.json` je čitelný v diffu pull requestu. Na reálném projektu by
-  `kb.sh check` běžel v CI a připomněl, že se struktura změnila. Tady build nepadá, aby změny v jiných podprojektech
-  nerozbíjely `kb-graph`.
-- **Jednorazová databáze.** Každý `load` smaže celou databázi a nahraje ji znovu z JSON. Úpravy přímo v Browseru
-  přežijí jen do dalšího loadu – lekce se proto píšou do JSON, ne do Neo4j.
+**Na co si dát pozor, když měním crm-web** (tabulka lekcí):
+```cypher
+MATCH (m:Module {id: 'crm-web'}), (l:Lesson)-[:ANCHORED_TO]->(x)
+WHERE x = m OR (m)-[:DECLARES]->(x) OR (x)-[:BUILT_FROM]->(m)
+RETURN DISTINCT l.id, l.title, l.text ORDER BY l.id
+```
 
-## Jak přidat lekci
+**Pasti k tématu** (graf téma → lekce → kotva):
+```cypher
+MATCH (t:Topic {id: 'session'})<-[:ABOUT]-(l:Lesson)
+OPTIONAL MATCH (l)-[a:ANCHORED_TO]->(x)
+RETURN t, l, a, x
+```
 
-1. Do `lessons/pitfalls.json` přidej záznam (id `pitfall-NN` podle čísla bodu v `poznamky/07-pasce.md`):
+**Hledání v textu lekcí**:
+```cypher
+MATCH (l:Lesson) WHERE toLower(l.text + ' ' + l.title) CONTAINS 'cookie'
+RETURN l.id, l.title, l.source
+```
 
-   ```json
-   {"id": "pitfall-33", "title": "…", "text": "1–2 věty vlastními slovy.",
-    "topics": ["session"], "anchors": [{"label": "Service", "id": "redis"}], "note": "07-pasce.md"}
-   ```
+**Co spadne, když spadne Redis** (i nepřímo):
+```cypher
+MATCH p = (:Service)-[:DEPENDS_ON*]->(:Service {id: 'redis'}) RETURN p
+```
 
-2. `bash kb-graph/kb.sh load`. Kotva musí mířit na uzel, který ve struktuře existuje (id najdeš v
-   `graph/structure.json` nebo dotazem 1). Když neexistuje, load skončí a databázi nechá beze změny:
+**Kudy jde požadavek** – nginx → aplikace → databáze (stará i nová aplikace míří do stejných tabulek):
+```cypher
+MATCH p = (:Service {id: 'nginx'})-[:ROUTES]->(:Route)-[:PROXIES_TO]->(:Service)
+          -[:DEPENDS_ON]->(:Service {id: 'postgres'})-[:OWNS]->(:Table)
+RETURN p
+```
 
-   ```
-   Neplatné kotvy v lekciách (databáza ostala bez zmeny):
-     pitfall-33 -[ANCHORED_TO]-> Service:neexistuje
-   ```
+**Čím nahradit Liferay koncept**:
+```cypher
+MATCH (c:Concept {side: 'legacy'})-[:REPLACED_BY]->(t:Concept)
+RETURN c.name AS legacy, t.name AS nahrada ORDER BY legacy
+```
 
-   To je efekt z článku: lekce ukotvená na něco, co už v kódu není, se ozve sama, místo aby tiše zastarala.
-   Test `RealLessonsTest` navíc hlídá, že každá past z `poznamky/07` má svou lekci.
+**Kde začít číst** – nejprovázanější poznámky:
+```cypher
+MATCH (n:Note) OPTIONAL MATCH (n)<-[r]-()
+RETURN n.id, n.title, count(r) AS odkazu ORDER BY odkazu DESC LIMIT 5
+```
 
-## Omezení dema
+## Graf je jen kopie
 
-- Bez vrstvy symbolů (třídy, metody, kdo koho volá přes JavaParser) – na pochopení Neo4j zbytečně těžká.
-- Bez napojení agenta přes MCP; agent zatím může graf použít jen přes `cypher-shell` nebo tento guide.
-- Lekce pokrývají `poznamky/05` a `07`; ostatní poznámky jsou v grafu jen jako uzly `Note` s odkazy.
+Databáze se při každém `kb.sh load` smaže a naplní znovu ze souborů v repu. Co upravíš přímo v Browseru, další load
+zahodí – trvalé změny patří do zdrojových souborů, viz [GENEROVANI.md](GENEROVANI.md).
