@@ -22,7 +22,7 @@ attr_of() {
         | sed -E "s/^ $3=\"//; s/\"$//; s/&amp;/\&/g"
 }
 # Obe appky zdieľajú DB blacklistu – výsledok nesmie závisieť od toho, čo zmenil predchádzajúci beh.
-reset_db() { docker compose exec -T postgres psql -q -U postgres -d crm -f /docker-entrypoint-initdb.d/02-blacklist-seed.sql > /dev/null; }
+reset_db() { docker compose exec -T postgres psql -q -U postgres -d crm < postgres/init/02-blacklist-seed.sql > /dev/null; }
 cookie() { grep -E "[[:space:]]$1[[:space:]]" "$JAR" | awk '{print $7}' | head -1; }
 login() {
     rm -f "$JAR"

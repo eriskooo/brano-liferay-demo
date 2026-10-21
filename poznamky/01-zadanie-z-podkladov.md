@@ -18,7 +18,8 @@ Zkratky viz [00-konvencie.md](00-konvencie.md).
   a 30+ objektů v session (neověřená čísla).
 - Deeplinker/Backlinker (generování interních odkazů a „zpět“) → vlastní URL builder;
   podle prezentace „je třeba ještě rozpracovat“.
-- Klient se ptá, zda to poběží na JBoss (komentář) – Q&A: technicky ano, neověřeno.
+- Klient se ptal, zda to poběží na JBoss (komentář). Rozhodnuto 2026-10-21: JBoss není podmínkou, nová aplikace
+  běží jako samostatný proces (Spring Boot 4 na JBoss ani nejde, viz [07-pasce.md](07-pasce.md) bod 30).
 
 ## PoC ukázky v prezentaci
 - Ukázka 1: seznam tarifů/produktů → klik → formulář „Zrušení služby“ (datum podání,

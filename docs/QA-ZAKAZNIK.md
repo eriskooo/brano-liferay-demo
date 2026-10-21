@@ -103,9 +103,11 @@ nebo akce a kontroluje se centrálně při každém požadavku.
 *Doloženo:* e2e scénář operátora s právem jen ke čtení (skryté akce, odmítnutý přístup).
 
 ### 14. Poběží nová aplikace na našem aplikačním serveru JBoss?
-Spring Boot standardně běží jako samostatná aplikace s vestavěným Tomcatem, což je provozně nejjednodušší varianta.
-Nasazení jako WAR na JBoss je technicky možné, ale v demu ho neověřujeme. Ověření doporučujeme zařadit
-do pilotní fáze na vašem prostředí.
+Ne, aplikační server nebude potřeba. Nová aplikace běží jako samostatný proces s vestavěným Tomcatem a nasazuje se
+jako kontejner nebo systémová služba. Nasazení na JBoss nedoporučujeme: Spring Boot 4 vyžaduje Servlet 6.1
+(Jakarta EE 11) a nepodporuje webový server Undertow, na kterém JBoss stojí. Cílový provoz tak nepřebírá žádnou
+část stávající platformy.
+*Doloženo:* nová aplikace běží v demu jako samostatný kontejner vedle Liferay.
 
 ### 15. Co to znamená pro provoz a monitoring?
 Aplikace se nasazuje jako kontejner nebo samostatný proces, zapisuje logy do souborů a audit log má stejný formát
@@ -148,7 +150,8 @@ AI nástroje používáme jako pomoc při přenosu kódu, ne jako náhradu ově�
 - přístup ke zdrojovým kódům backendových modulů a k internímu Maven repozitáři,
 - testovací prostředí s napojením na SSO portál a testovací data,
 - klíčové uživatele pro definici scénářů jednotlivých oblastí,
-- rozhodnutí o cílovém provozu (samostatný proces vs. JBoss) a potvrzení, že se bezpečnostní model nemění,
+- prostředí pro provoz nové aplikace jako samostatného procesu (kontejner nebo služba),
+- potvrzení, že se bezpečnostní model nemění,
 - souhlas s výběrem pilotní oblasti,
 - zařazení přidávajících úprav stávající aplikace a backendu do vašeho release procesu (otázka 6).
 
@@ -160,7 +163,6 @@ AI nástroje používáme jako pomoc při přenosu kódu, ne jako náhradu ově�
 |---|---|---|
 | Napojení backendu (`javax` → `jakarta`, oddělení za rozhraní) | analýza čeká na zdrojové kódy backendu | před pilotem |
 | Transakce nad více backendovými voláními | hranice ve frontendu zmapovány (8 tříd); propagace a JTA/XA v backendu neověřeny | před pilotem |
-| Provoz na JBoss | technicky možné, neověřeno | pilot |
 | Výkon proti staré aplikaci | neměřeno | pilot (zátěžový test) |
 | Deeplinky a odkazy „zpět“, překlady z CMS | v plánu jako průřezová témata (krok 7) | po druhé oblasti |
 | Odhad celého projektu | metodika připravena, kalibrace pilotem | po pilotu |

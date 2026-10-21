@@ -70,3 +70,26 @@
     jako jednu API operaci se stejnou hranicí a propagací (pozor na `…NewTx` = REQUIRES_NEW a `SUPPORTS`).
     Najdeš je: `grep -rln "@Transactional\|TransactionTemplate" CP/java`. Kontejnerizace sama nic neřeší –
     backend je knihovna uvnitř WAR.
+28. **Dispatch dashboardu je byznys logika, ne routování.** Vlastní `HandlerMapping` vybírá controller podle kontextu
+    zákazníka (kategorie produktu, stav tarifního prostoru, segment, počet účtů, interní/externí uživatel, deeplink)
+    a při každém renderu navíc zruší prázdnou objednávku v session – dashboard tak závisí na stavu oblasti objednávek.
+    Převod `page` → URL proto není mechanický: rozhodovací funkci přenést 1:1 a pokrýt tabulkovým testem, vstupní URL
+    bez `{page}` smí obsluhovat jen jeden router. Friendly URL nese `{page}` v cestě, přepínat lze tedy po stránkách.
+29. **Core frontendová knihovna dodavatele je portletová.** Base controller, session manager a page-flow scénářů dědí
+    z externího JARu, jehož zdroj v podkladech není (bytecode je jen v `CARGO/WEB-INF/lib`). `javap` v něm ukazuje
+    stovky odkazů na `javax.portlet.*` a `PortalUtil`. V samostatné nové aplikaci je to další kód k náhradě – patří
+    do inventury rozsahu a do požadavků na zákazníka (zdroj, licence).
+30. **Spring Boot 4 a JBoss.** Boot 4 (Spring 7) vyžaduje Servlet 6.1 (Jakarta EE 11) a nepodporuje Undertow, na kterém
+    stojí web vrstva JBoss/WildFly. JBoss EAP 8 je Jakarta EE 10 (Servlet 6.0), na něm připadá v úvahu Spring Boot 3.5;
+    JBoss, na kterém dnes běží Liferay 6.2, je `javax` – tam nejde ani Boot 3. V projektu proto JBoss není
+    cílem: nová aplikace běží jako samostatný proces (rozhodnuto 2026-10-21).
+31. **Servlet ve WARu portletů sdílí session i Spring kontext.** Ověřeno v demu (Liferay 6.2 + Tomcat 7): servlet ve
+    stejném WAR volaný přímo (mimo portál) dostane stejné ID session jako portál, vidí atributy `APPLICATION_SCOPE`
+    i `PORTLET_SCOPE` (klíč `javax.portlet.p.<portletId>?…`, včetně `@SessionAttributes`) a tentýž root kontext se všemi
+    službami. Reálný WAR přímé servlety už má (verze, health). Migrace „uvnitř WARu“ je tedy technicky možná, projekt
+    ji ale zamítl (2026-10-21: samostatná aplikace s novým stackem, legacy měnit co nejméně). Pro souběh z toho plyne
+    méně invazivní sdílení session: přidaný servlet ve WARu („session bridge“), přes který nová aplikace čte a zapisuje
+    session portletů, místo úprav fasády. Na produkčním JBoss legacy ověřit stejným pokusem.
+32. **Git Bash přepisuje absolutní cesty v argumentech** `docker compose exec` (`/docker-entrypoint-initdb.d/x.sql`
+    → `C:/Program Files/Git/…`). Soubor předávat přes stdin, nebo nastavit `MSYS_NO_PATHCONV=1`. Smoke testy tím
+    tiše přeskakovaly reset DB.

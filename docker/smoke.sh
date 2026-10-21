@@ -23,7 +23,7 @@ attr_of() {
 }
 rc()    { docker compose exec -T redis redis-cli "$@" | tr -d '\r'; }
 # Obe appky zdieľajú DB blacklistu – výsledok nesmie závisieť od toho, čo zmenil predchádzajúci beh.
-reset_db() { docker compose exec -T postgres psql -q -U postgres -d crm -f /docker-entrypoint-initdb.d/02-blacklist-seed.sql > /dev/null; }
+reset_db() { docker compose exec -T postgres psql -q -U postgres -d crm < postgres/init/02-blacklist-seed.sql > /dev/null; }
 login() {
     rm -f "$JAR"
     curl -s -c "$JAR" -b "$JAR" -o /dev/null -X POST "$B/sso/login" \

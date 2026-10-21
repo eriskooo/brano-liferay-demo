@@ -166,7 +166,6 @@ Následující oblasti pilot zatím neověřil:
 - **Backend:** zdrojové kódy backendových modulů nejsou k dispozici; způsob napojení se určí před pilotem.
 - **Transakce:** hranice ve frontendu jsou zmapovány; propagace v backendu a případné distribuované transakce
   (databáze + message broker) je třeba ověřit v jeho kódu.
-- **JBoss:** Spring Boot standardně běží jako samostatný proces; nasazení na JBoss je technicky možné, neověřeno.
 - **Výkon:** srovnání staré a nové aplikace dosud neměřeno; nástroj pro zátěžový test je k dispozici, scénář pro starou aplikaci je třeba doplnit.
 - **Odkazy a překlady:** generování interních odkazů a překlady z externího CMS jsou v plánu (krok 7).
 - **Celkový odhad:** metodika je připravena, čísla vzniknou kalibrací pilotem.
@@ -178,7 +177,7 @@ Následující oblasti pilot zatím neověřil:
 - přístup ke zdrojovým kódům backendu a k internímu Maven repozitáři
 - testovací prostředí napojené na SSO portál, testovací data
 - klíčoví uživatelé pro definici scénářů jednotlivých modulů
-- rozhodnutí o cílovém provozu (samostatný proces vs. JBoss)
+- prostředí pro provoz nové aplikace jako samostatného procesu (kontejner nebo služba)
 - potvrzení, že se bezpečnostní model během migrace nemění
 - zařazení úprav stávající aplikace a backendu do standardního release procesu
 
