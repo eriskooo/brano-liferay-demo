@@ -433,6 +433,13 @@
     },
     {
       "label" : "Note",
+      "id" : "13-cesta-requestu.md",
+      "props" : {
+        "title" : "Cesta requestu: JSP → server (Liferay portlet vs. Spring Boot)"
+      }
+    },
+    {
+      "label" : "Note",
       "id" : "README.md",
       "props" : {
         "title" : "Znalostní báze: migrace legacy CRM z Liferay 6.2"
@@ -1797,6 +1804,50 @@
       "type" : "LINKS_TO",
       "from" : {
         "label" : "Note",
+        "id" : "13-cesta-requestu.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "00-konvencie.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "13-cesta-requestu.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "05-mapa-konceptov.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "13-cesta-requestu.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "07-pasce.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "13-cesta-requestu.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "09-session-liferay-vs-spring.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
         "id" : "README.md"
       },
       "to" : {
@@ -1923,6 +1974,17 @@
       "to" : {
         "label" : "Note",
         "id" : "12-charakterizacni-e2e-testy.md"
+      }
+    },
+    {
+      "type" : "LINKS_TO",
+      "from" : {
+        "label" : "Note",
+        "id" : "README.md"
+      },
+      "to" : {
+        "label" : "Note",
+        "id" : "13-cesta-requestu.md"
       }
     },
     {
